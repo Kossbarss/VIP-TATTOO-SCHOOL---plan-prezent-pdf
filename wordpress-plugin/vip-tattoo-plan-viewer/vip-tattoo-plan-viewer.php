@@ -168,10 +168,20 @@ function vip_tattoo_plan_render_pixels() {
  * reads these synchronously the moment it runs near the end of <body>.
  */
 function vip_tattoo_plan_render_globals() {
+    // The checkout REST route lives in the *separate* vip-tattoo-landing
+    // plugin's own namespace ('vip-tattoo/v1', registered by its
+    // includes/payments.php) -- both plugins run on the same WordPress
+    // install, so this is just rest_url() pointed at another active
+    // plugin's already-registered route, not a duplicated payment
+    // implementation. Overridable in settings in case that plugin's
+    // namespace ever changes.
+    $checkout_base = trim(get_option('vip_tattoo_plan_checkout_rest_base', ''));
+    if (!$checkout_base) $checkout_base = rest_url('vip-tattoo/v1/');
     ?>
 <script>
   window.VIP_TATTOO_PLAN_REST_URL = '<?php echo esc_js(rest_url('vip-tattoo-plan/v1/')); ?>';
   window.VIP_TATTOO_PLAN_NONCE = '<?php echo esc_js(wp_create_nonce('wp_rest')); ?>';
+  window.VIP_TATTOO_CHECKOUT_REST_BASE = '<?php echo esc_js($checkout_base); ?>';
   window.VIP_TATTOO_PLAN_HAS_META_PIXEL = <?php echo trim(get_option('vip_tattoo_plan_meta_pixel_id', '')) ? 'true' : 'false'; ?>;
   window.VIP_TATTOO_PLAN_HAS_TIKTOK = <?php echo trim(get_option('vip_tattoo_plan_tiktok_pixel_id', '')) ? 'true' : 'false'; ?>;
   window.VIP_TATTOO_PLAN_HAS_GA4 = <?php echo trim(get_option('vip_tattoo_plan_ga4_id', '')) ? 'true' : 'false'; ?>;

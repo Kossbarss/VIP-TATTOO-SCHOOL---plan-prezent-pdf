@@ -90,7 +90,8 @@ function vip_tattoo_plan_rest_track(WP_REST_Request $request) {
     $visit_token = sanitize_text_field($request->get_param('visit_token'));
     $event_type  = sanitize_key($request->get_param('event_type'));
 
-    if (!$visit_token || !in_array($event_type, ['view', 'download'], true)) {
+    $allowed_events = ['view', 'download', 'checkout_open', 'contact_click'];
+    if (!$visit_token || !in_array($event_type, $allowed_events, true)) {
         return new WP_REST_Response(['error' => 'Invalid payload'], 400);
     }
 
@@ -121,7 +122,7 @@ function vip_tattoo_plan_rest_track(WP_REST_Request $request) {
     if ($inserted) {
         do_action('vip_tattoo_plan_event', $data);
         vip_tattoo_plan_dispatch_webhook($data);
-        if ($event_type === 'download') {
+        if (in_array($event_type, ['download', 'checkout_open'], true)) {
             vip_tattoo_plan_notify_telegram($data);
         }
     }
@@ -185,7 +186,11 @@ function vip_tattoo_plan_notify_telegram($data) {
     $chat_id = get_option('vip_tattoo_plan_telegram_chat_id', '');
     if (!$token || !$chat_id) return;
 
-    $message = "📄 Скачали план курсу VIP Tattoo School\n"
+    $labels = [
+        'download'      => '📄 Скачали план курсу VIP Tattoo School',
+        'checkout_open' => '💳 Открыли форму оплаты на странице плана курсу',
+    ];
+    $message = ($labels[$data['event_type']] ?? '🔔 Событие на странице плана курсу') . "\n"
         . "UTM: " . ($data['utm_source'] ?: '—') . ' / ' . ($data['utm_medium'] ?: '—') . ' / ' . ($data['utm_campaign'] ?: '—') . "\n"
         . 'Реферер: ' . ($data['referrer'] ?: '—');
 

@@ -23,8 +23,10 @@ add_action('admin_menu', function () {
 function vip_tattoo_plan_settings_fields() {
     return [
         'vip_tattoo_plan_pdf_attachment_id'     => 0,
-        'vip_tattoo_plan_cta_text'              => 'Скачать PDF',
-        'vip_tattoo_plan_cta_secondary_text'    => 'Открыть в новой вкладке',
+        'vip_tattoo_plan_cta_text'              => 'Открыть доступ к обучению',
+        'vip_tattoo_plan_cta_secondary_text'    => 'Написать Виктории',
+        'vip_tattoo_plan_telegram_contact_url'  => 'https://t.me/+48733341364',
+        'vip_tattoo_plan_checkout_rest_base'    => '',
         'vip_tattoo_plan_seo_title'             => 'План курса — VIP Tattoo School',
         'vip_tattoo_plan_seo_description'       => 'Полная программа обучения тату-мастеров с нуля до постоянных клиентов — все 15 блоков курса.',
         'vip_tattoo_plan_og_title'              => '',
@@ -64,7 +66,7 @@ function vip_tattoo_plan_render_settings_page() {
                 update_option($key, sanitize_textarea_field(wp_unslash($_POST[$key])));
             } elseif (in_array($key, ['vip_tattoo_plan_pdf_attachment_id', 'vip_tattoo_plan_og_image_id'], true)) {
                 update_option($key, (int) $_POST[$key]);
-            } elseif ($key === 'vip_tattoo_plan_webhook_url') {
+            } elseif (in_array($key, ['vip_tattoo_plan_webhook_url', 'vip_tattoo_plan_telegram_contact_url', 'vip_tattoo_plan_checkout_rest_base'], true)) {
                 update_option($key, esc_url_raw(wp_unslash($_POST[$key])));
             } elseif ($key === 'vip_tattoo_plan_robots') {
                 $allowed = ['index,follow', 'noindex,follow', 'index,nofollow', 'noindex,nofollow'];
@@ -106,8 +108,22 @@ function vip_tattoo_plan_render_settings_page() {
                     <td><input type="text" class="regular-text" id="vip_tattoo_plan_cta_text" name="vip_tattoo_plan_cta_text" value="<?php echo esc_attr($vals['vip_tattoo_plan_cta_text']); ?>" /></td>
                 </tr>
                 <tr>
-                    <th><label for="vip_tattoo_plan_cta_secondary_text">Текст кнопки «Відкрити»</label></th>
+                    <th><label for="vip_tattoo_plan_cta_secondary_text">Текст другої кнопки</label></th>
                     <td><input type="text" class="regular-text" id="vip_tattoo_plan_cta_secondary_text" name="vip_tattoo_plan_cta_secondary_text" value="<?php echo esc_attr($vals['vip_tattoo_plan_cta_secondary_text']); ?>" /></td>
+                </tr>
+                <tr>
+                    <th><label for="vip_tattoo_plan_telegram_contact_url">Посилання другої кнопки (особистий Telegram)</label></th>
+                    <td>
+                        <input type="url" class="regular-text" id="vip_tattoo_plan_telegram_contact_url" name="vip_tattoo_plan_telegram_contact_url" value="<?php echo esc_attr($vals['vip_tattoo_plan_telegram_contact_url']); ?>" />
+                        <p class="description">Куди веде кнопка «<?php echo esc_html($vals['vip_tattoo_plan_cta_secondary_text']); ?>» — за замовчуванням особистий Telegram Вікторії з лендингу.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="vip_tattoo_plan_checkout_rest_base">REST-адреса оплати (з плагіна лендингу)</label></th>
+                    <td>
+                        <input type="url" class="regular-text" id="vip_tattoo_plan_checkout_rest_base" name="vip_tattoo_plan_checkout_rest_base" value="<?php echo esc_attr($vals['vip_tattoo_plan_checkout_rest_base']); ?>" placeholder="<?php echo esc_attr(rest_url('vip-tattoo/v1/')); ?>" />
+                        <p class="description">Перша кнопка («<?php echo esc_html($vals['vip_tattoo_plan_cta_text']); ?>») відкриває форму (email+телефон) і веде на оплату через REST-роут плагіна лендингу <code>vip-tattoo-landing</code> (create-checkout). Залиш порожнім — використається адреса за замовчуванням: <code><?php echo esc_html(rest_url('vip-tattoo/v1/')); ?></code>. Заповнюй, лише якщо цей роут колись перенесуть на інший namespace.</p>
+                    </td>
                 </tr>
             </table>
 

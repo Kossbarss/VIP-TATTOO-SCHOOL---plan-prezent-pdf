@@ -1,10 +1,12 @@
 /**
- * Fires one "view" event on load and one "download" event per click on a
- * [data-vtp-event="download"] link, each carrying a per-page-load token
- * so the server-side REST route can de-duplicate retried calls. Also
- * mirrors both events into whichever ad-platform pixels are configured
- * (GA4/dataLayer, Meta Pixel, TikTok Pixel), so conversion tracking on
- * those platforms doesn't depend on parsing server logs separately.
+ * Fires one "view" event on load and one event per click on any
+ * [data-vtp-event="..."] element (download / contact_click), each
+ * carrying a per-page-load token so the server-side REST route can
+ * de-duplicate retried calls. Also mirrors events into whichever
+ * ad-platform pixels are configured (GA4/dataLayer, Meta Pixel, TikTok
+ * Pixel), so conversion tracking on those platforms doesn't depend on
+ * parsing server logs separately. Exposes window.__vtpTrack so
+ * checkout.js can log the "checkout_open" event through the same path.
  */
 (function () {
   function readParam(name) {
@@ -54,8 +56,14 @@
       // error out the actual page/download for the visitor.
     });
 
+    var ga4EventNames = {
+      download: 'plan_pdf_download',
+      checkout_open: 'plan_checkout_open',
+      contact_click: 'plan_contact_click',
+      view: 'plan_pdf_view',
+    };
     if (window.VIP_TATTOO_PLAN_HAS_GA4 && typeof window.gtag === 'function') {
-      window.gtag('event', eventType === 'download' ? 'plan_pdf_download' : 'plan_pdf_view');
+      window.gtag('event', ga4EventNames[eventType] || eventType);
     }
     if (window.VIP_TATTOO_PLAN_HAS_META_PIXEL && typeof window.fbq === 'function' && eventType === 'download') {
       window.fbq('track', 'Lead');
@@ -65,10 +73,12 @@
     }
   }
 
+  window.__vtpTrack = track;
+
   track('view');
 
   document.addEventListener('click', function (e) {
-    var el = e.target.closest('[data-vtp-event="download"]');
-    if (el) track('download');
+    var el = e.target.closest('[data-vtp-event]');
+    if (el) track(el.getAttribute('data-vtp-event'));
   });
 })();

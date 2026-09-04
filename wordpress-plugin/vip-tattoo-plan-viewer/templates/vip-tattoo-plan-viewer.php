@@ -11,8 +11,9 @@
 if (!defined('ABSPATH')) exit;
 
 $pdf_url = vip_tattoo_plan_pdf_url();
-$cta_primary = get_option('vip_tattoo_plan_cta_text', 'Скачать PDF');
-$cta_secondary = get_option('vip_tattoo_plan_cta_secondary_text', 'Открыть в новой вкладке');
+$cta_primary = get_option('vip_tattoo_plan_cta_text', 'Открыть доступ к обучению');
+$cta_secondary = get_option('vip_tattoo_plan_cta_secondary_text', 'Написать Виктории');
+$contact_url = get_option('vip_tattoo_plan_telegram_contact_url', 'https://t.me/+48733341364');
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -33,14 +34,31 @@ $cta_secondary = get_option('vip_tattoo_plan_cta_secondary_text', 'Открыт�
     <h1>Полная программа обучения<br>тату-мастеров с нуля</h1>
     <p class="vtp-lead">Полное содержание и план всех 15 блоков курса — от первого включения машинки до именного диплома. Открой презентацию ниже или скачай PDF.</p>
     <div class="vtp-btn-row">
-      <a class="vtp-btn vtp-btn-primary" data-vtp-event="download" href="<?php echo esc_url($pdf_url); ?>" download><?php echo esc_html($cta_primary); ?></a>
-      <a class="vtp-btn vtp-btn-secondary" data-vtp-event="download" href="<?php echo esc_url($pdf_url); ?>" target="_blank" rel="noopener"><?php echo esc_html($cta_secondary); ?></a>
+      <button type="button" class="vtp-btn vtp-btn-primary" id="vtpOpenCheckout"><?php echo esc_html($cta_primary); ?></button>
+      <a class="vtp-btn vtp-btn-secondary" data-vtp-event="contact_click" href="<?php echo esc_url($contact_url); ?>" target="_blank" rel="noopener"><?php echo esc_html($cta_secondary); ?></a>
     </div>
     <div class="vtp-viewer">
       <iframe src="<?php echo esc_url($pdf_url); ?>" title="План курсу VIP Tattoo School" loading="lazy"></iframe>
     </div>
+    <p class="vtp-download-link"><a href="<?php echo esc_url($pdf_url); ?>" data-vtp-event="download" download>Скачать PDF-версию плана</a></p>
     <div class="vtp-footer-note">ViP tattoo school · Виктория Поникарова</div>
   </div>
+
+  <!-- ============ CHECKOUT POPUP ============ -->
+  <div class="vtp-popup-overlay" id="vtpPopupOverlay"></div>
+  <div class="vtp-popup-card" id="vtpPopupCard" role="dialog" aria-modal="true" aria-labelledby="vtpPopupTitle">
+    <button class="vtp-popup-close" id="vtpPopupClose" aria-label="Закрыть" type="button">&times;</button>
+    <h3 id="vtpPopupTitle">Открыть доступ к обучению</h3>
+    <p class="vtp-popup-sub">Оставь email и телефон — пришлём ссылку на оплату и доступ к курсу в Telegram сразу после оплаты.</p>
+    <form class="vtp-popup-form" id="vtpCheckoutForm">
+      <input type="email" name="email" placeholder="Твой email" required />
+      <input type="tel" name="phone" placeholder="Твой номер телефона" required />
+      <button type="submit" class="vtp-btn vtp-btn-primary vtp-btn-block">Перейти к оплате</button>
+    </form>
+    <p class="vtp-popup-footnote"><strong>3 дня гарантия возврата</strong> — без лишних вопросов</p>
+  </div>
+
 <script src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'js/track.js'); ?>" defer></script>
+<script src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'js/checkout.js'); ?>" defer></script>
 </body>
 </html>
