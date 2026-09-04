@@ -50,10 +50,6 @@
   .vtp-popup-form{display:flex;flex-direction:column;gap:12px;}
   .vtp-popup-form input{padding:12px 14px;border-radius:8px;border:1.5px solid rgba(36,26,18,0.16);font-size:14px;font-family:inherit;}
   .vtp-popup-footnote{margin:16px 0 0;font-size:12px;color:var(--ink-dim);text-align:center;}
-  .vtp-preview-note{margin:14px 0 0;font-size:12px;color:var(--ink-dim);}
-
-  .vtp-demo-banner{background:#1a120c;color:#f2e9da;font-size:12.5px;text-align:center;padding:9px 16px;}
-  .vtp-demo-banner b{color:var(--gold);}
 
   @media (max-width:600px){
     .vtp-wrap h1{font-size:28px;}
@@ -62,7 +58,6 @@
 </style>
 </head>
 <body>
-<div class="vtp-demo-banner">Демо-версія сторінки плагіна на GitHub Pages — <b>кнопка оплати тут не підключена до бекенду</b> (це працює лише на живому WordPress-сайті).</div>
 <div class="vtp-wrap">
   <div class="vtp-logo">V</div>
   <div class="vtp-eyebrow">VIP Tattoo School</div>
@@ -89,7 +84,6 @@
     <input type="tel" name="phone" placeholder="Твой номер телефона" required />
     <button type="submit" class="vtp-btn vtp-btn-primary vtp-btn-block">Перейти к оплате</button>
   </form>
-  <p class="vtp-preview-note">Демо-режим: тут форма нічого не надсилає. У WordPress-плагіні вона веде на реальну оплату.</p>
   <p class="vtp-popup-footnote"><strong>3 дня гарантия возврата</strong> — без лишних вопросов</p>
 </div>
 
@@ -104,7 +98,10 @@
   function close(){ overlay.classList.remove('is-open'); card.classList.remove('is-open'); }
   document.getElementById('vtpCheckoutForm').addEventListener('submit', function(e){
     e.preventDefault();
-    alert('Демо-режим: у реальному плагіні тут відбудеться редірект на сторінку оплати Stripe/PayPal.');
+    var email = e.target.email.value.trim();
+    var phone = e.target.phone.value.trim();
+    if (!email || !phone) return;
+    window.location.href = 'https://t.me/mentor_tatoo_Viktoria_bot';
   });
 </script>
 </body>
