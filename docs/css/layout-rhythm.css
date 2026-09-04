@@ -1,0 +1,243 @@
+/* Shared vertical rhythm and alignment grid for RU and UA landing pages. */
+
+:root {
+  --layout-section-y: clamp(3.25rem, 4vw, 4.5rem);
+  --layout-head-content: clamp(2.25rem, 3vw, 3rem);
+  --layout-kicker-title: clamp(0.875rem, 1vw, 1.125rem);
+  --layout-title-copy: 1rem;
+  --layout-group-gap: clamp(2rem, 2.8vw, 2.75rem);
+  --layout-major-gap: clamp(2.5rem, 3.5vw, 3.5rem);
+}
+
+.section {
+  padding-top: var(--layout-section-y);
+  padding-bottom: var(--layout-section-y);
+}
+
+.section--paper-alt {
+  background: var(--paper-alt);
+}
+
+.section--centered {
+  text-align: center;
+}
+
+.section > .container > .section-head {
+  width: 100%;
+  max-width: min(48rem, 100%);
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: var(--layout-head-content);
+  margin-left: 0;
+}
+
+.section-head--narrow {
+  max-width: min(45rem, 100%) !important;
+}
+
+.section-head--wide {
+  max-width: min(60rem, 100%) !important;
+}
+
+.section-head--centered {
+  margin-right: auto !important;
+  margin-left: auto !important;
+  text-align: center;
+}
+
+.section-head--flush {
+  margin-bottom: 0 !important;
+}
+
+.section-head--compact {
+  margin-bottom: 1.75rem !important;
+}
+
+.section-head .kicker {
+  margin-bottom: var(--layout-kicker-title);
+  line-height: 1.35;
+}
+
+.section-head h2 {
+  line-height: 1.12;
+  text-wrap: balance;
+}
+
+.section-head p {
+  max-width: 44rem;
+  margin-top: var(--layout-title-copy);
+  line-height: 1.65;
+}
+
+.section-head--centered p {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.section-cta {
+  margin-top: 2rem;
+}
+
+.guarantee-box--centered {
+  max-width: 45rem;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+/* Part of the desktop 1.2x guarantee-box treatment (see style-base.css,
+   same min-width:1024px breakpoint) -- the box's own max-width cap has
+   to be set here specifically, since this file loads after
+   style-base.css and would otherwise win the cascade and keep the box
+   stuck at 45rem regardless of what's set there. 54rem is 1.2x the
+   45rem above (an earlier 3x/135rem version was scaled back by /2.5
+   per client request). */
+@media (min-width: 1024px) {
+  .guarantee-box--centered {
+    max-width: 54rem;
+  }
+}
+
+.pain-card p,
+.feature-card p,
+.pillar-body p,
+.bonus-row p,
+.lesson-cell p,
+.case-carousel-detail p {
+  line-height: 1.6;
+}
+
+@media (min-width: 701px) {
+  .hero-panorama-viewport {
+    transform: none !important;
+  }
+
+  .hero-panorama-shell {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .hero-stats {
+    margin-top: 1.75rem !important;
+    margin-bottom: 1.75rem !important;
+  }
+}
+
+.cases-section .cases-intro {
+  max-width: min(50rem, 100%) !important;
+  margin-bottom: var(--layout-group-gap) !important;
+  text-align: left !important;
+}
+
+.cases-section .cases-intro h2 {
+  max-width: 50rem !important;
+  line-height: 1.12 !important;
+  text-align: left !important;
+}
+
+.cases-section .chat-mock {
+  margin: 0 0 var(--layout-major-gap) !important;
+  line-height: 1.55;
+}
+
+/* Wider than --layout-head-content (shared with every other section) --
+   client feedback specifically on this gallery: the 3D carousel's photos
+   read as almost touching the heading above and the detail card below at
+   the shared rhythm value, so this section gets its own, more generous
+   gap instead of changing the variable other sections still rely on. */
+.cases-section .case-fan-head {
+  max-width: min(50rem, 100%) !important;
+  margin: 0 0 clamp(2.75rem, 4vw, 4rem) !important;
+  text-align: left !important;
+}
+
+.cases-section .case-fan-head h2 {
+  line-height: 1.12 !important;
+  text-align: left !important;
+}
+
+.case-fan-wrap {
+  padding-top: 0 !important;
+}
+
+/* Visually center the pagination roller (dots + arrows) between the
+   gallery and the detail card. The .case-carousel-demo gap treats both
+   neighbors' layout boxes as the reference edge, but the real rendered
+   edge differs from that box on both ends: desktop's fixed-height
+   viewport leaves empty space below the auto-sized square photo (so the
+   roller reads too close to the card), while the front face's 3D
+   perspective scales it past its own layout box on mobile (so the roller
+   reads too close to the gallery instead). Shifting only the roller
+   (desktop) or only the detail card (mobile) -- with a matching opposite
+   margin so the following element's position doesn't move -- balances
+   the visible gap without touching the shared rhythm gap itself. */
+@media (min-width: 1024px) {
+  #caseFanLayout[data-case-carousel-3d="true"] .case-carousel-dots {
+    margin-top: -1.78125rem !important;
+    margin-bottom: 1.78125rem !important;
+  }
+}
+
+@media (max-width: 767px) {
+  #caseFanLayout[data-case-carousel-3d="true"] .case-carousel-detail {
+    margin-top: -2rem !important;
+  }
+}
+
+/* Gap between the carousel and the detail card below it -- client feedback
+   on the real-photo gallery: at the shared .case-carousel-demo gap (2.25rem)
+   the white detail card reads as touching the bottom row of photos on
+   mobile/tablet, where there's no extra whitespace from a wider desktop
+   layout to soften it. Desktop keeps the original gap since it wasn't
+   flagged there. */
+@media (max-width: 1023px) {
+  /* Split across the two gaps flanking the pagination dots (see the base
+     .case-carousel-demo rule in card-fan-carousel.css) so the total
+     carousel-to-detail-card span stays at the previously requested 3rem
+     instead of doubling now that the dots sit in between. */
+  #caseFanLayout[data-case-carousel-3d="true"] .case-carousel-demo {
+    gap: 1.5rem !important;
+  }
+
+  .cases-section .case-fan-head {
+    margin-bottom: clamp(3rem, 6vw, 4rem) !important;
+  }
+}
+
+.case-fan-cta {
+  margin-top: var(--layout-group-gap) !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.section .btn + .contact-note,
+.section .avatar-row + .btn {
+  margin-top: 1.25rem;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --layout-section-y: clamp(2.5rem, 9vw, 3.5rem);
+    --layout-head-content: clamp(1.75rem, 7vw, 2.5rem);
+    --layout-group-gap: clamp(1.5rem, 6vw, 2rem);
+    --layout-major-gap: clamp(2rem, 8vw, 2.75rem);
+  }
+
+  .section-head h2,
+  .cases-section .cases-intro h2,
+  .cases-section .case-fan-head h2 {
+    line-height: 1.15 !important;
+  }
+
+  .cases-section .case-fan-head {
+    margin-bottom: clamp(4.125rem, 13.5vw, 5.25rem) !important;
+  }
+
+  /* Halved for the same reason as the 1023px block above: total span
+     across the dots stays at the previously requested 7.3125rem. */
+  #caseFanLayout[data-case-carousel-3d="true"] .case-carousel-demo {
+    gap: 3.65625rem !important;
+  }
+
+  .section-cta {
+    margin-top: 1.5rem;
+  }
+}
