@@ -44,10 +44,12 @@
   .prog-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:40px;}
   @media (max-width:900px){.prog-grid{grid-template-columns:repeat(2,1fr);}}
   .prog-card{background:linear-gradient(135deg,var(--red),var(--red-dark));border-radius:14px;padding:18px 16px;color:#fff;min-height:96px;position:relative;overflow:hidden;}
-  .prog-card .num{font-family:'Playfair Display',serif;font-weight:700;font-size:18px;}
-  .prog-card .name{font-size:13px;margin-top:26px;font-weight:600;}
+  .prog-card::after{content:"V";position:absolute;right:-6px;bottom:-22px;font-family:'Playfair Display',serif;font-weight:700;font-size:86px;color:rgba(255,255,255,0.12);line-height:1;pointer-events:none;}
+  .prog-card .num{font-family:'Playfair Display',serif;font-weight:700;font-size:18px;position:relative;z-index:1;}
+  .prog-card .name{font-size:13px;margin-top:26px;font-weight:600;position:relative;z-index:1;}
   .support-row{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;border-top:1px solid rgba(255,255,255,0.12);padding-top:28px;}
   @media (max-width:820px){.support-row{grid-template-columns:repeat(2,1fr);}}
+  .support-icon{width:40px;height:40px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:12px;}
   .support-item b{display:block;font-size:14px;margin-bottom:6px;color:#fff;}
   .support-item span{font-size:13px;color:#a89a86;line-height:1.5;}
 
@@ -107,6 +109,9 @@
   .faq-layout img{border-radius:16px;}
 
   /* ---- Final CTA ---- */
+  .final-list{list-style:none;margin:0 0 24px;padding:0;display:flex;flex-direction:column;gap:10px;}
+  .final-list li{font-size:14px;line-height:1.5;padding-left:22px;position:relative;color:#e9e0d3;}
+  .final-list li::before{content:"✓";position:absolute;left:0;color:var(--gold);font-weight:700;}
   .final-lead{color:#cabfae;font-size:15px;line-height:1.6;margin-bottom:28px;max-width:480px;}
   .btn-row{display:flex;gap:16px;flex-wrap:wrap;}
   .btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 28px;border-radius:10px;font-weight:600;font-size:15px;text-decoration:none;cursor:pointer;border:none;font-family:inherit;transition:transform .15s ease;}
@@ -162,10 +167,10 @@
     </div>
     <div class="eyebrow" style="color:var(--gold);">ФОРМАТ ПОДДЕРЖКИ</div>
     <div class="support-row">
-      <div class="support-item"><b>Личная обратная связь</b><span>Виктория лично отвечает и разбирает домашние задания</span></div>
-      <div class="support-item"><b>Чат сообщества</b><span>Общение и поддержка с другими тату-мастерами</span></div>
-      <div class="support-item"><b>AI-ассистент 24/7</b><span>Персональный помощник на данных курса и студии Sarna</span></div>
-      <div class="support-item"><b>Живые Zoom-созвоны</b><span>Разбор твоего кабинета, цен и клиентов вживую (блоки 13–14)</span></div>
+      <div class="support-item"><div class="support-icon">💬</div><b>Личная обратная связь</b><span>Виктория лично отвечает и разбирает домашние задания</span></div>
+      <div class="support-item"><div class="support-icon">👥</div><b>Чат сообщества</b><span>Общение и поддержка с другими тату-мастерами</span></div>
+      <div class="support-item"><div class="support-icon">✨</div><b>AI-ассистент 24/7</b><span>Персональный помощник на данных курса и студии Sarna</span></div>
+      <div class="support-item"><div class="support-icon">🎥</div><b>Живые Zoom-созвоны</b><span>Разбор твоего кабинета, цен и клиентов вживую (блоки 13–14)</span></div>
     </div>
   </div>
   <div class="slide-num"><b>02</b> / 22</div>
@@ -502,8 +507,8 @@
 <!-- Slide 18 — Результат обучения -->
 <section class="slide slide-alt">
   <div class="container">
-    <div class="eyebrow">РЕЗУЛЬТАТ ОБУЧЕНИЯ</div>
-    <h2 class="section-title">После прохождения курса ты получишь:</h2>
+    <div class="module-head"><div class="module-badge">★</div><div class="module-icon">🏆</div><div class="module-title">Результат обучения</div></div>
+    <p class="module-sub" style="margin-bottom:24px;">После прохождения курса ты получишь:</p>
     <div class="result-cards">
       <div class="result-card"><div class="emoji">💰</div><b>Контроль над своим доходом</b><span>Перестанешь зависеть от работодателя и сможешь сам назначать цену своей работы.</span></div>
       <div class="result-card"><div class="emoji">✍️</div><b>Уверенную технику без дрожи</b><span>Разберёшься в машинке, линии и цвете — больше никакого страха испортить рисунок.</span></div>
@@ -518,8 +523,8 @@
 <!-- Slide 19 — Почему именно это обучение -->
 <section class="slide">
   <div class="container">
-    <div class="eyebrow">ПОЧЕМУ ИМЕННО ЭТО ОБУЧЕНИЕ</div>
-    <h2 class="section-title">Чем VIP tattoo school отличается от типичного обучения тату</h2>
+    <div class="module-head"><div class="module-badge">⚖️</div><div class="module-icon">🔍</div><div class="module-title">Почему именно это обучение</div></div>
+    <p class="module-sub" style="margin-bottom:24px;">Чем VIP tattoo school отличается от типичного обучения тату.</p>
     <div class="compare-grid">
       <div class="compare-card">
         <h3>VIP tattoo school</h3>
@@ -550,7 +555,7 @@
 <section class="slide slide-alt">
   <div class="container two-col">
     <div>
-      <div class="module-head"><div class="module-icon">❤️</div><div class="module-title">Честный старт</div></div>
+      <div class="module-head"><div class="module-badge">♡</div><div class="module-icon">✓</div><div class="module-title">Честный старт</div></div>
       <p class="module-sub">Без риска и лишних вопросов.</p>
       <div class="guarantee-box">
         <div class="guarantee-icon">🛡️</div>
@@ -580,8 +585,8 @@
 <section class="slide">
   <div class="container faq-layout">
     <div>
-      <div class="eyebrow">ПОПУЛЯРНЫЕ ВОПРОСЫ</div>
-      <h2 class="section-title">Часто задаваемые вопросы</h2>
+      <div class="module-head"><div class="module-badge">?</div><div class="module-icon">💬</div><div class="module-title">Популярные вопросы</div></div>
+      <p class="module-sub" style="margin-bottom:24px;">Часто задаваемые вопросы.</p>
       <div class="faq-grid">
         <div class="faq-item"><div class="n">01</div><h3>Нужен ли художественный опыт?</h3><p>Не обязателен, но приветствуется. В программе есть модуль по отработке линии и композиции с нуля.</p></div>
         <div class="faq-item"><div class="n">02</div><h3>Сколько стоит оборудование?</h3><p>Базовый набор для практики на искусственной коже — от 60–80€. Список моделей есть в бонусном уроке.</p></div>
@@ -596,20 +601,38 @@
   <div class="slide-num"><b>21</b> / 22</div>
 </section>
 
-<!-- Slide 22 — Final CTA -->
+<!-- Slide 22 — Recap + Final CTA -->
 <section class="slide slide-dark">
   <div class="container two-col">
     <div>
+      <div class="hero-eyebrow" style="margin-bottom:24px;"><span class="hero-logo">V</span></div>
       <div class="eyebrow" style="color:var(--gold);">ПОЧЕМУ ИМЕННО ЭТО ОБУЧЕНИЕ</div>
-      <h2 class="section-title" style="color:#fff;">Готов начать путь в тату-индустрии?</h2>
-      <p class="final-lead">Доступ остаётся с тобой навсегда — можешь возвращаться к любому блоку в любой момент. Напиши мне лично, и я расскажу, как начать обучение уже сегодня.</p>
+      <h2 class="section-title" style="color:#fff;font-size:22px;">Чем VIP tattoo school отличается от типичного обучения</h2>
+      <ul class="final-list">
+        <li>Практика на моделях под личным наблюдением ментора</li>
+        <li>Индивидуальный разбор каждой выполненной работы</li>
+        <li>Сертификат, признанный 12 студиями-партнёрами</li>
+        <li>Пожизненный доступ к записям и обновлениям</li>
+        <li>Онлайн-связь с куратором без выходных</li>
+      </ul>
+      <div class="eyebrow" style="color:var(--gold);">ВХОДИТ В ОБУЧЕНИЕ</div>
+      <ul class="final-list">
+        <li>Tattoo AI-ассистент на данных курса и студии Sarna</li>
+        <li>Набор готовых эскизов и трафаретов</li>
+        <li>Калькулятор стоимости тату</li>
+        <li>30-дневный практикум продаж</li>
+      </ul>
       <div class="btn-row">
         <a class="btn btn-primary" href="https://t.me/mentor_tatoo_Viktoria_bot" target="_blank" rel="noopener">Открыть доступ к обучению</a>
         <a class="btn btn-secondary" href="https://t.me/+48733341364" target="_blank" rel="noopener">Написать Виктории</a>
       </div>
+    </div>
+    <div>
+      <div class="cert-photo"><img src="assets/plan/certificate-detail.jpg" alt="Сертификат об окончании курса VIP tattoo school"></div>
+      <h3 style="color:#fff;font-size:20px;margin-top:24px;">Готов начать путь в тату-индустрии?</h3>
+      <p class="final-lead" style="margin-top:12px;">Доступ остаётся с тобой навсегда — можешь возвращаться к любому блоку в любой момент. Напиши мне лично, и я расскажу, как начать обучение уже сегодня.</p>
       <div class="final-byline">ViP tattoo school · Виктория Поникарова</div>
     </div>
-    <div class="cert-photo"><img src="assets/plan/certificate-detail.jpg" alt="Сертификат об окончании курса VIP tattoo school"></div>
   </div>
   <div class="slide-num"><b>22</b> / 22</div>
 </section>
