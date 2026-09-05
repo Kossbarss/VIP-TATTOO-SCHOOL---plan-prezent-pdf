@@ -15,9 +15,12 @@
      overlays just make that same area clickable in the browser -- no
      visible styling, or the image's own button would be duplicated. */
   .slide-btn{
+    /* Hit-box padded beyond the visible button rect (2% top/bottom) so
+       it stays a comfortable tap target on small screens without
+       changing what's visually drawn in the image. */
     position:absolute;
-    bottom:5.56%;
-    height:5.56%;
+    bottom:3.56%;
+    height:9.56%;
     cursor:pointer;
   }
   .slide-btn-primary{ left:4.48%; width:21.88%; }
