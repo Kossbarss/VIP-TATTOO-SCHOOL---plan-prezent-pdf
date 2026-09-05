@@ -34,18 +34,19 @@
     left:4%;
     bottom:3.2%;
     width:24%;
-    height:9.6%;
+    min-height:9.6%;
     display:flex;
     align-items:center;
     justify-content:center;
     text-align:center;
-    padding:0 4%;
+    padding:1.6% 3%;
     border-radius:999px;
     overflow:hidden;
     text-decoration:none;
     font-family:'Nunito','Segoe UI',sans-serif;
     font-weight:700;
-    font-size:clamp(9px,1.55vw,14px);
+    line-height:1.15;
+    font-size:clamp(11px,1.55vw,14px);
     letter-spacing:0.01em;
     color:#fff;
     background:linear-gradient(105deg,#f98658 0%,#f25832 24%,#e62115 52%,#f25832 78%,#f98658 100%);
@@ -71,6 +72,40 @@
     0%{ transform:skewX(-18deg) translateX(0%); }
     55%{ transform:skewX(-18deg) translateX(422%); }
     100%{ transform:skewX(-18deg) translateX(422%); }
+  }
+
+  /* Below ~640px the two buttons have no room to sit inline over the
+     tiny baked-in slot without wrapping and overlapping the content
+     above them -- so on narrow screens hide the inline overlay and
+     show a full-width button pair under the image instead. */
+  .mobile-cta{display:none;}
+  @media (max-width:640px){
+    .slide-btn-primary, .slide-btn-secondary{ display:none; }
+    .mobile-cta{
+      display:flex; flex-direction:column; gap:12px;
+      padding:20px 16px 28px; background:#15110e;
+    }
+    .mobile-cta .btn{
+      display:flex; align-items:center; justify-content:center;
+      padding:14px 20px; border-radius:999px;
+      font-family:'Nunito','Segoe UI',sans-serif;
+      font-weight:700; font-size:15px; text-decoration:none;
+    }
+    .mobile-cta .btn-primary{
+      color:#fff; position:relative; overflow:hidden;
+      background:linear-gradient(105deg,#f98658 0%,#f25832 24%,#e62115 52%,#f25832 78%,#f98658 100%);
+      box-shadow:0 10px 20px -10px rgba(221,0,3,0.6);
+    }
+    .mobile-cta .btn-primary::after{
+      content:"";
+      position:absolute; top:0; left:-60%; width:45%; height:100%;
+      background:linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
+      animation:slide-btn-shine 3.6s ease-in-out infinite;
+    }
+    .mobile-cta .btn-primary span{ position:relative; z-index:1; }
+    .mobile-cta .btn-secondary{
+      color:#fff; border:1.5px solid rgba(255,255,255,0.5);
+    }
   }
 </style>
 </head>
@@ -101,6 +136,10 @@
     <img class="slide-img" src="assets/slides/slide-22.jpg" alt="Слайд 22 — готов начать путь в тату-индустрии">
     <a class="slide-btn-primary" href="https://t.me/mentor_tatoo_Viktoria_bot" target="_blank" rel="noopener"><span class="slide-btn-primary-label">Открыть доступ к обучению</span></a>
     <a class="slide-btn slide-btn-secondary" href="https://t.me/+48733341364" target="_blank" rel="noopener"><span class="slide-btn-label">Написать Виктории</span></a>
+  </div>
+  <div class="mobile-cta">
+    <a class="btn btn-primary" href="https://t.me/mentor_tatoo_Viktoria_bot" target="_blank" rel="noopener"><span>Открыть доступ к обучению</span></a>
+    <a class="btn btn-secondary" href="https://t.me/+48733341364" target="_blank" rel="noopener">Написать Виктории</a>
   </div>
 </div>
 </body>
