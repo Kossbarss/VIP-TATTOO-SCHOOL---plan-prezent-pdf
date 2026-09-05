@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>План курса — VIP Tattoo School</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:#15110e;}
@@ -60,75 +58,12 @@
     flex:1 1 200px;
     color:#fff; border:1.5px solid rgba(255,255,255,0.5);
   }
-
-  /* ---- Enlarged-text overlays -----------------------------------
-     Slides 1, 2, 21 and 22 have their original body text erased from
-     the JPEG (see the corresponding slide-NN.jpg) and replaced here
-     with real, larger HTML text positioned over the same spot -- the
-     photos/graphics around it are the untouched original pixels. */
-  .slide-wrap{ position:relative; }
-  .ov{ position:absolute; font-family:'Nunito',sans-serif; }
-  .ov p{ margin:0 0 0.6em; }
-  .ov-serif{ font-family:'Playfair Display',serif; }
-
-  /* Slide 1 */
-  .ov-s1{ left:0%; top:49.5%; width:53%; color:#cabfae; }
-  .ov-s1 .lead{ font-size:1.55vw; line-height:1.6; }
-  .ov-s1 .stats{ display:flex; flex-wrap:wrap; gap:2.2vw 2.8vw; margin-top:1.2vw; }
-  .ov-s1 .stat b{ display:block; font-family:'Playfair Display',serif; font-weight:700; font-size:2.35vw; color:#c9a15a; }
-  .ov-s1 .stat span{ font-size:0.95vw; color:#a89a86; }
-  .ov-s1 .byline{ margin-top:1.6vw; padding-top:1vw; border-top:1px solid rgba(242,233,218,0.2); font-style:italic; font-size:1.05vw; color:#a89a86; }
-
-  /* Slide 2 support row */
-  .ov-s2-item{ position:absolute; top:71%; width:16%; color:#a89a86; }
-  .ov-s2-item b{ display:block; font-size:1.35vw; color:#fff; margin-bottom:0.3vw; }
-  .ov-s2-item span{ font-size:1.05vw; line-height:1.4; }
-
-  /* Slide 21 FAQ */
-  .ov-s21-head{ left:17%; top:5.5%; width:60%; color:#241a12; }
-  .ov-s21-head h3{ font-family:'Playfair Display',serif; font-weight:700; font-size:2.6vw; margin:0 0 0.2vw; }
-  .ov-s21-head em{ font-style:italic; font-size:1.3vw; color:#6f645c; }
-  .ov-s21-grid{ left:4%; top:31%; width:67%; display:grid; grid-template-columns:1fr 1fr; gap:1.6vw 2vw; color:#241a12; }
-  .ov-s21-grid .n{ color:#c9a15a; font-family:'Playfair Display',serif; font-weight:700; font-size:1.3vw; }
-  .ov-s21-grid h4{ margin:0.15vw 0 0.3vw; font-size:1.35vw; }
-  .ov-s21-grid p{ margin:0; font-size:1.15vw; line-height:1.4; color:#6f645c; }
-
-  /* Slide 22 recap */
-  .ov-s22-left{ left:3.7%; top:12%; width:46%; color:#e9e0d3; }
-  .ov-s22-left .eyebrow{ font-size:1.05vw; letter-spacing:0.1em; text-transform:uppercase; color:#c9a15a; font-weight:700; margin-bottom:0.4vw; }
-  .ov-s22-left h3{ font-family:'Playfair Display',serif; font-weight:700; font-size:2vw; color:#fff; margin:0 0 1vw; }
-  .ov-s22-left ul{ list-style:none; margin:0 0 1.4vw; padding:0; }
-  .ov-s22-left li{ font-size:1.25vw; line-height:1.7; padding-left:1.4vw; position:relative; }
-  .ov-s22-left li::before{ content:"✓"; position:absolute; left:0; color:#c9a15a; font-weight:700; }
-  .ov-s22-right{ left:51.5%; top:70.5%; width:44%; color:#cabfae; }
-  .ov-s22-right h3{ font-family:'Playfair Display',serif; font-weight:700; font-size:1.7vw; color:#fff; margin:0 0 0.8vw; }
-  .ov-s22-right p{ font-size:1.2vw; line-height:1.6; margin:0 0 1vw; }
-  .ov-s22-right .byline{ padding-top:0.9vw; border-top:1px solid rgba(242,233,218,0.2); font-style:italic; font-size:1.05vw; color:#a89a86; }
 </style>
 </head>
 <body>
 <div class="slides">
-  <div class="slide-wrap">
-    <img class="slide-img" src="assets/slides/slide-01.jpg" alt="Слайд 1 — VIP Tattoo School">
-    <div class="ov ov-s1">
-      <p class="lead">Полное содержание и план всех 15 блоков курса — от первого включения машинки до именного диплома. Автор — Виктория Поникарова, основательница студии Sarna Tattoo, ментор 300+ выпускников в 12 студиях-партнёрах по Украине и Европе.</p>
-      <div class="stats">
-        <div class="stat"><b>15</b><span>практических блоков</span></div>
-        <div class="stat"><b>40+</b><span>часов практики и видео</span></div>
-        <div class="stat"><b>18</b><span>разобранных стилей тату</span></div>
-        <div class="stat"><b>12</b><span>студий-партнёров</span></div>
-      </div>
-      <div class="byline">Виктория Поникарова · ViP tattoo school</div>
-    </div>
-  </div>
-  <div class="slide-wrap">
-    <img class="slide-img" src="assets/slides/slide-02.jpg" alt="Слайд 2 — структура курса">
-    <div class="ov" style="left:3.7%;top:65.8%;font-size:1vw;letter-spacing:0.1em;text-transform:uppercase;color:#c9a15a;font-weight:700;">ФОРМАТ ПОДДЕРЖКИ</div>
-    <div class="ov ov-s2-item" style="left:8.9%;"><b>Личная обратная связь</b><span>Виктория лично отвечает и разбирает домашние задания</span></div>
-    <div class="ov ov-s2-item" style="left:31.5%;"><b>Чат сообщества</b><span>Общение и поддержка с другими тату-мастерами</span></div>
-    <div class="ov ov-s2-item" style="left:54.2%;"><b>AI-ассистент 24/7</b><span>Персональный помощник на данных курса и студии Sarna</span></div>
-    <div class="ov ov-s2-item" style="left:76.9%;"><b>Живые Zoom-созвоны</b><span>Разбор твоего кабинета, цен и клиентов вживую (блоки 13–14)</span></div>
-  </div>
+  <img class="slide-img" src="assets/slides/slide-01.jpg" alt="Слайд 1 — VIP Tattoo School">
+  <img class="slide-img" src="assets/slides/slide-02.jpg" alt="Слайд 2 — структура курса">
   <img class="slide-img" src="assets/slides/slide-03.jpg" alt="Слайд 3 — блок 1: вступление">
   <img class="slide-img" src="assets/slides/slide-04.jpg" alt="Слайд 4 — блок 2: AI-assistant">
   <img class="slide-img" src="assets/slides/slide-05.jpg" alt="Слайд 5 — блок 3: безопасность">
@@ -147,47 +82,8 @@
   <img class="slide-img" src="assets/slides/slide-18.jpg" alt="Слайд 18 — результат обучения">
   <img class="slide-img" src="assets/slides/slide-19.jpg" alt="Слайд 19 — почему именно это обучение">
   <img class="slide-img" src="assets/slides/slide-20.jpg" alt="Слайд 20 — честный старт">
-  <div class="slide-wrap">
-    <img class="slide-img" src="assets/slides/slide-21.jpg" alt="Слайд 21 — популярные вопросы">
-    <div class="ov ov-s21-head">
-      <h3>Популярные вопросы</h3>
-      <em>Часто задаваемые вопросы.</em>
-    </div>
-    <div class="ov ov-s21-grid">
-      <div><span class="n">01</span><h4>Нужен ли художественный опыт?</h4><p>Не обязателен, но приветствуется. В программе есть модуль по отработке линии и композиции с нуля.</p></div>
-      <div><span class="n">02</span><h4>Сколько стоит оборудование?</h4><p>Базовый набор для практики на искусственной коже — от 60–80€. Список моделей есть в бонусном уроке.</p></div>
-      <div><span class="n">03</span><h4>Гарантированы ли первые клиенты?</h4><p>Даём систему и шаблоны, которые уже сработали у учеников, но результат зависит от твоей практики.</p></div>
-      <div><span class="n">04</span><h4>Сколько времени уделять обучению?</h4><p>В среднем 5–7 часов в неделю на протяжении 8 недель, включая практику.</p></div>
-      <div><span class="n">05</span><h4>Есть ли возрастные ограничения?</h4><p>Обучение доступно с 18 лет — стандартное требование для работы в тату-индустрии.</p></div>
-      <div><span class="n">06</span><h4>Нужен ли ноутбук для обучения?</h4><p>Достаточно смартфона — всё проходит через Telegram, удобно смотреть уроки и сдавать задания.</p></div>
-    </div>
-  </div>
-  <div class="slide-wrap">
-    <img class="slide-img" src="assets/slides/slide-22.jpg" alt="Слайд 22 — готов начать путь в тату-индустрии">
-    <div class="ov ov-s22-left">
-      <div class="eyebrow">Почему именно это обучение</div>
-      <h3>Чем VIP tattoo school отличается от типичного обучения</h3>
-      <ul>
-        <li>Практика на моделях под личным наблюдением ментора</li>
-        <li>Индивидуальный разбор каждой выполненной работы</li>
-        <li>Сертификат, признанный 12 студиями-партнёрами</li>
-        <li>Пожизненный доступ к записям и обновлениям</li>
-        <li>Онлайн-связь с куратором без выходных</li>
-      </ul>
-      <div class="eyebrow">Входит в обучение</div>
-      <ul>
-        <li>Tattoo AI-ассистент на данных курса и студии Sarna</li>
-        <li>Набор готовых эскизов и трафаретов</li>
-        <li>Калькулятор стоимости тату</li>
-        <li>30-дневный практикум продаж</li>
-      </ul>
-    </div>
-    <div class="ov ov-s22-right">
-      <h3>Готов начать путь в тату-индустрии?</h3>
-      <p>Доступ остаётся с тобой навсегда — можешь возвращаться к любому блоку в любой момент. Напиши мне лично, и я расскажу, как начать обучение уже сегодня.</p>
-      <div class="byline">ViP tattoo school · Виктория Поникарова</div>
-    </div>
-  </div>
+  <img class="slide-img" src="assets/slides/slide-21.jpg" alt="Слайд 21 — популярные вопросы">
+  <img class="slide-img" src="assets/slides/slide-22.jpg" alt="Слайд 22 — готов начать путь в тату-индустрии">
   <div class="cta-bar">
     <a class="btn btn-primary" href="https://t.me/mentor_tatoo_Viktoria_bot" target="_blank" rel="noopener"><span>Открыть доступ к обучению</span></a>
     <a class="btn btn-secondary" href="https://t.me/+48733341364" target="_blank" rel="noopener">Написать Виктории</a>
