@@ -72,10 +72,17 @@
   .slide-wrap{ position:relative; }
   .ov{ position:absolute; font-family:'Nunito',sans-serif; }
   .ov-s22-included{ left:3.7%; top:70.4%; height:29.6%; width:46%; color:#e9e0d3; display:flex; flex-direction:column; justify-content:center; }
-  .ov-s22-included .eyebrow{ font-size:1.1vw; letter-spacing:0.1em; text-transform:uppercase; color:#c9a15a; font-weight:700; margin-bottom:0.6vw; }
-  .ov-s22-included ul{ list-style:none; margin:0; padding:0; }
-  .ov-s22-included li{ font-size:1.2vw; line-height:1.5; padding-left:1.4vw; position:relative; }
-  .ov-s22-included li::before{ content:"•"; position:absolute; left:0; color:#c9a15a; font-weight:700; }
+  .ov-s22-included .eyebrow{
+    display:inline-flex; align-self:flex-start; align-items:center; gap:0.5vw;
+    font-size:1.05vw; letter-spacing:0.08em; text-transform:uppercase;
+    color:#1a120c; font-weight:800; background:linear-gradient(100deg,#f0c883,#c9a15a);
+    padding:0.45vw 1vw; border-radius:999px; margin-bottom:1.1vw;
+  }
+  .ov-s22-included ul{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; column-gap:1.6vw; row-gap:0.85vw; }
+  .ov-s22-included li{ font-size:1.32vw; line-height:1.35; font-weight:600; padding-left:1.6vw; position:relative; }
+  .ov-s22-included li::before{ content:"✓"; position:absolute; left:0; top:0; color:#1a120c; background:#c9a15a; width:1.15vw; height:1.15vw; border-radius:50%; font-size:0.85vw; font-weight:800; display:flex; align-items:center; justify-content:center; }
+  .ov-s22-included li.key{ color:#fff; font-weight:800; }
+  .ov-s22-included li.key::before{ background:linear-gradient(100deg,#f0c883,#c9a15a); box-shadow:0 0 0 3px rgba(201,161,90,0.25); }
   .ov-s22-right{ left:51.5%; top:70.4%; height:29.6%; width:44%; color:#cabfae; display:flex; flex-direction:column; justify-content:center; }
   .ov-s22-right h3{ font-family:'Playfair Display',serif; font-weight:700; font-size:1.9vw; color:#fff; margin:0 0 1.1vw; }
   .ov-s22-right p{ font-size:1.4vw; line-height:1.65; margin:0 0 1.3vw; }
@@ -155,10 +162,10 @@
   <div class="slide-wrap">
     <img class="slide-img" src="assets/slides/slide-22.jpg?v=2" alt="Слайд 22 — готов начать путь в тату-индустрии">
     <div class="ov ov-s22-included">
-      <div class="eyebrow">Входит в обучение</div>
+      <div class="eyebrow">★ Ключевое преимущество</div>
       <ul>
-        <li>Пожизненный доступ к материалам курса</li>
-        <li>Учишься в своём темпе, когда удобно</li>
+        <li class="key">Пожизненный доступ к материалам курса</li>
+        <li class="key">Учишься в своём темпе, когда удобно</li>
         <li>Tattoo AI-ассистент на данных курса и студии Sarna</li>
         <li>Набор готовых эскизов и трафаретов</li>
         <li>Калькулятор стоимости тату</li>
