@@ -107,13 +107,31 @@
     font-family:'Nunito',sans-serif; font-weight:800;
     font-size:1.3vw; line-height:1.25; color:#fff; text-shadow:none; filter:none;
   }
+
+  /* ---- Bold white text on slide 1 (hero) and slide 2 (support row) -
+     The grey description paragraph + stat labels on slide 1, and the
+     grey descriptions in "Формат поддержки" on slide 2, were erased
+     from their images (backgrounds reconstructed locally) and are
+     replaced here with real, larger bold-white HTML text matching the
+     "Ключевое преимущество" list's style -- everything else (photos,
+     numbers, icons, titles) stays original pixels. */
+  .ov-s1-desc{ position:absolute; left:4.17%; top:49.6%; width:50%; font-family:'Nunito',sans-serif; font-weight:800; font-size:1.05vw; line-height:1.55; color:#fff; }
+  .ov-s1-stat{ position:absolute; top:75.9%; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.92vw; line-height:1.3; color:#fff; }
+  .ov-s2-support{ position:absolute; top:75.9%; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.95vw; line-height:1.35; color:#fff; }
 </style>
 </head>
 <body>
 <div class="slides">
-  <img class="slide-img" src="assets/slides/slide-01.jpg" alt="Слайд 1 — VIP Tattoo School">
   <div class="slide-wrap">
-    <img class="slide-img" src="assets/slides/slide-02.jpg?v=5" alt="Слайд 2 — структура курса">
+    <img class="slide-img" src="assets/slides/slide-01.jpg?v=2" alt="Слайд 1 — VIP Tattoo School">
+    <div class="ov ov-s1-desc">Полное содержание и план всех 15 блоков курса — от первого включения машинки до именного диплома. Автор — Виктория Поникарова, основательница студии Sarna Tattoo, ментор 300+ выпускников в 12 студиях-партнёрах по Украине и Европе.</div>
+    <div class="ov ov-s1-stat" style="left:4.375%;width:10.625%;">практических блоков</div>
+    <div class="ov ov-s1-stat" style="left:16.67%;width:11.875%;">часов практики и видео</div>
+    <div class="ov ov-s1-stat" style="left:29.04%;width:10.42%;">разобранных стилей тату</div>
+    <div class="ov ov-s1-stat" style="left:41.375%;width:9.25%;">студий-партнёров</div>
+  </div>
+  <div class="slide-wrap">
+    <img class="slide-img" src="assets/slides/slide-02.jpg?v=6" alt="Слайд 2 — структура курса">
     <div class="ov ov-card-num" style="left:4.958%;top:16.667%;">01</div>
     <div class="ov ov-card-label" style="left:4.958%;top:23.926%;width:15.875%;">VIP tattoo school</div>
     <div class="ov ov-card-num" style="left:22.625%;top:16.667%;">02</div>
@@ -144,6 +162,10 @@
     <div class="ov ov-card-label" style="left:58.000%;top:56.815%;width:15.875%;">Zoom — Tattoo</div>
     <div class="ov ov-card-num" style="left:75.667%;top:49.556%;">15</div>
     <div class="ov ov-card-label" style="left:75.667%;top:56.815%;width:15.875%;">Именной диплом</div>
+    <div class="ov ov-s2-support" style="left:9.17%;width:15.75%;">Виктория лично отвечает и разбирает домашние задания</div>
+    <div class="ov ov-s2-support" style="left:31.79%;width:17.71%;">Общение и поддержка с другими тату-мастерами</div>
+    <div class="ov ov-s2-support" style="left:54.46%;width:15.125%;">Персональный помощник на данных курса и студии Sarna</div>
+    <div class="ov ov-s2-support" style="left:77.21%;width:16.17%;">Разбор твоего кабинета, цен и клиентов вживую (блоки 13–14)</div>
   </div>
   <img class="slide-img" src="assets/slides/slide-03.jpg" alt="Слайд 3 — блок 1: вступление">
   <img class="slide-img" src="assets/slides/slide-04.jpg" alt="Слайд 4 — блок 2: AI-assistant">
