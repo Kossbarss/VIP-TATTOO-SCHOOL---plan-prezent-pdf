@@ -82,9 +82,14 @@
   .icon-shine{ position:absolute; overflow:hidden; border-radius:22%; pointer-events:none; }
   .icon-shine::after{
     content:"";
-    position:absolute; top:0; left:-60%; width:45%; height:100%;
+    position:absolute; top:-40%; left:-90%; width:110%; height:180%;
     background:linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
-    animation:cta-btn-shine 3.6s ease-in-out infinite;
+    animation:icon-shine-sweep 3.6s ease-in-out infinite;
+  }
+  @keyframes icon-shine-sweep{
+    0%{ transform:skewX(-18deg) translateX(0%); }
+    55%{ transform:skewX(-18deg) translateX(172%); }
+    100%{ transform:skewX(-18deg) translateX(172%); }
   }
 
   /* ---- Enlarged text on slide 23 ----------------------------------
