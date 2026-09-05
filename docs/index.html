@@ -136,14 +136,22 @@
   }
 
   /* ---- New slide 3: "Формат поддержки" ------------------------------
-     Split out of the old slide 2 into its own slide. The background
-     (logo, 4 icon circles, divider line) is a composed image
-     (slide-03.jpg); all text is real HTML so it matches the rest of
-     the deck's typography exactly. */
-  .ov-s3-eyebrow{ position:absolute; left:3.5%; top:23%; font-family:'Nunito',sans-serif; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; font-size:1.05vw; color:#c9a15a; }
-  .ov-s3-heading{ position:absolute; left:3.5%; top:28.5%; width:65%; font-family:'Playfair Display',serif; font-weight:700; font-size:2.5vw; color:#fff; line-height:1.3; }
-  .ov-s3-title{ position:absolute; top:60.7%; font-family:'Playfair Display',serif; font-weight:700; font-size:1.3vw; color:#fff; }
-  .ov-s3-desc{ position:absolute; top:64.4%; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.95vw; line-height:1.35; color:#fff; }
+     Split out of the old slide 2 into its own slide, rebuilt with the
+     same header-badge + 4-card + quote-box structure the other module
+     slides (e.g. "Результат обучения") use. The background (header
+     icons, card boxes, the 4 icon badges, divider line, quote box) is
+     a composed image (slide-03.jpg); all text is real HTML so it
+     matches the rest of the deck's typography exactly. */
+  .ov-s3-heading{ position:absolute; left:15%; top:8.16%; font-family:'Playfair Display',serif; font-weight:700; font-size:2vw; color:#241a10; }
+  .ov-s3-subtitle{ position:absolute; left:15%; top:15.05%; font-family:'Nunito',sans-serif; font-style:italic; font-size:1.05vw; color:#8a8078; }
+  .ov-s3-title{ position:absolute; top:55.22%; text-align:center; font-family:'Nunito',sans-serif; font-weight:800; font-size:1.15vw; line-height:1.3; color:#241a10; }
+  .ov-s3-desc{ position:absolute; top:60.94%; text-align:center; font-family:'Nunito',sans-serif; font-weight:600; font-size:0.98vw; line-height:1.4; color:#7d7469; }
+  .ov-s3-quote{
+    position:absolute; left:3.5%; top:79.17%; width:93%; height:15.05%;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
+    font-size:1.35vw; color:#8a5a1f;
+  }
 </style>
 </head>
 <body>
@@ -192,18 +200,19 @@
     <div class="ov ov-badge on-dark" style="top:90.6%;"><span class="num">2</span><span class="den">/23</span></div>
   </div>
   <div class="slide-wrap">
-    <img class="slide-img" src="assets/slides/slide-03.jpg" alt="Слайд 3 — формат поддержки">
-    <div class="ov ov-s3-eyebrow">Формат поддержки</div>
-    <div class="ov ov-s3-heading">Как я поддерживаю тебя на протяжении всего курса</div>
-    <div class="ov ov-s3-title" style="left:4.54%;width:20%;">Личная обратная связь</div>
-    <div class="ov ov-s3-desc" style="left:4.54%;width:20%;">Виктория лично отвечает и разбирает домашние задания</div>
-    <div class="ov ov-s3-title" style="left:27.2%;width:20%;">Чат сообщества</div>
-    <div class="ov ov-s3-desc" style="left:27.2%;width:20%;">Общение и поддержка с другими тату-мастерами</div>
-    <div class="ov ov-s3-title" style="left:49.9%;width:20%;">AI-ассистент 24/7</div>
-    <div class="ov ov-s3-desc" style="left:49.9%;width:20%;">Персональный помощник на данных курса и студии Sarna</div>
-    <div class="ov ov-s3-title" style="left:72.6%;width:22%;">Живые Zoom-созвоны</div>
-    <div class="ov ov-s3-desc" style="left:72.6%;width:22%;">Разбор твоего кабинета, цен и клиентов вживую (блоки 13–14)</div>
-    <div class="ov ov-badge on-dark"><span class="num">3</span><span class="den">/23</span></div>
+    <img class="slide-img" src="assets/slides/slide-03.jpg?v=5" alt="Слайд 3 — формат поддержки">
+    <div class="ov ov-s3-heading">Формат поддержки</div>
+    <div class="ov ov-s3-subtitle">Как я поддерживаю тебя на протяжении всего курса:</div>
+    <div class="ov ov-s3-title" style="left:4.708%;width:21.083%;">Личная обратная связь</div>
+    <div class="ov ov-s3-desc" style="left:4.708%;width:21.083%;">Виктория лично отвечает и разбирает домашние задания</div>
+    <div class="ov ov-s3-title" style="left:28%;width:20.79%;">Чат сообщества</div>
+    <div class="ov ov-s3-desc" style="left:28%;width:20.79%;">Общение и поддержка с другими тату-мастерами</div>
+    <div class="ov ov-s3-title" style="left:51.08%;width:21.08%;">AI-ассистент 24/7</div>
+    <div class="ov ov-s3-desc" style="left:51.08%;width:21.08%;">Персональный помощник на данных курса и студии Sarna</div>
+    <div class="ov ov-s3-title" style="left:74.5%;width:20.75%;">Живые Zoom-созвоны</div>
+    <div class="ov ov-s3-desc" style="left:74.5%;width:20.75%;">Разбор твоего кабинета, цен и клиентов вживую (блоки 13–14)</div>
+    <div class="ov ov-s3-quote">«Ты никогда не остаёшься один на один с вопросами — я на связи весь путь»</div>
+    <div class="ov ov-badge"><span class="num">3</span><span class="den">/23</span></div>
   </div>
   <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-04.jpg" alt="Слайд 4 — блок 1: вступление"><div class="ov ov-badge on-light"><span class="num">4</span><span class="den">/23</span></div></div>
   <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-05.jpg" alt="Слайд 5 — блок 2: AI-assistant"><div class="ov ov-badge on-light"><span class="num">5</span><span class="den">/23</span></div></div>
