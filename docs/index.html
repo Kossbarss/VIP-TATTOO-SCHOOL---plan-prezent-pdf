@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>План курса — VIP Tattoo School</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:#15110e;}
@@ -58,6 +60,23 @@
     flex:1 1 200px;
     color:#fff; border:1.5px solid rgba(255,255,255,0.5);
   }
+
+  /* ---- Enlarged text on slide 22 ----------------------------------
+     The "Входит в обучение" list and the final heading/paragraph/
+     byline were erased from slide-22.jpg (see that file) and are
+     replaced here with real, larger HTML text at the same spot -- the
+     certificate photo, first bullet list and CTA buttons are untouched. */
+  .slide-wrap{ position:relative; }
+  .ov{ position:absolute; font-family:'Nunito',sans-serif; }
+  .ov-s22-included{ left:3.7%; top:63.5%; width:46%; color:#e9e0d3; }
+  .ov-s22-included .eyebrow{ font-size:1.1vw; letter-spacing:0.1em; text-transform:uppercase; color:#c9a15a; font-weight:700; margin-bottom:0.8vw; }
+  .ov-s22-included ul{ list-style:none; margin:0; padding:0; }
+  .ov-s22-included li{ font-size:1.3vw; line-height:1.9; padding-left:1.4vw; position:relative; }
+  .ov-s22-included li::before{ content:"•"; position:absolute; left:0; color:#c9a15a; font-weight:700; }
+  .ov-s22-right{ left:51.5%; top:70.5%; width:44%; color:#cabfae; }
+  .ov-s22-right h3{ font-family:'Playfair Display',serif; font-weight:700; font-size:1.7vw; color:#fff; margin:0 0 0.8vw; }
+  .ov-s22-right p{ font-size:1.25vw; line-height:1.6; margin:0 0 1vw; }
+  .ov-s22-right .byline{ padding-top:0.9vw; border-top:1px solid rgba(242,233,218,0.2); font-style:italic; font-size:1.1vw; color:#a89a86; }
 </style>
 </head>
 <body>
@@ -83,7 +102,23 @@
   <img class="slide-img" src="assets/slides/slide-19.jpg" alt="Слайд 19 — почему именно это обучение">
   <img class="slide-img" src="assets/slides/slide-20.jpg" alt="Слайд 20 — честный старт">
   <img class="slide-img" src="assets/slides/slide-21.jpg" alt="Слайд 21 — популярные вопросы">
-  <img class="slide-img" src="assets/slides/slide-22.jpg" alt="Слайд 22 — готов начать путь в тату-индустрии">
+  <div class="slide-wrap">
+    <img class="slide-img" src="assets/slides/slide-22.jpg" alt="Слайд 22 — готов начать путь в тату-индустрии">
+    <div class="ov ov-s22-included">
+      <div class="eyebrow">Входит в обучение</div>
+      <ul>
+        <li>Tattoo AI-ассистент на данных курса и студии Sarna</li>
+        <li>Набор готовых эскизов и трафаретов</li>
+        <li>Калькулятор стоимости тату</li>
+        <li>30-дневный практикум продаж</li>
+      </ul>
+    </div>
+    <div class="ov ov-s22-right">
+      <h3>Готов начать путь в тату-индустрии?</h3>
+      <p>Доступ остаётся с тобой навсегда — можешь возвращаться к любому блоку в любой момент. Напиши мне лично, и я расскажу, как начать обучение уже сегодня.</p>
+      <div class="byline">ViP tattoo school · Виктория Поникарова</div>
+    </div>
+  </div>
   <div class="cta-bar">
     <a class="btn btn-primary" href="https://t.me/mentor_tatoo_Viktoria_bot" target="_blank" rel="noopener"><span>Открыть доступ к обучению</span></a>
     <a class="btn btn-secondary" href="https://t.me/+48733341364" target="_blank" rel="noopener">Написать Виктории</a>
