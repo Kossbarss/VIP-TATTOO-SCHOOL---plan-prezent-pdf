@@ -118,6 +118,29 @@
     animation:icon-shine-sweep 3.6s ease-in-out infinite;
   }
 
+  /* ---- Same rebuild applied to every module-slide header square ------
+     Slides 3-22's header badge (a number 01-15, or a small glyph on the
+     "bonus" slides) was likewise flat pixels, erased from each
+     slide-NN.jpg. Numbers render as real text; the four one-off glyphs
+     (handshake/star/scales/shield/question) are small extracted PNGs
+     with the red background made transparent. */
+  .sq-icon-hdr{
+    position:absolute; border-radius:26%; overflow:hidden;
+    background:linear-gradient(105deg,#f98658 0%,#f25832 24%,#e62115 52%,#f25832 78%,#f98658 100%);
+    box-shadow:0 10px 20px -10px rgba(221,0,3,0.6);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .sq-icon-hdr .num{
+    font-family:'Playfair Display',serif; font-weight:700; font-size:2.2cqw; color:#fff; line-height:1;
+  }
+  .sq-icon-hdr img{ width:52%; height:52%; object-fit:contain; }
+  .sq-icon-hdr::after{
+    content:"";
+    position:absolute; top:-40%; left:-90%; width:110%; height:180%;
+    background:linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
+    animation:icon-shine-sweep 3.6s ease-in-out infinite;
+  }
+
   /* ---- Enlarged text on slide 23 ----------------------------------
      The "Входит в обучение" list and the final heading/paragraph/
      byline were erased from slide-23.jpg (see that file) and are
@@ -285,8 +308,8 @@
     <div class="ov ov-badge on-dark" style="top:90.65%;"><span class="num">2</span><span class="den">/23</span></div>
   </div>
   <div class="slide-wrap">
-    <img class="slide-img" src="assets/slides/slide-03.jpg?v=14" alt="Слайд 3 — формат поддержки">
-    <div class="ov icon-shine" style="left:4.333%;top:7.708%;width:5.042%;height:13.02%;"></div>
+    <img class="slide-img" src="assets/slides/slide-03.jpg?v=17" alt="Слайд 3 — формат поддержки">
+    <div class="ov sq-icon-hdr" style="left:4.333%;top:7.708%;width:5.042%;height:13.02%;"><img src="assets/icons/handshake.png?v=3" alt=""></div>
     <div class="ov ov-s3-heading">Формат поддержки</div>
     <div class="ov ov-s3-subtitle">Как я поддерживаю тебя на протяжении всего курса:</div>
     <div class="ov ov-s3-title" style="left:4.708%;width:21.083%;">Личная обратная связь</div>
@@ -300,30 +323,30 @@
     <div class="ov ov-s3-quote">«Ты никогда не остаёшься один на один с вопросами — я на связи весь путь»</div>
     <div class="ov ov-badge" style="top:90.75%;"><span class="num">3</span><span class="den">/23</span></div>
   </div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-04.jpg?v=3" alt="Слайд 4 — блок 1: вступление"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">4</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-05.jpg?v=2" alt="Слайд 5 — блок 2: AI-assistant"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">5</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-06.jpg?v=2" alt="Слайд 6 — блок 3: безопасность"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">6</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-07.jpg?v=2" alt="Слайд 7 — блок 4: материалы"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">7</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-08.jpg?v=3" alt="Слайд 8 — блок 5: организация и рабочее место"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">8</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-09.jpg?v=2" alt="Слайд 9 — блок 6: практика"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">9</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-10.jpg?v=2" alt="Слайд 10 — блок 7: работа с кожей"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">10</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-11.jpg?v=2" alt="Слайд 11 — блок 8: трафареты"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">11</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-12.jpg?v=2" alt="Слайд 12 — блок 9: Pro Stories"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">12</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-13.jpg?v=3" alt="Слайд 13 — блок 10: 30-дневный практикум"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">13</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-14.jpg?v=2" alt="Слайд 14 — блок 11: стили"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">14</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-15.jpg?v=3" alt="Слайд 15 — блок 12: работа с клиентом"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">15</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-16.jpg?v=3" alt="Слайд 16 — блок 13: реклама"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">16</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-17.jpg?v=2" alt="Слайд 17 — блок 14: Zoom-Tattoo"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">17</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-18.jpg?v=2" alt="Слайд 18 — блок 15: именной диплом"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light"><span class="num">18</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-04.jpg?v=5" alt="Слайд 4 — блок 1: вступление"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">01</span></div><div class="ov ov-badge on-light"><span class="num">4</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-05.jpg?v=4" alt="Слайд 5 — блок 2: AI-assistant"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">02</span></div><div class="ov ov-badge on-light"><span class="num">5</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-06.jpg?v=4" alt="Слайд 6 — блок 3: безопасность"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">03</span></div><div class="ov ov-badge on-light"><span class="num">6</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-07.jpg?v=4" alt="Слайд 7 — блок 4: материалы"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">04</span></div><div class="ov ov-badge on-light"><span class="num">7</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-08.jpg?v=5" alt="Слайд 8 — блок 5: организация и рабочее место"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">05</span></div><div class="ov ov-badge on-light"><span class="num">8</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-09.jpg?v=4" alt="Слайд 9 — блок 6: практика"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">06</span></div><div class="ov ov-badge on-light"><span class="num">9</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-10.jpg?v=4" alt="Слайд 10 — блок 7: работа с кожей"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">07</span></div><div class="ov ov-badge on-light"><span class="num">10</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-11.jpg?v=4" alt="Слайд 11 — блок 8: трафареты"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">08</span></div><div class="ov ov-badge on-light"><span class="num">11</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-12.jpg?v=4" alt="Слайд 12 — блок 9: Pro Stories"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">09</span></div><div class="ov ov-badge on-light"><span class="num">12</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-13.jpg?v=5" alt="Слайд 13 — блок 10: 30-дневный практикум"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">10</span></div><div class="ov ov-badge on-light"><span class="num">13</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-14.jpg?v=4" alt="Слайд 14 — блок 11: стили"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">11</span></div><div class="ov ov-badge on-light"><span class="num">14</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-15.jpg?v=5" alt="Слайд 15 — блок 12: работа с клиентом"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">12</span></div><div class="ov ov-badge on-light"><span class="num">15</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-16.jpg?v=5" alt="Слайд 16 — блок 13: реклама"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">13</span></div><div class="ov ov-badge on-light"><span class="num">16</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-17.jpg?v=4" alt="Слайд 17 — блок 14: Zoom-Tattoo"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">14</span></div><div class="ov ov-badge on-light"><span class="num">17</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-18.jpg?v=4" alt="Слайд 18 — блок 15: именной диплом"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">15</span></div><div class="ov ov-badge on-light"><span class="num">18</span><span class="den">/23</span></div></div>
   <div class="slide-wrap">
-    <img class="slide-img" src="assets/slides/slide-19.jpg?v=8" alt="Слайд 19 — результат обучения">
-    <div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div>
+    <img class="slide-img" src="assets/slides/slide-19.jpg?v=12" alt="Слайд 19 — результат обучения">
+    <div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/star.png?v=3" alt=""></div>
     <div class="ov ov-s19-quote">«Не просто диплом — реальная профессия, которая кормит и приносит уверенность»</div>
     <div class="ov ov-badge on-light" style="left:91.29%;"><span class="num">19</span><span class="den">/23</span></div>
   </div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-20.jpg?v=4" alt="Слайд 20 — почему именно это обучение"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light" style="left:91.29%;"><span class="num">20</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-21.jpg?v=4" alt="Слайд 21 — честный старт"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-light" style="left:91.29%;"><span class="num">21</span><span class="den">/23</span></div></div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-22.jpg?v=4" alt="Слайд 22 — популярные вопросы"><div class="ov icon-shine" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"></div><div class="ov ov-badge on-dark" style="left:91.29%;"><span class="num">22</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-20.jpg?v=7" alt="Слайд 20 — почему именно это обучение"><div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/scales.png?v=3" alt=""></div><div class="ov ov-badge on-light" style="left:91.29%;"><span class="num">20</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-21.jpg?v=7" alt="Слайд 21 — честный старт"><div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/shield.png?v=3" alt=""></div><div class="ov ov-badge on-light" style="left:91.29%;"><span class="num">21</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-22.jpg?v=7" alt="Слайд 22 — популярные вопросы"><div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/question.png?v=3" alt=""></div><div class="ov ov-badge on-dark" style="left:91.29%;"><span class="num">22</span><span class="den">/23</span></div></div>
   <div class="slide-wrap">
     <img class="slide-img" src="assets/slides/slide-23.jpg?v=2" alt="Слайд 23 — готов начать путь в тату-индустрии">
     <div class="ov ov-s22-included">
