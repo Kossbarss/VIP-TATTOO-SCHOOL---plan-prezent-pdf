@@ -92,13 +92,13 @@ function vip_tattoo_plan_render_settings_page() {
             <?php wp_nonce_field('vip_tattoo_plan_settings', 'vip_tattoo_plan_settings_nonce'); ?>
 
             <h2>Оплата і кнопки</h2>
-            <p class="description">Повна інтеграція Stripe/PayPal (тестові та live ключі, вебхуки, Telegram-доступ) — на окремій сторінці <a href="<?php echo esc_url(admin_url('admin.php?page=vip-tattoo-plan-payments')); ?>">«VIP Tattoo План: Оплата»</a>. Поле нижче використовується лише в режимі «Пряме посилання» там.</p>
+            <p class="description">Кнопка нижче — єдиний спосіб оплати на сторінці: вона веде напряму на Stripe/PayPal, без жодної форми чи збору даних цим сайтом. Test/Live ключі для вебхуків (потрібні лише для Meta Conversions API) — на окремій сторінці <a href="<?php echo esc_url(admin_url('admin.php?page=vip-tattoo-plan-payments')); ?>">«VIP Tattoo План: Оплата»</a>.</p>
             <table class="form-table">
                 <tr>
                     <th><label for="vip_tattoo_plan_stripe_url">Посилання на оплату (Stripe Payment Link)</label></th>
                     <td>
                         <input type="url" class="regular-text" id="vip_tattoo_plan_stripe_url" name="vip_tattoo_plan_stripe_url" value="<?php echo esc_attr($vals['vip_tattoo_plan_stripe_url']); ?>" />
-                        <p class="description">Куди веде кнопка «<?php echo esc_html($vals['vip_tattoo_plan_cta_text']); ?>» у режимі «Пряме посилання» — готове посилання Stripe Checkout (buy.stripe.com/...), відкривається в новій вкладці. Ніякого проміжного REST-роуту чи форми — Stripe сам приймає оплату.</p>
+                        <p class="description">Куди веде кнопка «<?php echo esc_html($vals['vip_tattoo_plan_cta_text']); ?>» — готове посилання Stripe Checkout (buy.stripe.com/...), відкривається в новій вкладці. Ніякого проміжного REST-роуту чи форми — Stripe сам приймає оплату і сам робить редирект після неї (налаштовується в кабінеті Stripe).</p>
                     </td>
                 </tr>
                 <tr>

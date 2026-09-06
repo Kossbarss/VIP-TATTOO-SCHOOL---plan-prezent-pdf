@@ -129,21 +129,7 @@
     </div>
   </div>
   <div class="cta-bar">
-    <a class="btn btn-primary" id="vtpCheckoutCta" href="{{STRIPE_CHECKOUT_URL}}" target="_blank" rel="noopener" data-vtp-event="checkout_click"><span>{{CTA_PRIMARY_TEXT}}</span></a>
+    <a class="btn btn-primary" href="{{STRIPE_CHECKOUT_URL}}" target="_blank" rel="noopener" data-vtp-event="checkout_click"><span>{{CTA_PRIMARY_TEXT}}</span></a>
     <a class="btn btn-secondary" href="{{CONTACT_URL}}" target="_blank" rel="noopener" data-vtp-event="contact_click">{{CTA_SECONDARY_TEXT}}</a>
-  </div>
-
-  <!-- Only used when "Режим оплати" = API (settings -> VIP Tattoo План: Оплата) -->
-  <div class="vtp-popup-overlay" id="vtpPopupOverlay"></div>
-  <div class="vtp-popup-card" id="vtpPopupCard" role="dialog" aria-modal="true" aria-labelledby="vtpPopupTitle">
-    <button class="vtp-popup-close" id="vtpPopupClose" aria-label="Закрыть" type="button">&times;</button>
-    <h3 id="vtpPopupTitle">{{CTA_PRIMARY_TEXT}}</h3>
-    <p class="vtp-popup-sub">Оставь email — пришлём доступ к курсу в Telegram сразу после оплаты.</p>
-    <form class="vtp-popup-form" id="vtpCheckoutForm">
-      <input type="email" name="email" placeholder="Твой email" required />
-      <input type="tel" name="phone" placeholder="Твой номер телефона (необязательно)" />
-      <button type="submit" class="btn btn-primary"><span>Перейти к оплате</span></button>
-    </form>
-    <p class="vtp-popup-error" id="vtpPopupError" hidden></p>
   </div>
 </div>

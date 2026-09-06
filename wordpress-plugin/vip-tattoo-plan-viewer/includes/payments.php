@@ -1,67 +1,61 @@
 <?php
 /**
- * Stripe + PayPal checkout (test/sandbox and live credentials, both kept
- * saved side by side and switched by a mode radio) with Telegram access
- * delivery -- same architecture as the vip-tattoo-landing plugin's own
- * includes/payments.php, ported here under a vip_tattoo_plan_ prefix and
- * its own DB table/REST namespace so the two plugins never collide even
- * when both are active on the same site.
+ * Stripe + PayPal webhook listeners (test/sandbox and live credentials,
+ * both kept saved side by side and switched by a mode radio).
  *
- * This only runs when "Режим оплати" is set to "API" on the settings
- * page. In the default "Пряме посилання" mode the CTA button stays a
- * plain link to vip_tattoo_plan_stripe_url and none of this fires --
- * js/checkout.js checks window.VIP_TATTOO_PLAN_CHECKOUT_MODE before
- * intercepting the click.
+ * This site collects and stores NOTHING about its visitors: there is no
+ * checkout form, no order table, no email/phone capture anywhere in this
+ * plugin. The page has exactly two buttons -- one goes straight to the
+ * Stripe Payment Link (or PayPal button) configured in "Оплата і кнопки"
+ * in the main settings, the other straight to Victoria's Telegram. Both
+ * providers handle the entire payment AND the post-payment redirect
+ * themselves (configured in the Stripe/PayPal dashboard's own "after
+ * payment" / return-URL settings, e.g. straight to a Telegram invite
+ * link) -- none of that is this plugin's concern.
  *
- * Flow: CTA click -> small email/phone popup -> REST "create-checkout"
- * opens a Stripe Checkout Session or a PayPal Order depending on the
- * active provider, stores a pending order row keyed by a random token ->
- * customer pays on the provider's hosted page -> provider redirects back
- * to our own "*-return" endpoint, which captures the order and forwards
- * the browser on to the Telegram bot's deep-link start URL -> our
- * Telegram webhook receives /start <token>, matches it against the
- * order, and replies with the access message. The provider's own webhook
- * (checkout.session.completed / CHECKOUT.ORDER.APPROVED) is the fallback
- * that captures the order if the browser never makes it back.
+ * The only reason this file exists at all is that the browser never
+ * lands back on our own domain after paying, so the client-side Meta
+ * Pixel loaded on the page never sees the purchase happen. A Stripe
+ * Payment Link is itself a Checkout Session under the hood, and a PayPal
+ * button still posts through that account's Orders API, so the SAME
+ * account-wide webhook events (checkout.session.completed /
+ * PAYMENT.CAPTURE.COMPLETED) fire for those payments exactly as they
+ * would for anything else on the account. This file verifies those
+ * webhook calls are genuinely from Stripe/PayPal, pulls the amount/
+ * currency/email straight out of the event payload Stripe/PayPal already
+ * sent, and immediately hashes+forwards it to Meta's Conversions API
+ * (see includes/meta-capi.php) -- nothing from the payload is ever
+ * written to the database. A tiny idempotency table records only an
+ * opaque event id and a timestamp, purely to stop a Stripe/PayPal retry
+ * from sending the same Purchase event to Meta twice.
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('VIP_TATTOO_PLAN_ORDERS_TABLE', 'vip_tattoo_plan_orders');
+define('VIP_TATTOO_PLAN_WEBHOOK_LOG_TABLE', 'vip_tattoo_plan_webhook_events');
 
 /* ------------------------------------------------------------------ */
-/* Activation: create the orders table                                */
+/* Activation: create the idempotency table (no PII columns at all)   */
 /* ------------------------------------------------------------------ */
 
 function vip_tattoo_plan_payments_activate() {
     global $wpdb;
-    $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
+    $table = $wpdb->prefix . VIP_TATTOO_PLAN_WEBHOOK_LOG_TABLE;
     $charset_collate = $wpdb->get_charset_collate();
     $sql = "CREATE TABLE {$table} (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        token VARCHAR(64) NOT NULL,
-        provider_order_id VARCHAR(191) DEFAULT NULL,
-        provider VARCHAR(20) DEFAULT NULL,
-        email VARCHAR(191) DEFAULT NULL,
-        phone VARCHAR(64) DEFAULT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'pending',
-        telegram_chat_id BIGINT DEFAULT NULL,
-        delivered_at DATETIME DEFAULT NULL,
+        provider VARCHAR(20) NOT NULL,
+        event_id VARCHAR(191) NOT NULL,
         created_at DATETIME NOT NULL,
-        paid_at DATETIME DEFAULT NULL,
         PRIMARY KEY  (id),
-        UNIQUE KEY token (token)
+        UNIQUE KEY provider_event (provider, event_id)
     ) {$charset_collate};";
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     dbDelta($sql);
-
-    if (!get_option('vip_tattoo_plan_telegram_webhook_secret')) {
-        update_option('vip_tattoo_plan_telegram_webhook_secret', wp_generate_password(32, false));
-    }
 }
 register_activation_hook(VIP_TATTOO_PLAN_PLUGIN_DIR . 'vip-tattoo-plan-viewer.php', 'vip_tattoo_plan_payments_activate');
 
-define('VIP_TATTOO_PLAN_PAYMENTS_DB_VERSION', 1);
+define('VIP_TATTOO_PLAN_PAYMENTS_DB_VERSION', 2);
 add_action('admin_init', function () {
     if ((int) get_option('vip_tattoo_plan_payments_db_version', 0) < VIP_TATTOO_PLAN_PAYMENTS_DB_VERSION) {
         vip_tattoo_plan_payments_activate();
@@ -69,25 +63,30 @@ add_action('admin_init', function () {
     }
 });
 
+// Idempotency check: true the first time this (provider, event_id) pair
+// is seen, false on every repeat (Stripe/PayPal retry the same webhook
+// delivery until it gets a 2xx, so this is the only thing standing
+// between one purchase and Meta getting the same Purchase event twice).
+function vip_tattoo_plan_webhook_seen_first_time($provider, $event_id) {
+    global $wpdb;
+    if (!$event_id) return true; // nothing to dedupe against -- let it through rather than silently drop it
+    $table = $wpdb->prefix . VIP_TATTOO_PLAN_WEBHOOK_LOG_TABLE;
+    $inserted = $wpdb->query($wpdb->prepare(
+        "INSERT IGNORE INTO {$table} (provider, event_id, created_at) VALUES (%s, %s, %s)",
+        $provider, $event_id, current_time('mysql')
+    ));
+    return (bool) $inserted;
+}
+
 /* ------------------------------------------------------------------ */
 /* Settings                                                            */
 /* ------------------------------------------------------------------ */
 
 function vip_tattoo_plan_payment_fields() {
     return [
-        // 'link' = CTA is a plain <a href> to vip_tattoo_plan_stripe_url
-        // (the simple mode, no keys needed). 'api' = CTA opens the
-        // email/phone popup and goes through the checkout below.
-        'vip_tattoo_plan_checkout_mode'              => 'link',
-        'vip_tattoo_plan_payment_provider'           => 'stripe',
-
         'vip_tattoo_plan_stripe_mode'                => 'test',
-        'vip_tattoo_plan_stripe_test_secret_key'     => '',
         'vip_tattoo_plan_stripe_test_webhook_secret' => '',
-        'vip_tattoo_plan_stripe_test_price_id'       => '',
-        'vip_tattoo_plan_stripe_live_secret_key'     => '',
         'vip_tattoo_plan_stripe_live_webhook_secret' => '',
-        'vip_tattoo_plan_stripe_live_price_id'       => '',
 
         'vip_tattoo_plan_paypal_mode'                => 'sandbox',
         'vip_tattoo_plan_paypal_sandbox_client_id'   => '',
@@ -96,14 +95,6 @@ function vip_tattoo_plan_payment_fields() {
         'vip_tattoo_plan_paypal_live_client_id'      => '',
         'vip_tattoo_plan_paypal_live_secret'         => '',
         'vip_tattoo_plan_paypal_live_webhook_id'     => '',
-
-        'vip_tattoo_plan_price_cents'                => '27500',
-        'vip_tattoo_plan_currency'                   => 'EUR',
-        'vip_tattoo_plan_product_name'               => 'VIP tattoo school — курс',
-
-        'vip_tattoo_plan_telegram_access_bot_token'    => '',
-        'vip_tattoo_plan_telegram_access_bot_username' => 'vip_tattoo_school_viktori_bot',
-        'vip_tattoo_plan_telegram_access_message'      => "Спасибо за покупку обучения! Ваша оплата успешно прошла 🎉\n\nПереходите и присоединяйтесь к учебной программе, где вы сейчас увидите 15 блоков, наполненных материалами и уроками, по этой ссылке (сделайте запрос, и администратор сразу вас добавит):\n\nhttps://t.me/+cUtIkWv6ljo5NmQy\n\nСсылка для доступа к материалам:\n\nhttps://t.me/+F_eC8wV1jqtiMWQy\n\nНа этом доступе находится общий чат, а также в нем есть навигация по всему курсу, чтобы вам было проще найти необходимый материал и загрузить его, ссылка (доступ):\n\nhttps://t.me/+XUvrwztuyXQ2NGZi\n\nМоя рекомендация вам - сначала просмотрите всё наполнение, то есть «пробегитесь» по всем блокам и всему обучению, чтобы понять, где и что находится и как работает «навигатор», и только после этого, в уверенном настроении, начинайте обучение по урокам, и конечно, не забывайте о общении в чате.\n\nУточнение: если что-то не получается загрузить или любая «кнопка» не работает, сразу пишите в чат поддержки.\n\nЕсли возникнут какие-либо вопросы — я всегда на связи 👌",
     ];
 }
 
@@ -125,22 +116,9 @@ function vip_tattoo_plan_render_payment_settings() {
 
     if (isset($_POST['vip_tattoo_plan_save_payment_settings']) && wp_verify_nonce($_POST['vip_tattoo_plan_payment_nonce'] ?? '', 'vip_tattoo_plan_payment_settings')) {
         foreach ($defaults as $key => $default) {
-            if ($key === 'vip_tattoo_plan_telegram_access_message') {
-                update_option($key, isset($_POST[$key]) ? sanitize_textarea_field(wp_unslash($_POST[$key])) : $default);
-            } else {
-                update_option($key, isset($_POST[$key]) ? sanitize_text_field(wp_unslash($_POST[$key])) : $default);
-            }
+            update_option($key, isset($_POST[$key]) ? sanitize_text_field(wp_unslash($_POST[$key])) : $default);
         }
         echo '<div class="notice notice-success"><p>Збережено.</p></div>';
-    }
-
-    if (isset($_POST['vip_tattoo_plan_set_telegram_webhook']) && wp_verify_nonce($_POST['vip_tattoo_plan_payment_nonce'] ?? '', 'vip_tattoo_plan_payment_settings')) {
-        $result = vip_tattoo_plan_set_telegram_webhook();
-        if ($result === true) {
-            echo '<div class="notice notice-success"><p>Telegram webhook встановлено успішно.</p></div>';
-        } else {
-            echo '<div class="notice notice-error"><p>Помилка встановлення webhook: ' . esc_html($result) . '</p></div>';
-        }
     }
 
     $vals = [];
@@ -150,79 +128,40 @@ function vip_tattoo_plan_render_payment_settings() {
 
     $paypal_webhook_url = rest_url('vip-tattoo-plan/v1/paypal-webhook');
     $stripe_webhook_url = rest_url('vip-tattoo-plan/v1/stripe-webhook');
-    $telegram_webhook_url = rest_url('vip-tattoo-plan/v1/telegram-webhook');
     ?>
     <div class="wrap">
-        <h1>VIP Tattoo School — План курсу: Оплата і Telegram-доступ</h1>
+        <h1>VIP Tattoo School — План курсу: Оплата</h1>
+        <p>
+            Цей сайт нічого не збирає і не зберігає про відвідувачів: жодної форми, жодної таблиці замовлень.
+            На сторінці лише дві кнопки — одна веде на Stripe Payment Link / PayPal (налаштовується в «Оплата і кнопки» основних налаштувань),
+            друга — напряму в Telegram до Вікторії. Обидва провайдери самі приймають оплату і самі ж роблять редирект після оплати
+            (це налаштовується в кабінеті Stripe/PayPal, а не тут).
+        </p>
+        <p>
+            Все нижче потрібне лише для одного: щоб <a href="<?php echo esc_url(admin_url('admin.php?page=vip-tattoo-plan-meta-capi')); ?>">Meta Conversions API</a>
+            дізнавався про реальну оплату — бо після оплати браузер одразу летить у Telegram, а не назад на сайт, і клієнтський піксель Meta
+            просто не встигає побачити подію. Дані з вебхука (сума, валюта, email/телефон, якщо провайдер їх передав) використовуються миттєво
+            для хешування й відправки в Meta, і ніде не зберігаються.
+        </p>
 
         <form method="post">
             <?php wp_nonce_field('vip_tattoo_plan_payment_settings', 'vip_tattoo_plan_payment_nonce'); ?>
-
-            <h2>Режим оплати</h2>
-            <table class="form-table">
-                <tr>
-                    <th><label>Як працює кнопка «<?php echo esc_html(get_option('vip_tattoo_plan_cta_text', 'Открыть доступ к обучению')); ?>»</label></th>
-                    <td>
-                        <label><input type="radio" name="vip_tattoo_plan_checkout_mode" value="link" <?php checked($vals['vip_tattoo_plan_checkout_mode'], 'link'); ?> /> Пряме посилання (готовий Stripe Payment Link, без ключів нижче — поточний спосіб)</label><br />
-                        <label><input type="radio" name="vip_tattoo_plan_checkout_mode" value="api" <?php checked($vals['vip_tattoo_plan_checkout_mode'], 'api'); ?> /> API-оплата (Stripe/PayPal нижче, з тестовими та live ключами, вебхуками і доставкою доступу в Telegram)</label>
-                        <p class="description">У режимі «Пряме посилання» все нижче на цій сторінці не використовується — кнопка просто веде на посилання з розділу «Оплата і кнопки» основних налаштувань.</p>
-                    </td>
-                </tr>
-                <tr>
-                    <th><label>Активний провайдер (тільки для режиму API)</label></th>
-                    <td>
-                        <label><input type="radio" name="vip_tattoo_plan_payment_provider" value="stripe" <?php checked($vals['vip_tattoo_plan_payment_provider'], 'stripe'); ?> /> Stripe</label><br />
-                        <label><input type="radio" name="vip_tattoo_plan_payment_provider" value="paypal" <?php checked($vals['vip_tattoo_plan_payment_provider'], 'paypal'); ?> /> PayPal</label>
-                        <p class="description">Налаштування іншого провайдера нижче нікуди не зникають — можна перемкнутись назад у будь-який момент.</p>
-                    </td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_price_cents">Ціна (в центах)</label></th>
-                    <td><input type="number" id="vip_tattoo_plan_price_cents" name="vip_tattoo_plan_price_cents" value="<?php echo esc_attr($vals['vip_tattoo_plan_price_cents']); ?>" /> <p class="description">27500 = 275.00</p></td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_currency">Валюта (код ISO, напр. EUR)</label></th>
-                    <td><input type="text" id="vip_tattoo_plan_currency" name="vip_tattoo_plan_currency" value="<?php echo esc_attr($vals['vip_tattoo_plan_currency']); ?>" /></td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_product_name">Назва товару (показується на сторінці оплати)</label></th>
-                    <td><input type="text" class="regular-text" id="vip_tattoo_plan_product_name" name="vip_tattoo_plan_product_name" value="<?php echo esc_attr($vals['vip_tattoo_plan_product_name']); ?>" /></td>
-                </tr>
-            </table>
 
             <h2>Stripe</h2>
             <table class="form-table">
                 <tr>
                     <th><label>Режим</label></th>
                     <td>
-                        <label><input type="radio" name="vip_tattoo_plan_stripe_mode" value="test" <?php checked($vals['vip_tattoo_plan_stripe_mode'], 'test'); ?> /> Test (тестові платежі, картка 4242 4242 4242 4242)</label><br />
-                        <label><input type="radio" name="vip_tattoo_plan_stripe_mode" value="live" <?php checked($vals['vip_tattoo_plan_stripe_mode'], 'live'); ?> /> Live (реальні платежі)</label>
-                        <p class="description">Перемикає, які з двох наборів полів (Test/Live) фактично використовуються — обидва завжди залишаються збереженими.</p>
-                    </td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_stripe_test_secret_key">Test Secret Key</label></th>
-                    <td>
-                        <input type="password" class="regular-text" autocomplete="off" id="vip_tattoo_plan_stripe_test_secret_key" name="vip_tattoo_plan_stripe_test_secret_key" value="<?php echo esc_attr($vals['vip_tattoo_plan_stripe_test_secret_key']); ?>" />
-                        <p class="description">З <a href="https://dashboard.stripe.com/test/apikeys" target="_blank" rel="noopener">dashboard.stripe.com/test/apikeys</a> (увімкни "Test mode" зверху). Починається з <code>sk_test_</code>.</p>
+                        <label><input type="radio" name="vip_tattoo_plan_stripe_mode" value="test" <?php checked($vals['vip_tattoo_plan_stripe_mode'], 'test'); ?> /> Test</label><br />
+                        <label><input type="radio" name="vip_tattoo_plan_stripe_mode" value="live" <?php checked($vals['vip_tattoo_plan_stripe_mode'], 'live'); ?> /> Live</label>
+                        <p class="description">Перемикає, який з двох webhook-секретів нижче використовується для перевірки підпису — обидва завжди залишаються збереженими.</p>
                     </td>
                 </tr>
                 <tr>
                     <th><label for="vip_tattoo_plan_stripe_test_webhook_secret">Test Webhook Signing Secret</label></th>
                     <td>
                         <input type="password" class="regular-text" autocomplete="off" id="vip_tattoo_plan_stripe_test_webhook_secret" name="vip_tattoo_plan_stripe_test_webhook_secret" value="<?php echo esc_attr($vals['vip_tattoo_plan_stripe_test_webhook_secret']); ?>" />
-                        <p class="description">У Test mode: Developers → Webhooks → "Add destination" на URL нижче, подія <code>checkout.session.completed</code>.</p>
-                    </td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_stripe_test_price_id">Test Price ID (необов'язково)</label></th>
-                    <td><input type="text" class="regular-text" id="vip_tattoo_plan_stripe_test_price_id" name="vip_tattoo_plan_stripe_test_price_id" value="<?php echo esc_attr($vals['vip_tattoo_plan_stripe_test_price_id']); ?>" placeholder="price_..." /></td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_stripe_live_secret_key">Live Secret Key</label></th>
-                    <td>
-                        <input type="password" class="regular-text" autocomplete="off" id="vip_tattoo_plan_stripe_live_secret_key" name="vip_tattoo_plan_stripe_live_secret_key" value="<?php echo esc_attr($vals['vip_tattoo_plan_stripe_live_secret_key']); ?>" />
-                        <p class="description">З <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener">dashboard.stripe.com/apikeys</a>. Починається з <code>sk_live_</code>.</p>
+                        <p class="description">У Test mode: dashboard.stripe.com/test/webhooks → «Add destination» на URL нижче, подія <code>checkout.session.completed</code>.</p>
                     </td>
                 </tr>
                 <tr>
@@ -230,17 +169,10 @@ function vip_tattoo_plan_render_payment_settings() {
                     <td>
                         <input type="password" class="regular-text" autocomplete="off" id="vip_tattoo_plan_stripe_live_webhook_secret" name="vip_tattoo_plan_stripe_live_webhook_secret" value="<?php echo esc_attr($vals['vip_tattoo_plan_stripe_live_webhook_secret']); ?>" />
                         <p class="description">
-                            У dashboard.stripe.com (поза Test mode) → Developers → Webhooks → "Add destination". URL ендпоінта:<br />
+                            dashboard.stripe.com (поза Test mode) → Developers → Webhooks → «Add destination». URL ендпоінта:<br />
                             <code><?php echo esc_html($stripe_webhook_url); ?></code><br />
-                            Подія для підписки: <code>checkout.session.completed</code>. Після створення скопіюй "Signing secret" (<code>whsec_...</code>) сюди.
+                            Подія для підписки: <code>checkout.session.completed</code>. Після створення скопіюй «Signing secret» (<code>whsec_...</code>) сюди.
                         </p>
-                    </td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_stripe_live_price_id">Live Price ID з каталогу Stripe (необов'язково)</label></th>
-                    <td>
-                        <input type="text" class="regular-text" id="vip_tattoo_plan_stripe_live_price_id" name="vip_tattoo_plan_stripe_live_price_id" value="<?php echo esc_attr($vals['vip_tattoo_plan_stripe_live_price_id']); ?>" placeholder="price_..." />
-                        <p class="description">Якщо заповнено — оплата йде саме на цю ціну з каталогу Stripe. Якщо порожньо — плагін сам створює одноразовий товар на льоту з полів «Ціна»/«Валюта»/«Назва товару» вище.</p>
                     </td>
                 </tr>
             </table>
@@ -250,8 +182,8 @@ function vip_tattoo_plan_render_payment_settings() {
                 <tr>
                     <th><label>Режим</label></th>
                     <td>
-                        <label><input type="radio" name="vip_tattoo_plan_paypal_mode" value="sandbox" <?php checked($vals['vip_tattoo_plan_paypal_mode'], 'sandbox'); ?> /> Sandbox (тестові платежі)</label><br />
-                        <label><input type="radio" name="vip_tattoo_plan_paypal_mode" value="live" <?php checked($vals['vip_tattoo_plan_paypal_mode'], 'live'); ?> /> Live (реальні платежі)</label>
+                        <label><input type="radio" name="vip_tattoo_plan_paypal_mode" value="sandbox" <?php checked($vals['vip_tattoo_plan_paypal_mode'], 'sandbox'); ?> /> Sandbox</label><br />
+                        <label><input type="radio" name="vip_tattoo_plan_paypal_mode" value="live" <?php checked($vals['vip_tattoo_plan_paypal_mode'], 'live'); ?> /> Live</label>
                     </td>
                 </tr>
                 <tr>
@@ -267,9 +199,9 @@ function vip_tattoo_plan_render_payment_settings() {
                     <td>
                         <input type="text" class="regular-text" id="vip_tattoo_plan_paypal_sandbox_webhook_id" name="vip_tattoo_plan_paypal_sandbox_webhook_id" value="<?php echo esc_attr($vals['vip_tattoo_plan_paypal_sandbox_webhook_id']); ?>" />
                         <p class="description">
-                            У developer.paypal.com (Sandbox) → твій застосунок → "Sandbox Webhooks" → "Add Webhook". URL ендпоінта:<br />
+                            developer.paypal.com (Sandbox) → твій застосунок → «Sandbox Webhooks» → «Add Webhook». URL ендпоінта:<br />
                             <code><?php echo esc_html($paypal_webhook_url); ?></code><br />
-                            Події для підписки: <code>Checkout order approved</code> і <code>Payment capture completed</code>. Після створення скопіюй "Webhook ID" сюди.
+                            Подія для підписки: <code>Payment capture completed</code>. Після створення скопіюй «Webhook ID» сюди.
                         </p>
                     </td>
                 </tr>
@@ -290,72 +222,16 @@ function vip_tattoo_plan_render_payment_settings() {
                 </tr>
             </table>
 
-            <h2>Telegram-доступ (надсилається після оплати, режим API)</h2>
-            <table class="form-table">
-                <tr>
-                    <th><label for="vip_tattoo_plan_telegram_access_bot_token">Bot Token (від @BotFather)</label></th>
-                    <td>
-                        <input type="password" class="regular-text" autocomplete="off" id="vip_tattoo_plan_telegram_access_bot_token" name="vip_tattoo_plan_telegram_access_bot_token" value="<?php echo esc_attr($vals['vip_tattoo_plan_telegram_access_bot_token']); ?>" />
-                        <p class="description">Окремий від бота адмін-сповіщень у розділі «Telegram-сповіщення» основних налаштувань — цей бот пише клієнту, той сповіщає тебе.</p>
-                    </td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_telegram_access_bot_username">Юзернейм бота (без @)</label></th>
-                    <td><input type="text" id="vip_tattoo_plan_telegram_access_bot_username" name="vip_tattoo_plan_telegram_access_bot_username" value="<?php echo esc_attr($vals['vip_tattoo_plan_telegram_access_bot_username']); ?>" /></td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_telegram_access_message">Текст повідомлення з доступом</label></th>
-                    <td><textarea id="vip_tattoo_plan_telegram_access_message" name="vip_tattoo_plan_telegram_access_message" rows="6" class="large-text"><?php echo esc_textarea($vals['vip_tattoo_plan_telegram_access_message']); ?></textarea></td>
-                </tr>
-            </table>
-
             <p class="submit">
                 <button type="submit" name="vip_tattoo_plan_save_payment_settings" value="1" class="button button-primary">Зберегти налаштування</button>
             </p>
         </form>
-
-        <hr />
-        <h2>Telegram webhook (доступ клієнту)</h2>
-        <p>Після того як зберіг Bot Token вище — натисни цю кнопку один раз, щоб підключити бота до сайту:</p>
-        <form method="post">
-            <?php wp_nonce_field('vip_tattoo_plan_payment_settings', 'vip_tattoo_plan_payment_nonce'); ?>
-            <button type="submit" name="vip_tattoo_plan_set_telegram_webhook" value="1" class="button">Встановити Telegram webhook</button>
-        </form>
-        <p class="description">Ендпоінт: <code><?php echo esc_html($telegram_webhook_url); ?></code></p>
-
-        <hr />
-        <h2>Останні замовлення (режим API)</h2>
-        <?php vip_tattoo_plan_render_recent_orders(); ?>
     </div>
     <?php
 }
 
-function vip_tattoo_plan_render_recent_orders() {
-    global $wpdb;
-    $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
-    $rows = $wpdb->get_results("SELECT * FROM {$table} ORDER BY id DESC LIMIT 25");
-    if (!$rows) {
-        echo '<p>Поки що немає замовлень.</p>';
-        return;
-    }
-    echo '<table class="widefat striped"><thead><tr><th>Email</th><th>Телефон</th><th>Провайдер</th><th>Статус</th><th>Telegram</th><th>Створено</th><th>Оплачено</th></tr></thead><tbody>';
-    foreach ($rows as $row) {
-        printf(
-            '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
-            esc_html($row->email),
-            esc_html($row->phone),
-            esc_html($row->provider),
-            esc_html($row->status),
-            $row->delivered_at ? '✓ доставлено' : '—',
-            esc_html($row->created_at),
-            esc_html($row->paid_at ?: '—')
-        );
-    }
-    echo '</tbody></table>';
-}
-
 /* ------------------------------------------------------------------ */
-/* PayPal helpers                                                      */
+/* PayPal helpers (needed only to call verify-webhook-signature)       */
 /* ------------------------------------------------------------------ */
 
 function vip_tattoo_plan_paypal_mode() {
@@ -441,36 +317,37 @@ function vip_tattoo_plan_paypal_request($method, $path, $body = null) {
 
     if ($code >= 400) {
         $message = is_array($data) ? ($data['message'] ?? wp_remote_retrieve_body($response)) : wp_remote_retrieve_body($response);
-        $error = new WP_Error('paypal_http_' . $code, 'PayPal HTTP ' . $code . ': ' . $message);
-        $error->add_data($data);
-        return $error;
+        return new WP_Error('paypal_http_' . $code, 'PayPal HTTP ' . $code . ': ' . $message);
     }
 
     return $data;
+}
+
+function vip_tattoo_plan_verify_paypal_webhook(WP_REST_Request $request) {
+    $webhook_id = vip_tattoo_plan_paypal_webhook_id();
+    if (!$webhook_id) return false; // unconfigured -- refuse rather than blindly trust an unverifiable POST
+
+    $body = [
+        'transmission_id'   => $request->get_header('paypal-transmission-id'),
+        'transmission_time' => $request->get_header('paypal-transmission-time'),
+        'cert_url'          => $request->get_header('paypal-cert-url'),
+        'auth_algo'         => $request->get_header('paypal-auth-algo'),
+        'transmission_sig'  => $request->get_header('paypal-transmission-sig'),
+        'webhook_id'        => $webhook_id,
+        'webhook_event'     => json_decode($request->get_body(), true),
+    ];
+
+    $result = vip_tattoo_plan_paypal_request('POST', '/v1/notifications/verify-webhook-signature', $body);
+    if (is_wp_error($result)) return false;
+    return ($result['verification_status'] ?? '') === 'SUCCESS';
 }
 
 /* ------------------------------------------------------------------ */
 /* Stripe helpers                                                      */
 /* ------------------------------------------------------------------ */
 
-function vip_tattoo_plan_payment_provider() {
-    $provider = get_option('vip_tattoo_plan_payment_provider', 'stripe');
-    return in_array($provider, ['stripe', 'paypal'], true) ? $provider : 'stripe';
-}
-
-function vip_tattoo_plan_checkout_mode() {
-    $mode = get_option('vip_tattoo_plan_checkout_mode', 'link');
-    return $mode === 'api' ? 'api' : 'link';
-}
-
 function vip_tattoo_plan_stripe_mode() {
     return get_option('vip_tattoo_plan_stripe_mode', 'test') === 'live' ? 'live' : 'test';
-}
-
-function vip_tattoo_plan_stripe_secret_key() {
-    return vip_tattoo_plan_stripe_mode() === 'live'
-        ? get_option('vip_tattoo_plan_stripe_live_secret_key', '')
-        : get_option('vip_tattoo_plan_stripe_test_secret_key', '');
 }
 
 function vip_tattoo_plan_stripe_webhook_secret() {
@@ -479,82 +356,13 @@ function vip_tattoo_plan_stripe_webhook_secret() {
         : get_option('vip_tattoo_plan_stripe_test_webhook_secret', '');
 }
 
-function vip_tattoo_plan_stripe_price_id() {
-    return trim(vip_tattoo_plan_stripe_mode() === 'live'
-        ? get_option('vip_tattoo_plan_stripe_live_price_id', '')
-        : get_option('vip_tattoo_plan_stripe_test_price_id', ''));
-}
-
-function vip_tattoo_plan_stripe_request($method, $path, $body = null) {
-    $secret = vip_tattoo_plan_stripe_secret_key();
-    if (!$secret) {
-        return new WP_Error('no_credentials', 'Stripe Secret Key не налаштований.');
-    }
-
-    $args = [
-        'method'  => $method,
-        'headers' => [
-            'Authorization' => 'Bearer ' . $secret,
-        ],
-        'timeout' => 20,
-    ];
-    if ($body !== null) {
-        $args['body'] = $body;
-    }
-
-    $response = wp_remote_request('https://api.stripe.com/v1' . $path, $args);
-    if (is_wp_error($response)) return $response;
-
-    $code = wp_remote_retrieve_response_code($response);
-    $data = json_decode(wp_remote_retrieve_body($response), true);
-
-    if ($code >= 400) {
-        $message = is_array($data) ? ($data['error']['message'] ?? wp_remote_retrieve_body($response)) : wp_remote_retrieve_body($response);
-        return new WP_Error('stripe_http_' . $code, 'Stripe HTTP ' . $code . ': ' . $message);
-    }
-
-    return $data;
-}
-
-function vip_tattoo_plan_stripe_capture_and_mark_paid($session_id) {
-    global $wpdb;
-    if (!$session_id) return;
-
-    $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
-    $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE provider_order_id = %s", $session_id));
-    if (!$order || $order->status === 'paid') {
-        if ($order) vip_tattoo_plan_deliver_access($order);
-        return;
-    }
-
-    $session = vip_tattoo_plan_stripe_request('GET', '/checkout/sessions/' . $session_id);
-    if (is_wp_error($session)) {
-        error_log('[VIP Tattoo Plan] Stripe session lookup failed for ' . $session_id . ': ' . $session->get_error_message());
-        return;
-    }
-
-    if (($session['payment_status'] ?? '') !== 'paid') {
-        error_log('[VIP Tattoo Plan] Stripe session ' . $session_id . ' payment_status: ' . ($session['payment_status'] ?? 'unknown'));
-        return;
-    }
-
-    $paid_at = current_time('mysql');
-    $wpdb->update($table, ['status' => 'paid', 'paid_at' => $paid_at], ['id' => $order->id]);
-    $order->status = 'paid';
-    $order->paid_at = $paid_at;
-
-    // Extension point for includes/meta-capi.php -- sends the Purchase
-    // event server-side, since the buyer never lands back on our own
-    // domain after paying (Stripe/PayPal redirect straight to the
-    // Telegram bot), so the browser-side Meta Pixel never fires it.
-    do_action('vip_tattoo_plan_order_paid', $order);
-
-    vip_tattoo_plan_deliver_access($order);
-}
-
+// Stripe's own signature scheme (no SDK dependency): "Stripe-Signature"
+// header is "t=<unix-timestamp>,v1=<hex-hmac>[,v0=...]" -- expected
+// signature is HMAC-SHA256 of "{timestamp}.{raw request body}" keyed by
+// the webhook signing secret.
 function vip_tattoo_plan_verify_stripe_webhook(WP_REST_Request $request) {
     $webhook_secret = vip_tattoo_plan_stripe_webhook_secret();
-    if (!$webhook_secret) return true;
+    if (!$webhook_secret) return false; // unconfigured -- refuse rather than blindly trust an unverifiable POST
 
     $signature_header = $request->get_header('stripe-signature');
     if (!$signature_header) return false;
@@ -577,108 +385,13 @@ function vip_tattoo_plan_verify_stripe_webhook(WP_REST_Request $request) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Telegram access delivery                                            */
-/* ------------------------------------------------------------------ */
-
-function vip_tattoo_plan_telegram_access_api($method, $params = []) {
-    $token = get_option('vip_tattoo_plan_telegram_access_bot_token');
-    if (!$token) return new WP_Error('no_token', 'Telegram bot token not configured');
-    $response = wp_remote_post("https://api.telegram.org/bot{$token}/{$method}", [
-        'body'    => $params,
-        'timeout' => 15,
-    ]);
-    if (is_wp_error($response)) return $response;
-    $body = json_decode(wp_remote_retrieve_body($response), true);
-    if (empty($body['ok'])) {
-        return new WP_Error('telegram_error', $body['description'] ?? 'Unknown Telegram API error');
-    }
-    return $body['result'];
-}
-
-function vip_tattoo_plan_set_telegram_webhook() {
-    $secret = get_option('vip_tattoo_plan_telegram_webhook_secret');
-    $url = rest_url('vip-tattoo-plan/v1/telegram-webhook');
-    $result = vip_tattoo_plan_telegram_access_api('setWebhook', [
-        'url'          => $url,
-        'secret_token' => $secret,
-    ]);
-    if (is_wp_error($result)) return $result->get_error_message();
-    return true;
-}
-
-function vip_tattoo_plan_deliver_access($order) {
-    global $wpdb;
-    $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
-
-    if ($order->status !== 'paid' || !$order->telegram_chat_id || $order->delivered_at) {
-        return;
-    }
-
-    $message = get_option('vip_tattoo_plan_telegram_access_message');
-    $result = vip_tattoo_plan_telegram_access_api('sendMessage', [
-        'chat_id' => $order->telegram_chat_id,
-        'text'    => $message,
-    ]);
-
-    if (!is_wp_error($result)) {
-        $wpdb->update($table, ['delivered_at' => current_time('mysql')], ['id' => $order->id]);
-    }
-}
-
-function vip_tattoo_plan_paypal_capture_and_mark_paid($paypal_order_id) {
-    global $wpdb;
-    if (!$paypal_order_id) return;
-
-    $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
-    $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE provider_order_id = %s", $paypal_order_id));
-    if (!$order || $order->status === 'paid') {
-        if ($order) vip_tattoo_plan_deliver_access($order);
-        return;
-    }
-
-    $result = vip_tattoo_plan_paypal_request('POST', '/v2/checkout/orders/' . $paypal_order_id . '/capture', new stdClass());
-
-    $already_captured = false;
-    if (is_wp_error($result)) {
-        $data = $result->get_error_data();
-        $issue = $data['details'][0]['issue'] ?? '';
-        if ($issue === 'ORDER_ALREADY_CAPTURED') {
-            $already_captured = true;
-        } else {
-            error_log('[VIP Tattoo Plan] PayPal capture failed for order ' . $paypal_order_id . ': ' . $result->get_error_message());
-            return;
-        }
-    }
-
-    $status = $already_captured ? 'COMPLETED' : ($result['status'] ?? '');
-    if ($status !== 'COMPLETED') {
-        error_log('[VIP Tattoo Plan] PayPal capture for order ' . $paypal_order_id . ' returned status: ' . $status);
-        return;
-    }
-
-    $paid_at = current_time('mysql');
-    $wpdb->update($table, ['status' => 'paid', 'paid_at' => $paid_at], ['id' => $order->id]);
-    $order->status = 'paid';
-    $order->paid_at = $paid_at;
-
-    do_action('vip_tattoo_plan_order_paid', $order);
-
-    vip_tattoo_plan_deliver_access($order);
-}
-
-/* ------------------------------------------------------------------ */
 /* REST routes                                                         */
 /* ------------------------------------------------------------------ */
 
 add_action('rest_api_init', function () {
-    register_rest_route('vip-tattoo-plan/v1', '/create-checkout', [
+    register_rest_route('vip-tattoo-plan/v1', '/stripe-webhook', [
         'methods'             => 'POST',
-        'callback'            => 'vip_tattoo_plan_rest_create_checkout',
-        'permission_callback' => '__return_true',
-    ]);
-    register_rest_route('vip-tattoo-plan/v1', '/paypal-return', [
-        'methods'             => 'GET',
-        'callback'            => 'vip_tattoo_plan_rest_paypal_return',
+        'callback'            => 'vip_tattoo_plan_rest_stripe_webhook',
         'permission_callback' => '__return_true',
     ]);
     register_rest_route('vip-tattoo-plan/v1', '/paypal-webhook', [
@@ -686,276 +399,71 @@ add_action('rest_api_init', function () {
         'callback'            => 'vip_tattoo_plan_rest_paypal_webhook',
         'permission_callback' => '__return_true',
     ]);
-    register_rest_route('vip-tattoo-plan/v1', '/stripe-return', [
-        'methods'             => 'GET',
-        'callback'            => 'vip_tattoo_plan_rest_stripe_return',
-        'permission_callback' => '__return_true',
-    ]);
-    register_rest_route('vip-tattoo-plan/v1', '/stripe-webhook', [
-        'methods'             => 'POST',
-        'callback'            => 'vip_tattoo_plan_rest_stripe_webhook',
-        'permission_callback' => '__return_true',
-    ]);
-    register_rest_route('vip-tattoo-plan/v1', '/telegram-webhook', [
-        'methods'             => 'POST',
-        'callback'            => 'vip_tattoo_plan_rest_telegram_webhook',
-        'permission_callback' => '__return_true',
-    ]);
 });
 
-function vip_tattoo_plan_rest_create_checkout(WP_REST_Request $request) {
-    global $wpdb;
-
-    if (vip_tattoo_plan_checkout_mode() !== 'api') {
-        return new WP_REST_Response(['error' => 'API-оплата вимкнена в налаштуваннях.'], 400);
-    }
-
-    $email = sanitize_email($request->get_param('email'));
-    $phone = sanitize_text_field($request->get_param('phone'));
-    if (!$email) {
-        return new WP_REST_Response(['error' => "Email обов'язковий."], 400);
-    }
-
-    $provider = vip_tattoo_plan_payment_provider();
-    $token = wp_generate_password(40, false, false);
-    $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
-    $wpdb->insert($table, [
-        'token'      => $token,
-        'provider'   => $provider,
-        'email'      => $email,
-        'phone'      => $phone,
-        'status'     => 'pending',
-        'created_at' => current_time('mysql'),
-    ]);
-
-    $price_cents = (int) get_option('vip_tattoo_plan_price_cents', 27500);
-    $currency = strtoupper(get_option('vip_tattoo_plan_currency', 'EUR'));
-    $product_name = get_option('vip_tattoo_plan_product_name', 'VIP tattoo school — курс');
-    $amount_value = number_format($price_cents / 100, 2, '.', '');
-
-    if ($provider === 'stripe') {
-        return vip_tattoo_plan_stripe_start_checkout($token, $price_cents, $currency, $product_name);
-    }
-
-    $return_url = add_query_arg('vip_token', $token, rest_url('vip-tattoo-plan/v1/paypal-return'));
-    $cancel_url = vip_tattoo_plan_page_url();
-
-    $order_body = [
-        'intent'         => 'CAPTURE',
-        'purchase_units' => [[
-            'reference_id' => $token,
-            'custom_id'    => $token,
-            'description'  => $product_name,
-            'amount'       => [
-                'currency_code' => $currency,
-                'value'         => $amount_value,
-            ],
-        ]],
-        'application_context' => [
-            'brand_name'  => $product_name,
-            'user_action' => 'PAY_NOW',
-            'return_url'  => $return_url,
-            'cancel_url'  => $cancel_url,
-        ],
-    ];
-
-    $result = vip_tattoo_plan_paypal_request('POST', '/v2/checkout/orders', $order_body);
-    if (is_wp_error($result)) {
-        return new WP_REST_Response(['error' => $result->get_error_message()], 500);
-    }
-
-    $approve_url = '';
-    foreach ($result['links'] ?? [] as $link) {
-        if (($link['rel'] ?? '') === 'approve') {
-            $approve_url = $link['href'];
-            break;
-        }
-    }
-    if (!$approve_url || empty($result['id'])) {
-        return new WP_REST_Response(['error' => 'PayPal не повернув посилання на оплату.'], 500);
-    }
-
-    $wpdb->update($table, ['provider_order_id' => $result['id']], ['token' => $token]);
-
-    return new WP_REST_Response(['checkout_url' => $approve_url], 200);
-}
-
-function vip_tattoo_plan_rest_paypal_return(WP_REST_Request $request) {
-    $vip_token = sanitize_text_field($request->get_param('vip_token'));
-    $paypal_order_id = sanitize_text_field($request->get_param('token'));
-
-    if ($paypal_order_id) {
-        vip_tattoo_plan_paypal_capture_and_mark_paid($paypal_order_id);
-    }
-
-    $bot_username = get_option('vip_tattoo_plan_telegram_access_bot_username', 'vip_tattoo_school_viktori_bot');
-    $redirect_to = $vip_token
-        ? ('https://t.me/' . $bot_username . '?start=' . $vip_token)
-        : vip_tattoo_plan_page_url();
-
-    wp_redirect($redirect_to);
-    exit;
-}
-
-function vip_tattoo_plan_stripe_start_checkout($token, $price_cents, $currency, $product_name) {
-    global $wpdb;
-    $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
-
-    $return_url = add_query_arg([
-        'vip_token'  => $token,
-        'session_id' => '{CHECKOUT_SESSION_ID}',
-    ], rest_url('vip-tattoo-plan/v1/stripe-return'));
-    $return_url = str_replace('%7BCHECKOUT_SESSION_ID%7D', '{CHECKOUT_SESSION_ID}', $return_url);
-    $cancel_url = vip_tattoo_plan_page_url();
-
-    $price_id = vip_tattoo_plan_stripe_price_id();
-
-    if ($price_id) {
-        $line_item = [
-            'price'    => $price_id,
-            'quantity' => 1,
-        ];
-    } else {
-        $line_item = [
-            'quantity'   => 1,
-            'price_data' => [
-                'currency'     => strtolower($currency),
-                'unit_amount'  => $price_cents,
-                'product_data' => ['name' => $product_name],
-            ],
-        ];
-    }
-
-    $body = [
-        'mode'                => 'payment',
-        'success_url'         => $return_url,
-        'cancel_url'          => $cancel_url,
-        'client_reference_id' => $token,
-        'metadata'            => ['token' => $token],
-        'line_items'          => [$line_item],
-    ];
-
-    $result = vip_tattoo_plan_stripe_request('POST', '/checkout/sessions', $body);
-    if (is_wp_error($result)) {
-        return new WP_REST_Response(['error' => $result->get_error_message()], 500);
-    }
-
-    if (empty($result['url']) || empty($result['id'])) {
-        return new WP_REST_Response(['error' => 'Stripe не повернув посилання на оплату.'], 500);
-    }
-
-    $wpdb->update($table, ['provider_order_id' => $result['id']], ['token' => $token]);
-
-    return new WP_REST_Response(['checkout_url' => $result['url']], 200);
-}
-
-function vip_tattoo_plan_rest_stripe_return(WP_REST_Request $request) {
-    $vip_token = sanitize_text_field($request->get_param('vip_token'));
-    $session_id = sanitize_text_field($request->get_param('session_id'));
-
-    if ($session_id) {
-        vip_tattoo_plan_stripe_capture_and_mark_paid($session_id);
-    }
-
-    $bot_username = get_option('vip_tattoo_plan_telegram_access_bot_username', 'vip_tattoo_school_viktori_bot');
-    $redirect_to = $vip_token
-        ? ('https://t.me/' . $bot_username . '?start=' . $vip_token)
-        : vip_tattoo_plan_page_url();
-
-    wp_redirect($redirect_to);
-    exit;
-}
-
-function vip_tattoo_plan_verify_paypal_webhook(WP_REST_Request $request) {
-    $webhook_id = vip_tattoo_plan_paypal_webhook_id();
-    if (!$webhook_id) return true;
-
-    $body = [
-        'transmission_id'   => $request->get_header('paypal-transmission-id'),
-        'transmission_time' => $request->get_header('paypal-transmission-time'),
-        'cert_url'          => $request->get_header('paypal-cert-url'),
-        'auth_algo'         => $request->get_header('paypal-auth-algo'),
-        'transmission_sig'  => $request->get_header('paypal-transmission-sig'),
-        'webhook_id'        => $webhook_id,
-        'webhook_event'     => json_decode($request->get_body(), true),
-    ];
-
-    $result = vip_tattoo_plan_paypal_request('POST', '/v1/notifications/verify-webhook-signature', $body);
-    if (is_wp_error($result)) return false;
-    return ($result['verification_status'] ?? '') === 'SUCCESS';
-}
-
-function vip_tattoo_plan_rest_paypal_webhook(WP_REST_Request $request) {
-    if (!vip_tattoo_plan_verify_paypal_webhook($request)) {
-        return new WP_REST_Response(['error' => 'Invalid signature'], 400);
-    }
-
-    $event = json_decode($request->get_body(), true);
-    $event_type = $event['event_type'] ?? '';
-    $resource = $event['resource'] ?? [];
-
-    if ($event_type === 'CHECKOUT.ORDER.APPROVED') {
-        vip_tattoo_plan_paypal_capture_and_mark_paid($resource['id'] ?? '');
-    } elseif ($event_type === 'PAYMENT.CAPTURE.COMPLETED') {
-        $order_id = $resource['supplementary_data']['related_ids']['order_id'] ?? '';
-        vip_tattoo_plan_paypal_capture_and_mark_paid($order_id);
-    }
-
-    return new WP_REST_Response(['received' => true], 200);
-}
-
+// Fires for EVERY completed Checkout Session on the Stripe account --
+// including ones created by a Payment Link, which is what the site's
+// own CTA button actually uses. Nothing here was created by this
+// plugin; the session already carries whatever Stripe itself collected
+// (amount, currency, and the buyer's email if Stripe asked for one).
 function vip_tattoo_plan_rest_stripe_webhook(WP_REST_Request $request) {
     if (!vip_tattoo_plan_verify_stripe_webhook($request)) {
         return new WP_REST_Response(['error' => 'Invalid signature'], 400);
     }
 
     $event = json_decode($request->get_body(), true);
-    $event_type = $event['type'] ?? '';
-
-    if ($event_type === 'checkout.session.completed') {
-        $session_id = $event['data']['object']['id'] ?? '';
-        vip_tattoo_plan_stripe_capture_and_mark_paid($session_id);
+    if (($event['type'] ?? '') !== 'checkout.session.completed') {
+        return new WP_REST_Response(['received' => true], 200);
     }
+
+    $session = $event['data']['object'] ?? [];
+    if (($session['payment_status'] ?? '') !== 'paid') {
+        return new WP_REST_Response(['received' => true], 200);
+    }
+
+    $event_id = $event['id'] ?? ($session['id'] ?? '');
+    if (!vip_tattoo_plan_webhook_seen_first_time('stripe', $event_id)) {
+        return new WP_REST_Response(['received' => true, 'duplicate' => true], 200);
+    }
+
+    do_action('vip_tattoo_plan_purchase_confirmed', [
+        'event_id' => $session['id'] ?? $event_id,
+        'email'    => $session['customer_details']['email'] ?? '',
+        'phone'    => $session['customer_details']['phone'] ?? '',
+        'value'    => isset($session['amount_total']) ? $session['amount_total'] / 100 : null,
+        'currency' => $session['currency'] ?? null,
+    ]);
 
     return new WP_REST_Response(['received' => true], 200);
 }
 
-function vip_tattoo_plan_rest_telegram_webhook(WP_REST_Request $request) {
-    global $wpdb;
-    $expected_secret = get_option('vip_tattoo_plan_telegram_webhook_secret');
-    $got_secret = $request->get_header('x-telegram-bot-api-secret-token');
-    if ($expected_secret && $got_secret !== $expected_secret) {
-        return new WP_REST_Response(['error' => 'Invalid secret'], 401);
+// Same idea for PayPal: fires for every completed capture on the
+// account, whichever button/flow the payment actually came through.
+function vip_tattoo_plan_rest_paypal_webhook(WP_REST_Request $request) {
+    if (!vip_tattoo_plan_verify_paypal_webhook($request)) {
+        return new WP_REST_Response(['error' => 'Invalid signature'], 400);
     }
 
-    $update = json_decode($request->get_body(), true);
-    $text = $update['message']['text'] ?? '';
-    $chat_id = $update['message']['chat']['id'] ?? null;
-
-    if ($chat_id && preg_match('/^\/start\s+(\S+)/', $text, $m)) {
-        $token = $m[1];
-        $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
-        $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE token = %s", $token));
-
-        if ($order) {
-            $wpdb->update($table, ['telegram_chat_id' => $chat_id], ['id' => $order->id]);
-            $order->telegram_chat_id = $chat_id;
-
-            if ($order->status === 'paid') {
-                vip_tattoo_plan_deliver_access($order);
-            } else {
-                vip_tattoo_plan_telegram_access_api('sendMessage', [
-                    'chat_id' => $chat_id,
-                    'text'    => 'Дякуємо! Обробляємо твою оплату — доступ надішлемо сюди протягом хвилини.',
-                ]);
-            }
-        } else {
-            vip_tattoo_plan_telegram_access_api('sendMessage', [
-                'chat_id' => $chat_id,
-                'text'    => 'Привіт! Схоже, посилання застаріле або невірне. Спробуй оформити замовлення на сайті ще раз.',
-            ]);
-        }
+    $event = json_decode($request->get_body(), true);
+    if (($event['event_type'] ?? '') !== 'PAYMENT.CAPTURE.COMPLETED') {
+        return new WP_REST_Response(['received' => true], 200);
     }
 
-    return new WP_REST_Response(['ok' => true], 200);
+    $resource = $event['resource'] ?? [];
+    $event_id = $event['id'] ?? ($resource['id'] ?? '');
+    if (!vip_tattoo_plan_webhook_seen_first_time('paypal', $event_id)) {
+        return new WP_REST_Response(['received' => true, 'duplicate' => true], 200);
+    }
+
+    $payer_email = $resource['payer']['email_address'] ?? ($event['resource']['payee']['email_address'] ?? '');
+
+    do_action('vip_tattoo_plan_purchase_confirmed', [
+        'event_id' => $resource['id'] ?? $event_id,
+        'email'    => $payer_email,
+        'phone'    => '',
+        'value'    => isset($resource['amount']['value']) ? (float) $resource['amount']['value'] : null,
+        'currency' => $resource['amount']['currency_code'] ?? null,
+    ]);
+
+    return new WP_REST_Response(['received' => true], 200);
 }

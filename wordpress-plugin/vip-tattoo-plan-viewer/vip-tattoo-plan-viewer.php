@@ -209,7 +209,6 @@ function vip_tattoo_plan_render_globals() {
 <script>
   window.VIP_TATTOO_PLAN_REST_URL = '<?php echo esc_js(rest_url('vip-tattoo-plan/v1/')); ?>';
   window.VIP_TATTOO_PLAN_NONCE = '<?php echo esc_js(wp_create_nonce('wp_rest')); ?>';
-  window.VIP_TATTOO_PLAN_CHECKOUT_MODE = '<?php echo esc_js(vip_tattoo_plan_checkout_mode()); ?>';
   window.VIP_TATTOO_PLAN_HAS_META_PIXEL = <?php echo trim(get_option('vip_tattoo_plan_meta_pixel_id', '')) ? 'true' : 'false'; ?>;
   window.VIP_TATTOO_PLAN_HAS_TIKTOK = <?php echo trim(get_option('vip_tattoo_plan_tiktok_pixel_id', '')) ? 'true' : 'false'; ?>;
   window.VIP_TATTOO_PLAN_HAS_GA4 = <?php echo trim(get_option('vip_tattoo_plan_ga4_id', '')) ? 'true' : 'false'; ?>;

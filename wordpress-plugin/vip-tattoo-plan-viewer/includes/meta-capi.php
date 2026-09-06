@@ -1,19 +1,22 @@
 <?php
 /**
  * Meta Conversions API: sends the "Purchase" event server-side straight
- * to Meta the moment Stripe/PayPal confirms payment (hooked on
- * 'vip_tattoo_plan_order_paid', fired from includes/payments.php).
+ * to Meta the moment Stripe/PayPal confirms a real payment, hooked on
+ * 'vip_tattoo_plan_purchase_confirmed' (fired from includes/payments.php
+ * for any completed Stripe Checkout Session or PayPal capture on the
+ * account -- including the ones the site's own Payment Link / PayPal
+ * button produce, since this plugin never creates its own checkout).
  *
  * This exists because the buyer's browser never lands back on our own
- * domain after paying -- both providers redirect straight to the
- * Telegram bot's deep link (see vip_tattoo_plan_rest_stripe_return() /
- * vip_tattoo_plan_rest_paypal_return()) -- so the client-side Meta Pixel
- * loaded on the plan page never sees the purchase happen. The
- * Conversions API call below is the only place this event can come from.
+ * domain after paying -- Stripe/PayPal's own "after payment" redirect
+ * goes straight to Telegram -- so the client-side Meta Pixel loaded on
+ * the plan page never sees the purchase happen. The Conversions API call
+ * below is the only place this event can come from.
  *
- * Only fires for orders created in "API" checkout mode (see
- * vip_tattoo_plan_checkout_mode()) -- the "Пряме посилання" mode has no
- * order row and no payment confirmation to hook into at all.
+ * Nothing here is stored: the event payload (email/phone/amount, exactly
+ * what Stripe/PayPal already collected on their own hosted page) is read
+ * once from the hook argument, hashed, sent to Meta, and discarded --
+ * this file writes only a status line (no PII) to its own log table.
  */
 
 if (!defined('ABSPATH')) exit;
@@ -163,17 +166,19 @@ function vip_tattoo_plan_meta_capi_hash($value) {
     return $value ? hash('sha256', strtolower(trim($value))) : null;
 }
 
-add_action('vip_tattoo_plan_order_paid', function ($order) {
+// $data comes straight from includes/payments.php's webhook handlers:
+// ['event_id' => Stripe session id / PayPal capture id, 'email', 'phone',
+// 'value', 'currency'] -- whatever Stripe/PayPal themselves collected and
+// put in their own webhook payload. None of it was collected by this
+// plugin, and none of it is stored anywhere beyond this function call.
+add_action('vip_tattoo_plan_purchase_confirmed', function ($data) {
     $pixel_id = trim(get_option('vip_tattoo_plan_meta_capi_pixel_id', ''));
     $access_token = trim(get_option('vip_tattoo_plan_meta_capi_access_token', ''));
     if (!$pixel_id || !$access_token) return; // not configured -- silently skip, same as the webhook verifiers elsewhere in this plugin
 
-    $price_cents = (int) get_option('vip_tattoo_plan_price_cents', 27500);
-    $currency = strtolower(get_option('vip_tattoo_plan_currency', 'EUR'));
-
     $user_data = array_filter([
-        'em' => vip_tattoo_plan_meta_capi_hash($order->email ?? ''),
-        'ph' => vip_tattoo_plan_meta_capi_hash(preg_replace('/\D/', '', $order->phone ?? '')),
+        'em' => vip_tattoo_plan_meta_capi_hash($data['email'] ?? ''),
+        'ph' => vip_tattoo_plan_meta_capi_hash(preg_replace('/\D/', '', $data['phone'] ?? '')),
     ]);
 
     $event = [
@@ -183,12 +188,12 @@ add_action('vip_tattoo_plan_order_paid', function ($order) {
         'event_source_url' => vip_tattoo_plan_page_url(),
         'user_data'        => $user_data,
         'custom_data'      => [
-            'value'    => round($price_cents / 100, 2),
-            'currency' => $currency,
+            'value'    => $data['value'] !== null ? (float) $data['value'] : 0,
+            'currency' => strtolower($data['currency'] ?: 'eur'),
         ],
     ];
-    if ($order->token) {
-        $event['event_id'] = $order->token; // dedupe key, matches the order's own token
+    if (!empty($data['event_id'])) {
+        $event['event_id'] = $data['event_id']; // dedupe key, matches the Stripe session / PayPal capture id
     }
 
     $body = [
@@ -210,7 +215,7 @@ add_action('vip_tattoo_plan_order_paid', function ($order) {
 
     if (is_wp_error($response)) {
         $wpdb->insert($log_table, [
-            'order_token' => $order->token ?? null,
+            'order_token' => $data['event_id'] ?? null,
             'status'      => 'error',
             'message'     => $response->get_error_message(),
             'created_at'  => current_time('mysql'),
@@ -221,7 +226,7 @@ add_action('vip_tattoo_plan_order_paid', function ($order) {
     $code = wp_remote_retrieve_response_code($response);
     $raw_body = wp_remote_retrieve_body($response);
     $wpdb->insert($log_table, [
-        'order_token' => $order->token ?? null,
+        'order_token' => $data['event_id'] ?? null,
         'status'      => $code < 400 ? 'success' : 'error',
         'message'     => $raw_body,
         'created_at'  => current_time('mysql'),
