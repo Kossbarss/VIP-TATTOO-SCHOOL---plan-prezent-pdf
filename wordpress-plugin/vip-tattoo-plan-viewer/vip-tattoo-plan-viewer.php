@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: VIP Tattoo — План курсу (Презентація)
- * Description: Hosts the "План курсу" PDF presentation on its own dedicated page template — self-contained SEO (title/description/OG/canonical/robots/JSON-LD), tracking-pixel integrations (GA4, GTM, Meta Pixel, TikTok Pixel, Pinterest Tag, LinkedIn Insight Tag), view/download event tracking with an outbound webhook + optional Telegram notification, and a settings page mirroring the coding standard of the VIP Tattoo landing plugin (nonces, sanitized fields, signature-verified inbound requests, idempotent event handling).
- * Version: 1.0.0
+ * Description: Hosts the "План курсу" 23-slide interactive presentation on its own dedicated page template — self-contained SEO (title/description/OG/canonical/robots/JSON-LD), tracking-pixel integrations (GA4, GTM, Meta Pixel, TikTok Pixel, Pinterest Tag, LinkedIn Insight Tag), view/checkout-click/contact-click event tracking with an outbound webhook + optional Telegram notification, a direct Stripe Payment Link checkout button, and a settings page mirroring the coding standard of the VIP Tattoo landing plugin (nonces, sanitized fields, signature-verified inbound requests, idempotent event handling).
+ * Version: 2.0.0
  */
 
 if (!defined('ABSPATH')) exit;
@@ -43,18 +43,53 @@ add_filter('template_include', function ($template) {
 });
 
 /**
- * Resolves the PDF URL the template should embed/link to: an uploaded
- * Media Library attachment (preferred, set on the settings page) with a
- * fallback to the copy of plan-kursu.pdf bundled in assets/, so the page
- * still works out of the box before anyone touches the settings.
+ * Finds the published page using this plugin's template, so the webhook
+ * payload and any future canonical/SEO fallback can link to the real page
+ * instead of an attachment or the bare home URL -- same pattern as the
+ * landing plugin's vip_tattoo_find_page_url().
  */
-function vip_tattoo_plan_pdf_url() {
-    $attachment_id = (int) get_option('vip_tattoo_plan_pdf_attachment_id', 0);
-    if ($attachment_id) {
-        $url = wp_get_attachment_url($attachment_id);
+function vip_tattoo_plan_page_url() {
+    $pages = get_posts([
+        'post_type'      => 'page',
+        'post_status'    => 'publish',
+        'meta_key'       => '_wp_page_template',
+        'meta_value'     => VIP_TATTOO_PLAN_TEMPLATE_SLUG,
+        'posts_per_page' => 1,
+        'fields'         => 'ids',
+    ]);
+    if ($pages) {
+        $url = get_permalink($pages[0]);
         if ($url) return $url;
     }
-    return VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/plan-kursu.pdf';
+    return home_url('/');
+}
+
+/**
+ * Placeholder map for content/body-plan.html, resolved from the settings
+ * page's saved options -- same "one array, one str_replace" pattern the
+ * landing plugin's vip_tattoo_placeholders() uses for its own fragments.
+ */
+function vip_tattoo_plan_placeholders() {
+    return [
+        '{{ASSET_URL}}'          => VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/',
+        '{{STRIPE_CHECKOUT_URL}}' => esc_url(get_option('vip_tattoo_plan_stripe_url', 'https://buy.stripe.com/fZucN57RO3TEgXu23C9AA00')),
+        '{{CTA_PRIMARY_TEXT}}'   => esc_html(get_option('vip_tattoo_plan_cta_text', 'Открыть доступ к обучению')),
+        '{{CTA_SECONDARY_TEXT}}' => esc_html(get_option('vip_tattoo_plan_cta_secondary_text', 'Написать Виктории')),
+        '{{CONTACT_URL}}'        => esc_url(get_option('vip_tattoo_plan_telegram_contact_url', 'https://t.me/+48733341364')),
+    ];
+}
+
+/**
+ * Renders the slide-deck body: content/body-plan.html with every
+ * placeholder above substituted in, same file_get_contents()+str_replace()
+ * approach the landing plugin uses for its own page fragments.
+ */
+function vip_tattoo_plan_render_body() {
+    $file = VIP_TATTOO_PLAN_PLUGIN_DIR . 'content/body-plan.html';
+    if (!file_exists($file)) return;
+
+    $placeholders = vip_tattoo_plan_placeholders();
+    echo str_replace(array_keys($placeholders), array_values($placeholders), file_get_contents($file));
 }
 
 /**
@@ -168,20 +203,10 @@ function vip_tattoo_plan_render_pixels() {
  * reads these synchronously the moment it runs near the end of <body>.
  */
 function vip_tattoo_plan_render_globals() {
-    // The checkout REST route lives in the *separate* vip-tattoo-landing
-    // plugin's own namespace ('vip-tattoo/v1', registered by its
-    // includes/payments.php) -- both plugins run on the same WordPress
-    // install, so this is just rest_url() pointed at another active
-    // plugin's already-registered route, not a duplicated payment
-    // implementation. Overridable in settings in case that plugin's
-    // namespace ever changes.
-    $checkout_base = trim(get_option('vip_tattoo_plan_checkout_rest_base', ''));
-    if (!$checkout_base) $checkout_base = rest_url('vip-tattoo/v1/');
     ?>
 <script>
   window.VIP_TATTOO_PLAN_REST_URL = '<?php echo esc_js(rest_url('vip-tattoo-plan/v1/')); ?>';
   window.VIP_TATTOO_PLAN_NONCE = '<?php echo esc_js(wp_create_nonce('wp_rest')); ?>';
-  window.VIP_TATTOO_CHECKOUT_REST_BASE = '<?php echo esc_js($checkout_base); ?>';
   window.VIP_TATTOO_PLAN_HAS_META_PIXEL = <?php echo trim(get_option('vip_tattoo_plan_meta_pixel_id', '')) ? 'true' : 'false'; ?>;
   window.VIP_TATTOO_PLAN_HAS_TIKTOK = <?php echo trim(get_option('vip_tattoo_plan_tiktok_pixel_id', '')) ? 'true' : 'false'; ?>;
   window.VIP_TATTOO_PLAN_HAS_GA4 = <?php echo trim(get_option('vip_tattoo_plan_ga4_id', '')) ? 'true' : 'false'; ?>;

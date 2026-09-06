@@ -1,16 +1,18 @@
 <?php
 /**
- * View/download event tracking for the plan-viewer page.
+ * View/click event tracking for the plan-viewer page (the 23-slide course
+ * presentation).
  *
  * Flow: js/track.js fires once per page load ("view") and once per click
- * on the download/open buttons ("download"), each tagged with a
- * per-page-load token generated client-side -> REST route validates the
- * WP REST nonce (first-party only, same origin) and inserts the event,
- * de-duplicated on (visit_token, event_type) so a retried/duplicated
- * front-end call can never double-count -> on a fresh insert we fan the
- * event out to: an optional outbound webhook (HMAC-signed, for
- * Zapier/Make/a CRM), a WordPress action hook for same-site extensions,
- * and an optional Telegram admin notification on "download".
+ * on the Stripe/Telegram buttons ("checkout_click" / "contact_click"),
+ * each tagged with a per-page-load token generated client-side -> REST
+ * route validates the WP REST nonce (first-party only, same origin) and
+ * inserts the event, de-duplicated on (visit_token, event_type) so a
+ * retried/duplicated front-end call can never double-count -> on a fresh
+ * insert we fan the event out to: an optional outbound webhook
+ * (HMAC-signed, for Zapier/Make/a CRM), a WordPress action hook for
+ * same-site extensions, and an optional Telegram admin notification on
+ * "checkout_click".
  */
 
 if (!defined('ABSPATH')) exit;
@@ -90,7 +92,7 @@ function vip_tattoo_plan_rest_track(WP_REST_Request $request) {
     $visit_token = sanitize_text_field($request->get_param('visit_token'));
     $event_type  = sanitize_key($request->get_param('event_type'));
 
-    $allowed_events = ['view', 'download', 'checkout_open', 'contact_click'];
+    $allowed_events = ['view', 'checkout_click', 'contact_click'];
     if (!$visit_token || !in_array($event_type, $allowed_events, true)) {
         return new WP_REST_Response(['error' => 'Invalid payload'], 400);
     }
@@ -122,7 +124,7 @@ function vip_tattoo_plan_rest_track(WP_REST_Request $request) {
     if ($inserted) {
         do_action('vip_tattoo_plan_event', $data);
         vip_tattoo_plan_dispatch_webhook($data);
-        if (in_array($event_type, ['download', 'checkout_open'], true)) {
+        if ($event_type === 'checkout_click') {
             vip_tattoo_plan_notify_telegram($data);
         }
     }
@@ -151,7 +153,7 @@ function vip_tattoo_plan_dispatch_webhook($data) {
             'campaign' => $data['utm_campaign'],
         ],
         'referrer'  => $data['referrer'],
-        'page_url'  => vip_tattoo_plan_pdf_url(),
+        'page_url'  => vip_tattoo_plan_page_url(),
         'timestamp' => $data['created_at'],
     ]);
 
@@ -187,8 +189,7 @@ function vip_tattoo_plan_notify_telegram($data) {
     if (!$token || !$chat_id) return;
 
     $labels = [
-        'download'      => '📄 Скачали план курсу VIP Tattoo School',
-        'checkout_open' => '💳 Открыли форму оплаты на странице плана курсу',
+        'checkout_click' => '💳 Клик по «Открыть доступ к обучению» на странице плана курса',
     ];
     $message = ($labels[$data['event_type']] ?? '🔔 Событие на странице плана курсу') . "\n"
         . "UTM: " . ($data['utm_source'] ?: '—') . ' / ' . ($data['utm_medium'] ?: '—') . ' / ' . ($data['utm_campaign'] ?: '—') . "\n"
@@ -214,11 +215,16 @@ function vip_tattoo_plan_render_recent_events() {
         echo '<p>Поки що немає подій.</p>';
         return;
     }
+    $event_labels = [
+        'view'            => '👁️ Перегляд',
+        'checkout_click'  => '💳 Клік «Оплатити»',
+        'contact_click'   => '✉️ Клік «Написати»',
+    ];
     echo '<table class="widefat striped"><thead><tr><th>Подія</th><th>UTM Source</th><th>UTM Campaign</th><th>Реферер</th><th>Час</th></tr></thead><tbody>';
     foreach ($rows as $row) {
         printf(
             '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>',
-            $row->event_type === 'download' ? '⬇️ Завантаження' : '👁️ Перегляд',
+            esc_html($event_labels[$row->event_type] ?? $row->event_type),
             esc_html($row->utm_source ?: '—'),
             esc_html($row->utm_campaign ?: '—'),
             esc_html($row->referrer ?: '—'),

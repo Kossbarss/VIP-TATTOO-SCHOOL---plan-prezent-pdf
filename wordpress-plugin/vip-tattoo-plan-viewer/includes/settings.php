@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin settings page: PDF source, SEO, tracking pixels, webhook,
+ * Admin settings page: Stripe checkout link, SEO, tracking pixels, webhook,
  * Telegram notification. Same save pattern as the landing plugin's
  * settings page -- one nonce shared by every form on the page, each form
  * gated on its own submit button's name (not the nonce alone), so
@@ -22,11 +22,10 @@ add_action('admin_menu', function () {
 
 function vip_tattoo_plan_settings_fields() {
     return [
-        'vip_tattoo_plan_pdf_attachment_id'     => 0,
+        'vip_tattoo_plan_stripe_url'             => 'https://buy.stripe.com/fZucN57RO3TEgXu23C9AA00',
         'vip_tattoo_plan_cta_text'              => 'Открыть доступ к обучению',
         'vip_tattoo_plan_cta_secondary_text'    => 'Написать Виктории',
         'vip_tattoo_plan_telegram_contact_url'  => 'https://t.me/+48733341364',
-        'vip_tattoo_plan_checkout_rest_base'    => '',
         'vip_tattoo_plan_seo_title'             => 'План курса — VIP Tattoo School',
         'vip_tattoo_plan_seo_description'       => 'Полная программа обучения тату-мастеров с нуля до постоянных клиентов — все 15 блоков курса.',
         'vip_tattoo_plan_og_title'              => '',
@@ -64,9 +63,9 @@ function vip_tattoo_plan_render_settings_page() {
             }
             if (in_array($key, ['vip_tattoo_plan_seo_description', 'vip_tattoo_plan_og_description'], true)) {
                 update_option($key, sanitize_textarea_field(wp_unslash($_POST[$key])));
-            } elseif (in_array($key, ['vip_tattoo_plan_pdf_attachment_id', 'vip_tattoo_plan_og_image_id'], true)) {
+            } elseif ($key === 'vip_tattoo_plan_og_image_id') {
                 update_option($key, (int) $_POST[$key]);
-            } elseif (in_array($key, ['vip_tattoo_plan_webhook_url', 'vip_tattoo_plan_telegram_contact_url', 'vip_tattoo_plan_checkout_rest_base'], true)) {
+            } elseif (in_array($key, ['vip_tattoo_plan_webhook_url', 'vip_tattoo_plan_telegram_contact_url', 'vip_tattoo_plan_stripe_url'], true)) {
                 update_option($key, esc_url_raw(wp_unslash($_POST[$key])));
             } elseif ($key === 'vip_tattoo_plan_robots') {
                 $allowed = ['index,follow', 'noindex,follow', 'index,nofollow', 'noindex,nofollow'];
@@ -84,27 +83,25 @@ function vip_tattoo_plan_render_settings_page() {
         $vals[$key] = get_option($key, $default);
     }
 
-    $pdf_url = vip_tattoo_plan_pdf_url();
     $webhook_secret = get_option('vip_tattoo_plan_webhook_secret', '');
     ?>
     <div class="wrap">
         <h1>VIP Tattoo School — План курсу (презентація)</h1>
-        <p>Поточний PDF: <a href="<?php echo esc_url($pdf_url); ?>" target="_blank" rel="noopener"><?php echo esc_html($pdf_url); ?></a></p>
 
-        <form method="post" enctype="multipart/form-data">
+        <form method="post">
             <?php wp_nonce_field('vip_tattoo_plan_settings', 'vip_tattoo_plan_settings_nonce'); ?>
 
-            <h2>PDF і кнопки</h2>
+            <h2>Оплата і кнопки</h2>
             <table class="form-table">
                 <tr>
-                    <th><label for="vip_tattoo_plan_pdf_attachment_id">ID вкладення PDF (Медіафайли)</label></th>
+                    <th><label for="vip_tattoo_plan_stripe_url">Посилання на оплату (Stripe Payment Link)</label></th>
                     <td>
-                        <input type="number" class="regular-text" id="vip_tattoo_plan_pdf_attachment_id" name="vip_tattoo_plan_pdf_attachment_id" value="<?php echo esc_attr($vals['vip_tattoo_plan_pdf_attachment_id']); ?>" />
-                        <p class="description">Завантаж plan-kursu.pdf у «Медіафайли» → відкрий файл → скопіюй число з кінця URL сторінки вкладення (Attachment ID) і встав сюди. Якщо порожньо/0 — використовується файл, вбудований у плагін (<code>assets/plan-kursu.pdf</code>).</p>
+                        <input type="url" class="regular-text" id="vip_tattoo_plan_stripe_url" name="vip_tattoo_plan_stripe_url" value="<?php echo esc_attr($vals['vip_tattoo_plan_stripe_url']); ?>" />
+                        <p class="description">Куди веде кнопка «<?php echo esc_html($vals['vip_tattoo_plan_cta_text']); ?>» — готове посилання Stripe Checkout (buy.stripe.com/...), відкривається в новій вкладці. Ніякого проміжного REST-роуту чи форми — Stripe сам приймає оплату.</p>
                     </td>
                 </tr>
                 <tr>
-                    <th><label for="vip_tattoo_plan_cta_text">Текст кнопки «Скачати»</label></th>
+                    <th><label for="vip_tattoo_plan_cta_text">Текст кнопки оплати</label></th>
                     <td><input type="text" class="regular-text" id="vip_tattoo_plan_cta_text" name="vip_tattoo_plan_cta_text" value="<?php echo esc_attr($vals['vip_tattoo_plan_cta_text']); ?>" /></td>
                 </tr>
                 <tr>
@@ -116,13 +113,6 @@ function vip_tattoo_plan_render_settings_page() {
                     <td>
                         <input type="url" class="regular-text" id="vip_tattoo_plan_telegram_contact_url" name="vip_tattoo_plan_telegram_contact_url" value="<?php echo esc_attr($vals['vip_tattoo_plan_telegram_contact_url']); ?>" />
                         <p class="description">Куди веде кнопка «<?php echo esc_html($vals['vip_tattoo_plan_cta_secondary_text']); ?>» — за замовчуванням особистий Telegram Вікторії з лендингу.</p>
-                    </td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_checkout_rest_base">REST-адреса оплати (з плагіна лендингу)</label></th>
-                    <td>
-                        <input type="url" class="regular-text" id="vip_tattoo_plan_checkout_rest_base" name="vip_tattoo_plan_checkout_rest_base" value="<?php echo esc_attr($vals['vip_tattoo_plan_checkout_rest_base']); ?>" placeholder="<?php echo esc_attr(rest_url('vip-tattoo/v1/')); ?>" />
-                        <p class="description">Перша кнопка («<?php echo esc_html($vals['vip_tattoo_plan_cta_text']); ?>») відкриває форму (email+телефон) і веде на оплату через REST-роут плагіна лендингу <code>vip-tattoo-landing</code> (create-checkout). Залиш порожнім — використається адреса за замовчуванням: <code><?php echo esc_html(rest_url('vip-tattoo/v1/')); ?></code>. Заповнюй, лише якщо цей роут колись перенесуть на інший namespace.</p>
                     </td>
                 </tr>
             </table>
@@ -211,7 +201,7 @@ function vip_tattoo_plan_render_settings_page() {
                 </tr>
             </table>
 
-            <h2>Telegram-сповіщення (при завантаженні PDF)</h2>
+            <h2>Telegram-сповіщення (при кліку на оплату)</h2>
             <table class="form-table">
                 <tr>
                     <th><label for="vip_tattoo_plan_telegram_bot_token">Bot Token (від @BotFather)</label></th>

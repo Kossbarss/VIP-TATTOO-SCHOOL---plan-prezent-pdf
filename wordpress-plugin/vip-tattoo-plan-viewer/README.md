@@ -1,6 +1,6 @@
 # VIP Tattoo — План курсу (плагін)
 
-WordPress-плагін, що публікує PDF-презентацію `plan-kursu.pdf` як окрему, повністю незалежну сторінку (без хедера/футера/меню теми) — за тим самим принципом, що й основний плагін лендингу `vip-tattoo-landing`.
+WordPress-плагін, що публікує інтерактивну 23-слайдову презентацію плану курсу як окрему, повністю незалежну сторінку (без хедера/футера/меню теми) — за тим самим принципом, що й основний плагін лендингу `vip-tattoo-landing`. Кнопка «Открыть доступ к обучению» веде напряму на готове посилання Stripe Payment Link — оплату повністю приймає Stripe, плагін лише фіксує клік.
 
 ## Встановлення
 
@@ -12,19 +12,21 @@ WordPress-плагін, що публікує PDF-презентацію `plan-k
 
 В адмінці зліва з'явиться пункт меню **«VIP Tattoo План»**:
 
-- **PDF і кнопки** — за замовчуванням використовується файл, вбудований у плагін (`assets/plan-kursu.pdf`). Щоб підмінити на власний — заванантаж PDF у «Медіафайли», встав ID вкладення.
+- **Оплата і кнопки** — посилання на Stripe Payment Link (кнопка «Открыть доступ к обучению»), текст обох кнопок, посилання другої кнопки (особистий Telegram).
 - **SEO** — title, description, Open Graph, canonical, robots, JSON-LD Course schema.
 - **Піксели / аналітика** — GA4, Google Tag Manager, Meta (Facebook) Pixel, TikTok Pixel, Pinterest Tag, LinkedIn Insight Tag. Кожен вмикається лише якщо заповнене відповідне поле.
-- **Вебхук** — на кожен перегляд/завантаження сторінки шле підписаний (HMAC-SHA256) POST-запит на вказаний URL (Zapier / Make / власна CRM).
-- **Telegram-сповіщення** — надсилає повідомлення адміну в Telegram при кожному завантаженні PDF.
+- **Вебхук** — на кожну подію (перегляд/клік оплати/клік «Написати») шле підписаний (HMAC-SHA256) POST-запит на вказаний URL (Zapier / Make / власна CRM).
+- **Telegram-сповіщення** — надсилає повідомлення адміну в Telegram при кожному кліку на кнопку оплати.
 
 ## Архітектура (коротко)
 
-- `vip-tattoo-plan-viewer.php` — реєстрація шаблону сторінки, SEO/пікселі head-виводу.
+- `vip-tattoo-plan-viewer.php` — реєстрація шаблону сторінки, SEO/пікселі head-виводу, підстановка плейсхолдерів у `content/body-plan.html`.
 - `includes/settings.php` — адмін-сторінка налаштувань (nonce + санітизація всіх полів).
 - `includes/tracking.php` — таблиця подій, REST-роут `/vip-tattoo-plan/v1/track`, ідемпотентний інсерт (UNIQUE KEY на visit_token+event_type), вихідний вебхук, Telegram-нотифікація.
 - `templates/vip-tattoo-plan-viewer.php` — сама сторінка (повністю самодостатня, без залежності від теми).
-- `js/track.js` — клієнтський трекер (view/download події + піксель-виклики).
-- `assets/plan-kursu.pdf` — вбудована копія презентації (fallback).
+- `content/body-plan.html` — розмітка усіх 23 слайдів з плейсхолдерами (`{{ASSET_URL}}`, `{{STRIPE_CHECKOUT_URL}}`, `{{CTA_PRIMARY_TEXT}}`, `{{CTA_SECONDARY_TEXT}}`, `{{CONTACT_URL}}`).
+- `css/plan-viewer.css` — стилі презентації (ідентичні `docs/index.html`).
+- `js/track.js` — клієнтський трекер (view/checkout_click/contact_click події + піксель-виклики).
+- `assets/slides/`, `assets/icons/` — зображення слайдів та іконок, вбудовані в плагін (не залежить від папки `docs/`).
 
 Ця гілка (`wp-plugin-development`) розробляється незалежно від гілки `pdf-plan-development` — зміни тут не зачіпають сам PDF-файл в іншій гілці.

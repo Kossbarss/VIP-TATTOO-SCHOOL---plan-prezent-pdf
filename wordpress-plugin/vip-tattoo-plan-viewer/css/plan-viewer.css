@@ -1,0 +1,295 @@
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#15110e;}
+  /* All overlay text below is sized in "vw" units, which are relative
+     to the browser's viewport, not to this element. On desktop the
+     window is almost always wider than the 1400px the slides are
+     capped at, so vw-based text renders bigger than the slide was
+     designed for and overflows its box. container-type turns this
+     into a query container so "cqw" units (used everywhere below)
+     stay relative to the slide's own rendered width instead. */
+  .slides{max-width:1400px;margin:0 auto;container-type:inline-size;}
+  /* A thin dark line between every slide so consecutive slides sharing
+     the same background color (e.g. two cream module slides) still
+     read as separate pages instead of blending into one image. */
+  .slide-img{display:block;width:100%;height:auto;border-bottom:3px solid #15110e;}
+  /* Both buttons were baked into the slide-23 image; that flat art is
+     erased from the image now (see slide-23.jpg) and replaced by a
+     real button bar below it, in normal document flow. A fixed
+     percentage-of-image overlay can't hold this much text at every
+     viewport width without wrapping over the content above it -- a
+     bar with real width to grow into has no such limit. */
+  .cta-bar{
+    display:flex; flex-wrap:wrap; gap:14px;
+    padding:32px 20px 40px; background:#15110e;
+  }
+  .cta-bar .btn{
+    display:flex; align-items:center; justify-content:center;
+    padding:15px 28px; border-radius:999px;
+    font-family:'Nunito','Segoe UI',sans-serif;
+    font-weight:700; font-size:15px; text-decoration:none;
+    white-space:nowrap;
+    transition:transform .15s ease, box-shadow .2s ease;
+  }
+  .cta-bar .btn:hover{ transform:translateY(-2px); }
+  .cta-bar .btn-primary{
+    flex:1 1 260px;
+    color:#fff; position:relative; overflow:hidden;
+    background:linear-gradient(105deg,#f98658 0%,#f25832 24%,#e62115 52%,#f25832 78%,#f98658 100%);
+    box-shadow:0 10px 20px -10px rgba(221,0,3,0.6);
+  }
+  .cta-bar .btn-primary:hover{ box-shadow:0 14px 24px -10px rgba(221,0,3,0.7); }
+  .cta-bar .btn-primary::before{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 22% 18%, rgba(255,255,255,0.35), transparent 55%);
+    pointer-events:none;
+  }
+  .cta-bar .btn-primary::after{
+    content:"";
+    position:absolute; top:0; left:-60%; width:45%; height:100%;
+    background:linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
+    animation:cta-btn-shine 3.6s ease-in-out infinite;
+    pointer-events:none;
+  }
+  .cta-bar .btn-primary span{ position:relative; z-index:1; }
+  @keyframes cta-btn-shine{
+    0%{ transform:skewX(-18deg) translateX(0%); }
+    55%{ transform:skewX(-18deg) translateX(422%); }
+    100%{ transform:skewX(-18deg) translateX(422%); }
+  }
+  .cta-bar .btn-secondary{
+    flex:1 1 200px;
+    color:#fff; border:1.5px solid rgba(255,255,255,0.5);
+  }
+
+  /* ---- Shine sweep on every orange/red square icon -------------------
+     Reuses the CTA button's shine animation (cta-btn-shine) on a thin
+     absolutely-positioned overlay matched to each baked square icon's
+     position -- the squares themselves are pixels in the slide images,
+     so the moving highlight has to be a real HTML layer on top. */
+  .icon-shine{ position:absolute; overflow:hidden; border-radius:22%; pointer-events:none; }
+  .icon-shine::after{
+    content:"";
+    position:absolute; top:-40%; left:-90%; width:110%; height:180%;
+    background:linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
+    animation:icon-shine-sweep 3.6s ease-in-out infinite;
+  }
+  @keyframes icon-shine-sweep{
+    0%{ transform:skewX(-18deg) translateX(0%); }
+    55%{ transform:skewX(-18deg) translateX(172%); }
+    100%{ transform:skewX(-18deg) translateX(172%); }
+  }
+
+  /* ---- Slide 2's 15 cards, rebuilt as real CSS elements --------------
+     These were flat pixels in slide-02.jpg (erased, see that file), so
+     the shine could only ever be a layer glued on top. Rebuilding the
+     card itself as a styled div lets the sweep be the card's own
+     ::after -- genuinely part of the block, not an overlay on it. */
+  .sq-icon{
+    position:absolute; border-radius:14%/26%; overflow:hidden;
+    background:linear-gradient(105deg,#f98658 0%,#f25832 24%,#e62115 52%,#f25832 78%,#f98658 100%);
+    box-shadow:0 10px 20px -10px rgba(221,0,3,0.6);
+  }
+  .sq-icon::before{
+    content:"V"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Playfair Display',serif; font-weight:700; font-size:5.5cqw; line-height:1;
+    color:rgba(255,255,255,0.22);
+  }
+  .sq-icon .ring{
+    position:absolute; left:50%; top:50%; width:34%; height:65%;
+    transform:translate(-50%,-50%); border:2px solid rgba(255,255,255,0.16); border-radius:50%;
+  }
+  .sq-icon::after{
+    content:"";
+    position:absolute; top:-40%; left:-90%; width:110%; height:180%;
+    background:linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
+    animation:icon-shine-sweep 3.6s ease-in-out infinite;
+  }
+
+  /* ---- Same rebuild applied to every module-slide header square ------
+     Slides 3-22's header badge (a number 01-15, or a small glyph on the
+     "bonus" slides) was likewise flat pixels, erased from each
+     slide-NN.jpg. Numbers render as real text; the four one-off glyphs
+     (handshake/star/scales/shield/question) are small extracted PNGs
+     with the red background made transparent. */
+  .sq-icon-hdr{
+    position:absolute; border-radius:26%; overflow:hidden;
+    background:linear-gradient(105deg,#f98658 0%,#f25832 24%,#e62115 52%,#f25832 78%,#f98658 100%);
+    box-shadow:0 10px 20px -10px rgba(221,0,3,0.6);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .sq-icon-hdr .num{
+    font-family:'Playfair Display',serif; font-weight:700; font-size:2.2cqw; color:#fff; line-height:1;
+  }
+  .sq-icon-hdr img{ width:52%; height:52%; object-fit:contain; }
+  .sq-icon-hdr::after{
+    content:"";
+    position:absolute; top:-40%; left:-90%; width:110%; height:180%;
+    background:linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
+    animation:icon-shine-sweep 3.6s ease-in-out infinite;
+  }
+
+  /* ---- Enlarged text on slide 23 ----------------------------------
+     The "Входит в обучение" list and the final heading/paragraph/
+     byline were erased from slide-23.jpg (see that file) and are
+     replaced here with real, larger HTML text at the same spot -- the
+     certificate photo, first bullet list and CTA buttons are untouched. */
+  .slide-wrap{ position:relative; }
+  .ov{ position:absolute; font-family:'Nunito',sans-serif; }
+  .ov-s22-included{ left:3.7%; top:61.92%; height:38.09%; width:46%; color:#e9e0d3; display:flex; flex-direction:column; justify-content:flex-start; }
+  /* ---- Non-clickable discount banner, styled after the landing page's
+     sticky-bar (same ink->blood-dark->blood gradient, gold hairline,
+     struck-through old price + gold new price) but as a static inline
+     rounded badge above the eyebrow, not a fixed clickable bar. */
+  .ov-s22-included .discount-banner{
+    display:flex; align-self:center; align-items:baseline; justify-content:center;
+    gap:0.5cqw; width:100%; box-sizing:border-box;
+    background:linear-gradient(90deg,#15110f 0%,#dd0003 55%,#ff0003 100%);
+    border:1px solid rgba(201,162,74,0.45);
+    border-radius:1.35cqw; padding:1.125cqw 1.8cqw; margin-bottom:2.41cqw;
+    font-weight:600; font-size:1.575cqw; color:#fffdfa; line-height:1.3;
+    text-align:center; cursor:default; user-select:none;
+  }
+  .ov-s22-included .discount-banner .old{
+    text-decoration:line-through; color:rgba(250,246,239,0.55); font-size:0.9em;
+  }
+  .ov-s22-included .discount-banner .new{
+    font-size:1.25em; font-weight:800; color:#e8d5a8;
+  }
+  .ov-s22-included .eyebrow{
+    display:inline-flex; align-self:center; align-items:center; gap:0.45cqw;
+    font-size:0.95cqw; letter-spacing:0.07em; text-transform:uppercase;
+    color:#1a120c; font-weight:800; background:linear-gradient(100deg,#f0c883,#c9a15a);
+    padding:0.5cqw 1.1cqw; border-radius:999px; margin-bottom:1.35cqw; line-height:1;
+  }
+  .ov-s22-included ul{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; column-gap:1.5cqw; row-gap:1.5cqw; }
+  .ov-s22-included li{ font-size:1.12cqw; line-height:1.4; font-weight:800; color:#fff; padding-left:2.1cqw; position:relative; }
+  .ov-s22-included li::before{
+    content:"✓"; position:absolute; left:0; top:0.12cqw;
+    color:#1a120c; background:linear-gradient(100deg,#f0c883,#c9a15a);
+    width:1.05cqw; height:1.05cqw; min-width:1.05cqw; border-radius:50%;
+    font-size:0.65cqw; font-weight:800; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 2px rgba(201,161,90,0.22);
+  }
+  .ov-s22-right{ left:51.5%; top:70.4%; height:29.6%; width:44%; color:#cabfae; display:flex; flex-direction:column; justify-content:center; }
+  .ov-s22-right h3{ font-family:'Playfair Display',serif; font-weight:700; font-size:1.9cqw; color:#fff; margin:0 0 1.1cqw; }
+  .ov-s22-right p{ font-size:1.12cqw; line-height:1.4; font-weight:800; color:#fff; margin:0 0 1.3cqw; }
+  .ov-s22-right .byline{ padding-top:1.1cqw; border-top:1px solid rgba(242,233,218,0.2); font-style:italic; font-size:1.2cqw; color:#a89a86; }
+
+  /* ---- Enlarged text on the slide-2 program cards -----------------
+     Each card's number and block name were erased from slide-02.jpg
+     (background reconstructed locally) and are replaced here with
+     real, larger HTML text at the same spot -- fully opaque, no
+     text-shadow/glow -- while the card gradient and "V" watermark
+     stay original pixels. */
+  .ov-card-num{
+    font-family:'Playfair Display',serif; font-weight:700;
+    font-size:1.85cqw; color:#fff; line-height:1; text-shadow:none; filter:none;
+  }
+  .ov-card-label{
+    font-family:'Nunito',sans-serif; font-weight:800;
+    font-size:1.3cqw; line-height:1.25; color:#fff; text-shadow:none; filter:none;
+  }
+
+  /* ---- Bold white text on slide 1 (hero) -----------------------------
+     The grey description paragraph + stat labels on slide 1 were erased
+     from the image (background reconstructed locally) and are replaced
+     here with real, larger bold-white HTML text matching the
+     "Ключевое преимущество" list's style -- everything else (photos,
+     numbers) stays original pixels. */
+  .ov-s1-desc{ position:absolute; left:4.17%; top:49.6%; width:50%; font-family:'Nunito',sans-serif; font-weight:800; font-size:1.05cqw; line-height:1.55; color:#fff; }
+  .ov-s1-stat{ position:absolute; top:75.9%; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.92cqw; line-height:1.3; color:#fff; }
+
+  /* ---- Page-number badge, added to every slide -----------------------
+     The circular "N / 22" counter was baked into each source image at a
+     fixed spot; adding slide 3 shifted every later slide's number and
+     changed the total to 23, so the old counters were erased from all
+     22 images (see each slide-NN.jpg) and are replaced here with real
+     HTML text -- one accurate badge per slide, easy to keep in sync. */
+  .ov-badge{ position:absolute; left:92.22%; top:93.42%; display:flex; align-items:center; gap:0.4cqw; font-family:'Nunito',sans-serif; }
+  .ov-badge .num{
+    width:2.75cqw; height:2.75cqw; min-width:2.75cqw; border-radius:50%;
+    background:linear-gradient(100deg,#f0c883,#c9a15a); color:#1a120c;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:1.05cqw;
+  }
+  .ov-badge .den{
+    font-weight:700; font-size:1.05cqw; color:#d8cdb8;
+  }
+
+  /* ---- New slide 21 box: "Честный ответ" -----------------------------
+     Inserted above the existing "Гарантия честного старта" card; that
+     card and the stats row below it were shifted down inside slide-21.jpg
+     to make room (photo column untouched), and this real HTML box fills
+     the freed space. */
+  .ov-s21-honest{
+    left:4.92%; top:22.67%; width:52.75%; height:29.63%; box-sizing:border-box;
+    display:flex; flex-direction:column; justify-content:center;
+    background:#fff; border:1px solid #c9a15a; border-radius:1.4cqw;
+    padding:1.1cqw 2.2cqw;
+  }
+  .ov-s21-honest .eyebrow{
+    display:flex; align-items:center; gap:0.6cqw;
+    font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
+    font-size:1.2cqw; color:#a9662f; margin-bottom:0.55cqw; line-height:1;
+  }
+  .ov-s21-honest .eyebrow::before{
+    content:""; width:0.2cqw; align-self:stretch; min-height:1.2cqw;
+    background:#c9a15a; border-radius:999px;
+  }
+  /* Heading/paragraph font-size, weight and color measured directly off
+     the "Гарантия честного старта" card's baked pixels and matched 1:1;
+     that card was then shrunk to remove its own excess whitespace, and
+     the freed vertical space was given to this box, so its line-height
+     and padding can now match the same comfortable spacing too. */
+  .ov-s21-honest h3{
+    font-family:'Playfair Display',serif; font-weight:800; font-size:2.25cqw;
+    line-height:1.15; color:#21180f; margin:0 0 0.9cqw;
+  }
+  .ov-s21-honest p{
+    font-family:'Nunito',sans-serif; font-weight:400; font-size:1.3cqw;
+    line-height:1.32; color:#666664; margin:0;
+  }
+
+  /* ---- New slide 3: "Формат поддержки" ------------------------------
+     Split out of the old slide 2 into its own slide, rebuilt with the
+     same header-badge + 4-card + quote-box structure the other module
+     slides (e.g. "Результат обучения") use. The background (header
+     icons, card boxes, the 4 icon badges, divider line, quote box) is
+     a composed image (slide-03.jpg); all text is real HTML so it
+     matches the rest of the deck's typography exactly. */
+  /* Slide 1 uses two families with distinct roles: Playfair Display for
+     the big heading, the stat numbers and the italic byline; Nunito
+     (bold) for the paragraph and the stat labels. Slide 3 mirrors that
+     same pairing role-for-role instead of using one weight everywhere. */
+  /* ---- Module-slide subtitle line, every slide 4-22 -------------------
+     Same fix as slide 3's subtitle: the descriptive line under each
+     header title was baked into the image as thin/italic/pale text,
+     easy to miss. Erased from every slide-NN.jpg and replaced here with
+     real, bold, larger, dark HTML text (position/width set per slide
+     via inline style since text length and template family differ). */
+  .ov-hdr-subtitle{ position:absolute; font-family:'Nunito',sans-serif; font-weight:800; font-size:1.4cqw; line-height:1.3; color:#3a2c1c; }
+  .ov-s3-heading{ position:absolute; left:18%; top:8.5%; font-family:'Playfair Display',serif; font-weight:700; font-size:2.35cqw; color:#17120d; }
+  .ov-s3-subtitle{ position:absolute; left:18%; top:16.9%; font-family:'Nunito',sans-serif; font-weight:800; font-size:1.7cqw; color:#3a2c1c; }
+  .ov-s3-title{ position:absolute; top:54%; box-sizing:border-box; padding:0 1.6%; text-align:center; font-family:'Playfair Display',serif; font-weight:700; font-size:1.3cqw; color:#241a10; }
+  .ov-s3-desc{ position:absolute; top:60.94%; box-sizing:border-box; padding:0 1.6%; text-align:center; font-family:'Nunito',sans-serif; font-weight:800; font-size:1.05cqw; line-height:1.55; color:#241a10; }
+  .ov-s3-quote{
+    position:absolute; left:18.75%; top:78.85%; width:62.5%; height:15.42%;
+    box-sizing:border-box; padding:0 2%;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    font-family:'Playfair Display',serif; font-style:italic; font-weight:900; font-size:1.45cqw; line-height:1.4; color:#8a5a1f;
+  }
+
+  /* ---- Compact quote box on slide 19 ("Результат обучения") ---------
+     Same treatment as slide 3's quote: the original box (baked in
+     slide-19.jpg) was full-width and its baked italic text looked soft
+     because the browser was faking the slant. Narrowed the box and
+     erased its baked text, replacing it with real HTML text in the
+     same crisp real-italic/900-weight style. */
+  .ov-s19-quote{
+    position:absolute; left:18.75%; top:84.44%; width:62.5%; height:10.96%;
+    box-sizing:border-box; padding:0 2%;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    font-family:'Playfair Display',serif; font-style:italic; font-weight:900; font-size:1.45cqw; line-height:1.4; color:#8a5a1f;
+  }
