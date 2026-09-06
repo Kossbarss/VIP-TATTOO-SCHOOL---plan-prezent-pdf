@@ -10,23 +10,35 @@ WordPress-плагін, що публікує інтерактивну 23-сла
 
 ## Налаштування
 
-В адмінці зліва з'явиться пункт меню **«VIP Tattoo План»**:
+В адмінці зліва з'являться два пункти меню:
 
-- **Оплата і кнопки** — посилання на Stripe Payment Link (кнопка «Открыть доступ к обучению»), текст обох кнопок, посилання другої кнопки (особистий Telegram).
+**«VIP Tattoo План»**:
+- **Оплата і кнопки** — посилання на Stripe Payment Link (використовується в режимі «Пряме посилання», див. нижче), текст обох кнопок, посилання другої кнопки (особистий Telegram).
 - **SEO** — title, description, Open Graph, canonical, robots, JSON-LD Course schema.
 - **Піксели / аналітика** — GA4, Google Tag Manager, Meta (Facebook) Pixel, TikTok Pixel, Pinterest Tag, LinkedIn Insight Tag. Кожен вмикається лише якщо заповнене відповідне поле.
 - **Вебхук** — на кожну подію (перегляд/клік оплати/клік «Написати») шле підписаний (HMAC-SHA256) POST-запит на вказаний URL (Zapier / Make / власна CRM).
 - **Telegram-сповіщення** — надсилає повідомлення адміну в Telegram при кожному кліку на кнопку оплати.
 
+**«VIP Tattoo План: Оплата»** — повна інтеграція прийому оплати, за тим самим принципом, що й у плагіні лендингу `vip-tattoo-landing`:
+- **Режим оплати** — «Пряме посилання» (без ключів, кнопка веде на готовий Stripe Payment Link — за замовчуванням) або «API» (кнопка відкриває попап email/телефону і проводить оплату через Stripe/PayPal API нижче).
+- **Stripe** — окремі поля для **Test** (`sk_test_...`, тестовий webhook secret, тестовий Price ID) і **Live** (`sk_live_...`, live webhook secret, live Price ID) ключів; перемикач Test/Live не видаляє збережені значення іншого режиму.
+- **PayPal** — так само окремо **Sandbox** (Client ID/Secret/Webhook ID) і **Live** ключі, з перемикачем режиму.
+- **Ціна / валюта / назва товару** — використовуються, коли Price ID не задано (плагін сам створює одноразовий товар у Stripe на льоту).
+- **Telegram-доступ** — окремий бот (Token + юзернейм + текст повідомлення) для доставки доступу клієнту після оплати; незалежний від бота адмін-сповіщень вище.
+- Адреси вебхуків (Stripe/PayPal/Telegram) показані прямо на сторінці налаштувань — просто скопіювати в кабінет провайдера.
+- Внизу сторінки — таблиця останніх замовлень (email, телефон, провайдер, статус, чи доставлено в Telegram).
+
 ## Архітектура (коротко)
 
 - `vip-tattoo-plan-viewer.php` — реєстрація шаблону сторінки, SEO/пікселі head-виводу, підстановка плейсхолдерів у `content/body-plan.html`.
-- `includes/settings.php` — адмін-сторінка налаштувань (nonce + санітизація всіх полів).
-- `includes/tracking.php` — таблиця подій, REST-роут `/vip-tattoo-plan/v1/track`, ідемпотентний інсерт (UNIQUE KEY на visit_token+event_type), вихідний вебхук, Telegram-нотифікація.
+- `includes/settings.php` — адмін-сторінка основних налаштувань (nonce + санітизація всіх полів).
+- `includes/tracking.php` — таблиця подій, REST-роут `/vip-tattoo-plan/v1/track`, ідемпотентний інсерт (UNIQUE KEY на visit_token+event_type), вихідний вебхук, Telegram-нотифікація адміну.
+- `includes/payments.php` — окрема адмін-сторінка «Оплата» (test/live ключі Stripe та PayPal), таблиця замовлень, REST-роути створення чекауту/повернення/вебхуків обох провайдерів, доставка доступу клієнту в Telegram.
 - `templates/vip-tattoo-plan-viewer.php` — сама сторінка (повністю самодостатня, без залежності від теми).
-- `content/body-plan.html` — розмітка усіх 23 слайдів з плейсхолдерами (`{{ASSET_URL}}`, `{{STRIPE_CHECKOUT_URL}}`, `{{CTA_PRIMARY_TEXT}}`, `{{CTA_SECONDARY_TEXT}}`, `{{CONTACT_URL}}`).
-- `css/plan-viewer.css` — стилі презентації (ідентичні `docs/index.html`).
+- `content/body-plan.html` — розмітка усіх 23 слайдів з плейсхолдерами (`{{ASSET_URL}}`, `{{STRIPE_CHECKOUT_URL}}`, `{{CTA_PRIMARY_TEXT}}`, `{{CTA_SECONDARY_TEXT}}`, `{{CONTACT_URL}}`) + попап email/телефону (задіюється лише в режимі оплати «API»).
+- `css/plan-viewer.css` — стилі презентації (ідентичні `docs/index.html`) + стилі попапу оплати.
 - `js/track.js` — клієнтський трекер (view/checkout_click/contact_click події + піксель-виклики).
+- `js/checkout.js` — перехоплює клік по кнопці оплати в режимі «API», відкриває попап, викликає `create-checkout` і переадресовує на сторінку оплати Stripe/PayPal.
 - `assets/slides/`, `assets/icons/` — зображення слайдів та іконок, вбудовані в плагін (не залежить від папки `docs/`).
 
 Ця гілка (`wp-plugin-development`) розробляється незалежно від гілки `pdf-plan-development` — зміни тут не зачіпають сам PDF-файл в іншій гілці.

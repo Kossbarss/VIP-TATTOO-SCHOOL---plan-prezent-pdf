@@ -293,3 +293,43 @@
     display:flex; align-items:center; justify-content:center; text-align:center;
     font-family:'Playfair Display',serif; font-style:italic; font-weight:900; font-size:1.45cqw; line-height:1.4; color:#8a5a1f;
   }
+
+  /* ---- Email/phone popup, shown only in "API" checkout mode (see
+     js/checkout.js) -- collects a lead before opening the Stripe/PayPal
+     hosted checkout, since both providers' REST APIs need at least an
+     email up front. Hidden by default; toggled via .is-open so it costs
+     nothing in the default "Пряме посилання" mode. */
+  .vtp-popup-overlay{
+    position:fixed; inset:0; background:rgba(21,17,14,0.72);
+    z-index:1000; opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .vtp-popup-overlay.is-open{opacity:1; pointer-events:auto;}
+  .vtp-popup-card{
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-46%);
+    width:min(420px,90vw); background:#fbf6ec; border-radius:18px;
+    padding:32px 28px 28px; z-index:1001;
+    box-shadow:0 24px 60px rgba(0,0,0,0.45);
+    opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease;
+    font-family:'Nunito',sans-serif;
+  }
+  .vtp-popup-card.is-open{opacity:1; pointer-events:auto; transform:translate(-50%,-50%);}
+  .vtp-popup-card h3{
+    margin:0 0 8px; font-family:'Playfair Display',serif; font-weight:700; font-size:22px; color:#2a1f16;
+  }
+  .vtp-popup-sub{margin:0 0 20px; font-size:14px; line-height:1.5; color:#5a4c3c;}
+  .vtp-popup-close{
+    position:absolute; top:14px; right:16px; width:32px; height:32px; border-radius:50%;
+    border:none; background:transparent; font-size:22px; line-height:1; color:#8a7a63; cursor:pointer;
+  }
+  .vtp-popup-close:hover{background:rgba(0,0,0,0.06);}
+  .vtp-popup-form{display:flex; flex-direction:column; gap:12px;}
+  .vtp-popup-form input{
+    padding:14px 16px; border-radius:10px; border:1px solid #d8cbb2;
+    font-family:'Nunito',sans-serif; font-size:15px; background:#fff;
+  }
+  .vtp-popup-form input:focus{outline:2px solid #c9a24a; outline-offset:1px;}
+  .vtp-popup-form .btn{width:100%; margin-top:4px; border:none; cursor:pointer;}
+  .vtp-popup-form .btn[disabled]{opacity:0.6; cursor:default;}
+  .vtp-popup-error{
+    margin:14px 0 0; font-size:13px; color:#b3261e; text-align:center;
+  }

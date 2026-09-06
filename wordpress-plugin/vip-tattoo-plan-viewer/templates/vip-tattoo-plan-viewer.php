@@ -25,5 +25,6 @@ if (!defined('ABSPATH')) exit;
 <?php vip_tattoo_plan_render_globals(); ?>
 <?php vip_tattoo_plan_render_body(); ?>
 <script src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'js/track.js'); ?>" defer></script>
+<script src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'js/checkout.js'); ?>" defer></script>
 </body>
 </html>
