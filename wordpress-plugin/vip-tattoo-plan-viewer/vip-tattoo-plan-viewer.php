@@ -14,6 +14,7 @@ define('VIP_TATTOO_PLAN_TEMPLATE_SLUG', 'vip-tattoo-plan-viewer.php');
 require_once VIP_TATTOO_PLAN_PLUGIN_DIR . 'includes/settings.php';
 require_once VIP_TATTOO_PLAN_PLUGIN_DIR . 'includes/tracking.php';
 require_once VIP_TATTOO_PLAN_PLUGIN_DIR . 'includes/payments.php';
+require_once VIP_TATTOO_PLAN_PLUGIN_DIR . 'includes/meta-capi.php';
 
 /**
  * Single page template this plugin ships. Kept as a function (not a bare

@@ -28,12 +28,19 @@ WordPress-плагін, що публікує інтерактивну 23-сла
 - Адреси вебхуків (Stripe/PayPal/Telegram) показані прямо на сторінці налаштувань — просто скопіювати в кабінет провайдера.
 - Внизу сторінки — таблиця останніх замовлень (email, телефон, провайдер, статус, чи доставлено в Telegram).
 
+**«VIP Tattoo План: Оплата → Meta Conversions API»** (підменю) — серверна відправка події `Purchase` напряму в Meta, оскільки після оплати покупець одразу редиректиться в Telegram, а не назад на сайт, тому клієнтський піксель цю подію не бачить:
+- **Pixel ID**, **Access Token** (з Events Manager → піксель → Conversions API), **Test Event Code** (опційно, для перевірки в «Тестирование событий»).
+- Спрацьовує автоматично на хук `vip_tattoo_plan_order_paid` (той самий момент, що й доставка доступу в Telegram) — лише для замовлень у режимі оплати «API».
+- Email/телефон надсилаються тільки як SHA-256 хеші (вимога Meta).
+- Внизу — таблиця останніх спроб відправки (токен замовлення, статус, сира відповідь Meta з `fbtrace_id`, час).
+
 ## Архітектура (коротко)
 
 - `vip-tattoo-plan-viewer.php` — реєстрація шаблону сторінки, SEO/пікселі head-виводу, підстановка плейсхолдерів у `content/body-plan.html`.
 - `includes/settings.php` — адмін-сторінка основних налаштувань (nonce + санітизація всіх полів).
 - `includes/tracking.php` — таблиця подій, REST-роут `/vip-tattoo-plan/v1/track`, ідемпотентний інсерт (UNIQUE KEY на visit_token+event_type), вихідний вебхук, Telegram-нотифікація адміну.
-- `includes/payments.php` — окрема адмін-сторінка «Оплата» (test/live ключі Stripe та PayPal), таблиця замовлень, REST-роути створення чекауту/повернення/вебхуків обох провайдерів, доставка доступу клієнту в Telegram.
+- `includes/payments.php` — окрема адмін-сторінка «Оплата» (test/live ключі Stripe та PayPal), таблиця замовлень, REST-роути створення чекауту/повернення/вебхуків обох провайдерів, доставка доступу клієнту в Telegram, хук `vip_tattoo_plan_order_paid` для сторонніх інтеграцій.
+- `includes/meta-capi.php` — Meta Conversions API: надсилає `Purchase` на хук `vip_tattoo_plan_order_paid`, власна таблиця логів спроб відправки, підменю налаштувань під «VIP Tattoo План: Оплата».
 - `templates/vip-tattoo-plan-viewer.php` — сама сторінка (повністю самодостатня, без залежності від теми).
 - `content/body-plan.html` — розмітка усіх 23 слайдів з плейсхолдерами (`{{ASSET_URL}}`, `{{STRIPE_CHECKOUT_URL}}`, `{{CTA_PRIMARY_TEXT}}`, `{{CTA_SECONDARY_TEXT}}`, `{{CONTACT_URL}}`) + попап email/телефону (задіюється лише в режимі оплати «API»).
 - `css/plan-viewer.css` — стилі презентації (ідентичні `docs/index.html`) + стилі попапу оплати.

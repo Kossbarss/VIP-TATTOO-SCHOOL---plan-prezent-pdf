@@ -543,6 +543,12 @@ function vip_tattoo_plan_stripe_capture_and_mark_paid($session_id) {
     $order->status = 'paid';
     $order->paid_at = $paid_at;
 
+    // Extension point for includes/meta-capi.php -- sends the Purchase
+    // event server-side, since the buyer never lands back on our own
+    // domain after paying (Stripe/PayPal redirect straight to the
+    // Telegram bot), so the browser-side Meta Pixel never fires it.
+    do_action('vip_tattoo_plan_order_paid', $order);
+
     vip_tattoo_plan_deliver_access($order);
 }
 
@@ -654,6 +660,8 @@ function vip_tattoo_plan_paypal_capture_and_mark_paid($paypal_order_id) {
     $wpdb->update($table, ['status' => 'paid', 'paid_at' => $paid_at], ['id' => $order->id]);
     $order->status = 'paid';
     $order->paid_at = $paid_at;
+
+    do_action('vip_tattoo_plan_order_paid', $order);
 
     vip_tattoo_plan_deliver_access($order);
 }
