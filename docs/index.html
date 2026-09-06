@@ -149,6 +149,25 @@
   .slide-wrap{ position:relative; }
   .ov{ position:absolute; font-family:'Nunito',sans-serif; }
   .ov-s22-included{ left:3.7%; top:70.4%; height:29.6%; width:46%; color:#e9e0d3; display:flex; flex-direction:column; justify-content:center; }
+  /* ---- Non-clickable discount banner, styled after the landing page's
+     sticky-bar (same ink->blood-dark->blood gradient, gold hairline,
+     struck-through old price + gold new price) but as a static inline
+     rounded badge above the eyebrow, not a fixed clickable bar. */
+  .ov-s22-included .discount-banner{
+    display:flex; align-self:center; align-items:baseline; justify-content:center;
+    gap:0.5cqw; width:100%; box-sizing:border-box;
+    background:linear-gradient(90deg,#15110f 0%,#dd0003 55%,#ff0003 100%);
+    border:1px solid rgba(201,162,74,0.45);
+    border-radius:0.9cqw; padding:0.75cqw 1.2cqw; margin-bottom:1.2cqw;
+    font-weight:600; font-size:1.05cqw; color:#fffdfa; line-height:1.3;
+    text-align:center; cursor:default; user-select:none;
+  }
+  .ov-s22-included .discount-banner .old{
+    text-decoration:line-through; color:rgba(250,246,239,0.55); font-size:0.9em;
+  }
+  .ov-s22-included .discount-banner .new{
+    font-size:1.25em; font-weight:800; color:#e8d5a8;
+  }
   .ov-s22-included .eyebrow{
     display:inline-flex; align-self:center; align-items:center; gap:0.45cqw;
     font-size:0.95cqw; letter-spacing:0.07em; text-transform:uppercase;
@@ -393,6 +412,7 @@
   <div class="slide-wrap">
     <img class="slide-img" src="assets/slides/slide-23.jpg?v=2" alt="Слайд 23 — готов начать путь в тату-индустрии">
     <div class="ov ov-s22-included">
+      <div class="discount-banner">Забрать курс со скидкой за <span class="old">600€</span> <span class="new">275€</span></div>
       <div class="eyebrow">★ Ключевое преимущество</div>
       <ul>
         <li>Пожизненный доступ к материалам курса</li>
