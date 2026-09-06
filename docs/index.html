@@ -217,15 +217,15 @@
      to make room (photo column untouched), and this real HTML box fills
      the freed space. */
   .ov-s21-honest{
-    left:4.92%; top:20.4%; width:52.75%; height:20.1%; box-sizing:border-box;
+    left:4.92%; top:21.8%; width:52.75%; height:28.3%; box-sizing:border-box;
     display:flex; flex-direction:column; justify-content:center;
     background:#fff; border:1px solid #c9a15a; border-radius:1.4cqw;
-    padding:0.15cqw 2.2cqw;
+    padding:1.1cqw 2.2cqw;
   }
   .ov-s21-honest .eyebrow{
     display:flex; align-items:center; gap:0.6cqw;
     font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
-    font-size:1.2cqw; color:#a9662f; margin-bottom:0.3cqw; line-height:1;
+    font-size:1.2cqw; color:#a9662f; margin-bottom:0.55cqw; line-height:1;
   }
   .ov-s21-honest .eyebrow::before{
     content:""; width:0.2cqw; align-self:stretch; min-height:1.2cqw;
@@ -233,15 +233,16 @@
   }
   /* Heading/paragraph font-size, weight and color measured directly off
      the "Гарантия честного старта" card's baked pixels and matched 1:1;
-     only the line-height/margins are tighter, since this card has less
-     vertical room to work with. */
+     that card was then shrunk to remove its own excess whitespace, and
+     the freed vertical space was given to this box, so its line-height
+     and padding can now match the same comfortable spacing too. */
   .ov-s21-honest h3{
     font-family:'Playfair Display',serif; font-weight:800; font-size:2.25cqw;
-    line-height:1.05; color:#21180f; margin:0 0 0.3cqw;
+    line-height:1.15; color:#21180f; margin:0 0 0.9cqw;
   }
   .ov-s21-honest p{
     font-family:'Nunito',sans-serif; font-weight:400; font-size:1.3cqw;
-    line-height:1.1; color:#666664; margin:0;
+    line-height:1.32; color:#666664; margin:0;
   }
 
   /* ---- New slide 3: "Формат поддержки" ------------------------------
@@ -379,7 +380,7 @@
   </div>
   <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-20.jpg?v=7" alt="Слайд 20 — почему именно это обучение"><div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/scales.png?v=3" alt=""></div><div class="ov ov-badge on-light" style="left:91.29%;"><span class="num">20</span><span class="den">/23</span></div></div>
   <div class="slide-wrap">
-    <img class="slide-img" src="assets/slides/slide-21.jpg?v=9" alt="Слайд 21 — честный старт">
+    <img class="slide-img" src="assets/slides/slide-21.jpg?v=10" alt="Слайд 21 — честный старт">
     <div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/shield.png?v=3" alt=""></div>
     <div class="ov ov-s21-honest">
       <div class="eyebrow">Честный ответ</div>
