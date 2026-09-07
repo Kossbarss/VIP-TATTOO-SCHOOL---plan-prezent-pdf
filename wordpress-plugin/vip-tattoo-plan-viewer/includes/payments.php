@@ -337,11 +337,6 @@ function vip_tattoo_plan_render_payment_settings() {
         <hr />
         <h2>Останні замовлення</h2>
         <?php vip_tattoo_plan_render_recent_orders(); ?>
-
-        <hr />
-        <h2>Останній отриманий Telegram update (тимчасова діагностика)</h2>
-        <p class="description">Сирий JSON, який Telegram востаннє надіслав на <code>/telegram-webhook</code> — саме те, що реально отримав сервер, незалежно від того, що показує сам Telegram-клієнт у чаті.</p>
-        <textarea readonly rows="8" class="large-text code"><?php echo esc_textarea(get_option('vip_tattoo_plan_last_telegram_raw_update', 'Поки що нічого не отримано.')); ?></textarea>
     </div>
     <?php
 }
@@ -881,20 +876,6 @@ function vip_tattoo_plan_rest_stripe_return(WP_REST_Request $request) {
         ? ('https://t.me/' . $bot_username . '?start=' . $vip_token)
         : vip_tattoo_plan_page_url();
 
-    // Temporary diagnostic: append &debug=1 to see exactly what this
-    // endpoint computes (vip_token as received, the bot username option,
-    // and the final redirect_to string) as plain JSON instead of actually
-    // redirecting -- lets us verify server-side output independent of
-    // whatever the Telegram client does with the link afterwards.
-    if ($request->get_param('debug')) {
-        return new WP_REST_Response([
-            'received_vip_token' => $vip_token,
-            'received_session_id' => $session_id,
-            'bot_username_option' => $bot_username,
-            'computed_redirect_to' => $redirect_to,
-        ], 200);
-    }
-
     wp_redirect($redirect_to);
     exit;
 }
@@ -964,13 +945,6 @@ function vip_tattoo_plan_rest_telegram_webhook(WP_REST_Request $request) {
     $update = json_decode($request->get_body(), true);
     $text = $update['message']['text'] ?? '';
     $chat_id = $update['message']['chat']['id'] ?? null;
-
-    // Temporary diagnostic: Telegram's own apps hide the ?start= deep-link
-    // payload from the visible chat bubble even though the full "/start
-    // <payload>" text IS what's actually delivered to this webhook -- this
-    // records exactly what we received, independent of what the chat UI
-    // renders, so it can be inspected on the settings page.
-    update_option('vip_tattoo_plan_last_telegram_raw_update', $request->get_body());
 
     if ($chat_id && preg_match('/^\/start\s+(\S+)/', $text, $m)) {
         $token = $m[1];
