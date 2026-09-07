@@ -337,6 +337,11 @@ function vip_tattoo_plan_render_payment_settings() {
         <hr />
         <h2>Останні замовлення</h2>
         <?php vip_tattoo_plan_render_recent_orders(); ?>
+
+        <hr />
+        <h2>Останній отриманий Telegram update (тимчасова діагностика)</h2>
+        <p class="description">Сирий JSON, який Telegram востаннє надіслав на <code>/telegram-webhook</code> — саме те, що реально отримав сервер, незалежно від того, що показує сам Telegram-клієнт у чаті.</p>
+        <textarea readonly rows="8" class="large-text code"><?php echo esc_textarea(get_option('vip_tattoo_plan_last_telegram_raw_update', 'Поки що нічого не отримано.')); ?></textarea>
     </div>
     <?php
 }
@@ -959,6 +964,13 @@ function vip_tattoo_plan_rest_telegram_webhook(WP_REST_Request $request) {
     $update = json_decode($request->get_body(), true);
     $text = $update['message']['text'] ?? '';
     $chat_id = $update['message']['chat']['id'] ?? null;
+
+    // Temporary diagnostic: Telegram's own apps hide the ?start= deep-link
+    // payload from the visible chat bubble even though the full "/start
+    // <payload>" text IS what's actually delivered to this webhook -- this
+    // records exactly what we received, independent of what the chat UI
+    // renders, so it can be inspected on the settings page.
+    update_option('vip_tattoo_plan_last_telegram_raw_update', $request->get_body());
 
     if ($chat_id && preg_match('/^\/start\s+(\S+)/', $text, $m)) {
         $token = $m[1];
