@@ -21,7 +21,7 @@ WordPress-плагін, що публікує інтерактивну 23-сла
 **«VIP Tattoo План»**:
 - **Оплата і кнопки** — посилання на Stripe Payment Link (кнопка «Открыть доступ к обучению»), текст обох кнопок, посилання другої кнопки (особистий Telegram).
 - **SEO** — title, description, Open Graph, canonical, robots, JSON-LD Course schema.
-- **Піксели / аналітика** — GA4, Google Tag Manager, Meta (Facebook) Pixel, TikTok Pixel, Pinterest Tag, LinkedIn Insight Tag. Кожен вмикається лише якщо заповнене відповідне поле.
+- **Піксели / аналітика** — GA4, Google Tag Manager, Meta (Facebook) Pixel, TikTok Pixel. Кожен вмикається лише якщо заповнене відповідне поле. Клік по кнопці «Открыть доступ к обучению» шле подію Lead одразу в усі підключені пікселі (GA4: `generate_lead`, Meta: `Lead`, TikTok: `Lead`).
 - **Вебхук** — на кожну подію (перегляд/клік оплати/клік «Написати») шле підписаний (HMAC-SHA256) POST-запит на вказаний URL (Zapier / Make / власна CRM).
 - **Telegram-сповіщення** — надсилає повідомлення адміну в Telegram при кожному кліку на кнопку оплати.
 

@@ -4,12 +4,15 @@
  * directly on the "Открыть доступ к обучению" Stripe Payment Link and the
  * "Написать Виктории" Telegram link in content/body-plan.html), each
  * carrying a per-page-load token so the server-side REST route can
- * de-duplicate retried calls. Also mirrors events into whichever
- * ad-platform pixels are configured (GA4/dataLayer, Meta Pixel, TikTok
- * Pixel), so conversion tracking on those platforms doesn't depend on
- * parsing server logs separately. The Stripe link itself just navigates
- * normally (no popup, no order-creation REST call) -- Stripe hosts the
- * whole checkout, so there's nothing else for this plugin to do.
+ * de-duplicate retried calls.
+ *
+ * Also mirrors "checkout_click" into every configured ad-platform pixel
+ * as that platform's own "Lead" event -- GA4 (generate_lead), Meta Pixel
+ * (Lead), TikTok Pixel (Lead) -- so every platform's own ad-optimization
+ * and reporting sees the same "someone clicked the pay button" signal,
+ * not just Meta. The Stripe link itself just navigates normally (no
+ * popup, no order-creation REST call) -- Stripe hosts the whole
+ * checkout, so there's nothing else for this plugin to do.
  */
 (function () {
   function readParam(name) {
@@ -67,11 +70,21 @@
     if (window.VIP_TATTOO_PLAN_HAS_GA4 && typeof window.gtag === 'function') {
       window.gtag('event', ga4EventNames[eventType] || eventType);
     }
-    if (window.VIP_TATTOO_PLAN_HAS_META_PIXEL && typeof window.fbq === 'function' && eventType === 'checkout_click') {
-      window.fbq('track', 'Lead');
-    }
-    if (window.VIP_TATTOO_PLAN_HAS_TIKTOK && window.ttq && eventType === 'checkout_click') {
-      window.ttq.track('InitiateCheckout');
+
+    // "Открыть доступ к обучению" is the one action every connected
+    // pixel should record as a Lead -- fired here, once, into each
+    // platform's own standard/custom conversion event, rather than
+    // leaving it to whichever pixel happened to already have one.
+    if (eventType === 'checkout_click') {
+      if (window.VIP_TATTOO_PLAN_HAS_GA4 && typeof window.gtag === 'function') {
+        window.gtag('event', 'generate_lead');
+      }
+      if (window.VIP_TATTOO_PLAN_HAS_META_PIXEL && typeof window.fbq === 'function') {
+        window.fbq('track', 'Lead');
+      }
+      if (window.VIP_TATTOO_PLAN_HAS_TIKTOK && window.ttq) {
+        window.ttq.track('Lead');
+      }
     }
   }
 

@@ -38,8 +38,6 @@ function vip_tattoo_plan_settings_fields() {
         'vip_tattoo_plan_gtm_id'                => '',
         'vip_tattoo_plan_meta_pixel_id'         => '',
         'vip_tattoo_plan_tiktok_pixel_id'       => '',
-        'vip_tattoo_plan_pinterest_tag_id'      => '',
-        'vip_tattoo_plan_linkedin_partner_id'   => '',
         'vip_tattoo_plan_webhook_url'           => '',
         'vip_tattoo_plan_telegram_bot_token'    => '',
         'vip_tattoo_plan_telegram_chat_id'      => '',
@@ -177,14 +175,6 @@ function vip_tattoo_plan_render_settings_page() {
                 <tr>
                     <th><label for="vip_tattoo_plan_tiktok_pixel_id">TikTok Pixel ID</label></th>
                     <td><input type="text" class="regular-text" id="vip_tattoo_plan_tiktok_pixel_id" name="vip_tattoo_plan_tiktok_pixel_id" value="<?php echo esc_attr($vals['vip_tattoo_plan_tiktok_pixel_id']); ?>" /></td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_pinterest_tag_id">Pinterest Tag ID</label></th>
-                    <td><input type="text" class="regular-text" id="vip_tattoo_plan_pinterest_tag_id" name="vip_tattoo_plan_pinterest_tag_id" value="<?php echo esc_attr($vals['vip_tattoo_plan_pinterest_tag_id']); ?>" /></td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_linkedin_partner_id">LinkedIn Insight Tag (Partner ID)</label></th>
-                    <td><input type="text" class="regular-text" id="vip_tattoo_plan_linkedin_partner_id" name="vip_tattoo_plan_linkedin_partner_id" value="<?php echo esc_attr($vals['vip_tattoo_plan_linkedin_partner_id']); ?>" /></td>
                 </tr>
             </table>
 

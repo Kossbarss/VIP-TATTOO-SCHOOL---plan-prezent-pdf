@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: VIP Tattoo — План курсу (Презентація)
- * Description: Hosts the "План курсу" 23-slide interactive presentation on its own dedicated page template — self-contained SEO (title/description/OG/canonical/robots/JSON-LD), tracking-pixel integrations (GA4, GTM, Meta Pixel, TikTok Pixel, Pinterest Tag, LinkedIn Insight Tag), view/checkout-click/contact-click event tracking with an outbound webhook + optional Telegram notification, a direct Stripe Payment Link checkout button, and a settings page mirroring the coding standard of the VIP Tattoo landing plugin (nonces, sanitized fields, signature-verified inbound requests, idempotent event handling).
+ * Description: Hosts the "План курсу" 23-slide interactive presentation on its own dedicated page template — self-contained SEO (title/description/OG/canonical/robots/JSON-LD), tracking-pixel integrations (GA4, GTM, Meta Pixel, TikTok Pixel), view/checkout-click/contact-click event tracking with an outbound webhook + optional Telegram notification, a direct Stripe Payment Link checkout button, and a settings page mirroring the coding standard of the VIP Tattoo landing plugin (nonces, sanitized fields, signature-verified inbound requests, idempotent event handling).
  * Version: 2.0.0
  */
 
@@ -156,8 +156,6 @@ function vip_tattoo_plan_render_pixels() {
     $gtm_id      = trim(get_option('vip_tattoo_plan_gtm_id', ''));
     $meta_pixel  = trim(get_option('vip_tattoo_plan_meta_pixel_id', ''));
     $tiktok_id   = trim(get_option('vip_tattoo_plan_tiktok_pixel_id', ''));
-    $pinterest   = trim(get_option('vip_tattoo_plan_pinterest_tag_id', ''));
-    $linkedin_id = trim(get_option('vip_tattoo_plan_linkedin_partner_id', ''));
 
     if ($gtm_id) {
         ?>
@@ -184,18 +182,6 @@ function vip_tattoo_plan_render_pixels() {
         <?php
     }
 
-    if ($pinterest) {
-        ?>
-<script>!function(e){if(!window.pintrk){window.pintrk=function(){window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var n=window.pintrk;n.queue=[],n.version="3.0";var t=document.createElement("script");t.async=!0,t.src=e;var r=document.getElementsByTagName("script")[0];r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");pintrk('load','<?php echo esc_js($pinterest); ?>');pintrk('page');</script>
-        <?php
-    }
-
-    if ($linkedin_id) {
-        ?>
-<script type="text/javascript">_linkedin_partner_id="<?php echo esc_js($linkedin_id); ?>";window._linkedin_data_partner_ids=window._linkedin_data_partner_ids||[];window._linkedin_data_partner_ids.push(_linkedin_partner_id);</script>
-<script type="text/javascript">(function(l){if(!l){window.lintrk=function(a,b){window.lintrk.q.push([a,b])};window.lintrk.q=[]}var s=document.getElementsByTagName("script")[0];var b=document.createElement("script");b.type="text/javascript";b.async=true;b.src="https://snap.licdn.com/li.lms-analytics/insight.min.js";s.parentNode.insertBefore(b,s);})(window.lintrk);</script>
-        <?php
-    }
 }
 
 /**
