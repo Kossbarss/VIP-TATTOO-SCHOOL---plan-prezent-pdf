@@ -35,7 +35,7 @@ function vip_tattoo_plan_settings_fields() {
         'vip_tattoo_plan_schema_enabled'        => '1',
         'vip_tattoo_plan_ga4_id'                => '',
         'vip_tattoo_plan_gtm_id'                => '',
-        'vip_tattoo_plan_meta_pixel_id'         => '',
+        'vip_tattoo_plan_meta_pixel_id'         => '2292163738269124',
         'vip_tattoo_plan_tiktok_pixel_id'       => '',
         'vip_tattoo_plan_webhook_url'           => '',
         'vip_tattoo_plan_telegram_bot_token'    => '',
