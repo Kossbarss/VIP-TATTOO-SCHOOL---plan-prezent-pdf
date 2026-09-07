@@ -876,6 +876,20 @@ function vip_tattoo_plan_rest_stripe_return(WP_REST_Request $request) {
         ? ('https://t.me/' . $bot_username . '?start=' . $vip_token)
         : vip_tattoo_plan_page_url();
 
+    // Temporary diagnostic: append &debug=1 to see exactly what this
+    // endpoint computes (vip_token as received, the bot username option,
+    // and the final redirect_to string) as plain JSON instead of actually
+    // redirecting -- lets us verify server-side output independent of
+    // whatever the Telegram client does with the link afterwards.
+    if ($request->get_param('debug')) {
+        return new WP_REST_Response([
+            'received_vip_token' => $vip_token,
+            'received_session_id' => $session_id,
+            'bot_username_option' => $bot_username,
+            'computed_redirect_to' => $redirect_to,
+        ], 200);
+    }
+
     wp_redirect($redirect_to);
     exit;
 }
