@@ -140,6 +140,12 @@ function vip_tattoo_plan_render_payment_settings() {
         }
     }
 
+    if (isset($_POST['vip_tattoo_plan_clear_orders']) && wp_verify_nonce($_POST['vip_tattoo_plan_payment_nonce'] ?? '', 'vip_tattoo_plan_payment_settings')) {
+        global $wpdb;
+        $wpdb->query("TRUNCATE TABLE {$wpdb->prefix}" . VIP_TATTOO_PLAN_ORDERS_TABLE);
+        echo '<div class="notice notice-success"><p>Усі замовлення видалено.</p></div>';
+    }
+
     $vals = [];
     foreach ($defaults as $key => $default) {
         $vals[$key] = get_option($key, $default);
@@ -337,6 +343,10 @@ function vip_tattoo_plan_render_payment_settings() {
         <hr />
         <h2>Останні замовлення</h2>
         <?php vip_tattoo_plan_render_recent_orders(); ?>
+        <form method="post" onsubmit="return confirm('Видалити ВСІ замовлення з таблиці? Це не можна скасувати.');">
+            <?php wp_nonce_field('vip_tattoo_plan_payment_settings', 'vip_tattoo_plan_payment_nonce'); ?>
+            <p class="submit"><button type="submit" name="vip_tattoo_plan_clear_orders" value="1" class="button">Видалити всі замовлення (наприклад, тестові)</button></p>
+        </form>
     </div>
     <?php
 }
