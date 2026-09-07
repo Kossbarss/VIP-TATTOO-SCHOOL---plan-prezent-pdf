@@ -74,7 +74,6 @@ function vip_tattoo_plan_page_url() {
 function vip_tattoo_plan_placeholders() {
     return [
         '{{ASSET_URL}}'          => VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/',
-        '{{STRIPE_CHECKOUT_URL}}' => esc_url(get_option('vip_tattoo_plan_stripe_url', 'https://buy.stripe.com/fZucN57RO3TEgXu23C9AA00')),
         '{{CTA_PRIMARY_TEXT}}'   => esc_html(get_option('vip_tattoo_plan_cta_text', 'Открыть доступ к обучению')),
         '{{CTA_SECONDARY_TEXT}}' => esc_html(get_option('vip_tattoo_plan_cta_secondary_text', 'Написать Виктории')),
         '{{CONTACT_URL}}'        => esc_url(get_option('vip_tattoo_plan_telegram_contact_url', 'https://t.me/+48733341364')),

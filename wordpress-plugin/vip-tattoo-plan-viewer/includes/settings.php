@@ -22,7 +22,6 @@ add_action('admin_menu', function () {
 
 function vip_tattoo_plan_settings_fields() {
     return [
-        'vip_tattoo_plan_stripe_url'             => 'https://buy.stripe.com/fZucN57RO3TEgXu23C9AA00',
         'vip_tattoo_plan_cta_text'              => 'Открыть доступ к обучению',
         'vip_tattoo_plan_cta_secondary_text'    => 'Написать Виктории',
         'vip_tattoo_plan_telegram_contact_url'  => 'https://t.me/+48733341364',
@@ -63,7 +62,7 @@ function vip_tattoo_plan_render_settings_page() {
                 update_option($key, sanitize_textarea_field(wp_unslash($_POST[$key])));
             } elseif ($key === 'vip_tattoo_plan_og_image_id') {
                 update_option($key, (int) $_POST[$key]);
-            } elseif (in_array($key, ['vip_tattoo_plan_webhook_url', 'vip_tattoo_plan_telegram_contact_url', 'vip_tattoo_plan_stripe_url'], true)) {
+            } elseif (in_array($key, ['vip_tattoo_plan_webhook_url', 'vip_tattoo_plan_telegram_contact_url'], true)) {
                 update_option($key, esc_url_raw(wp_unslash($_POST[$key])));
             } elseif ($key === 'vip_tattoo_plan_robots') {
                 $allowed = ['index,follow', 'noindex,follow', 'index,nofollow', 'noindex,nofollow'];
@@ -89,16 +88,9 @@ function vip_tattoo_plan_render_settings_page() {
         <form method="post">
             <?php wp_nonce_field('vip_tattoo_plan_settings', 'vip_tattoo_plan_settings_nonce'); ?>
 
-            <h2>Оплата і кнопки</h2>
-            <p class="description">Кнопка нижче — єдиний спосіб оплати на сторінці: вона веде напряму на Stripe/PayPal, без жодної форми чи збору даних цим сайтом. Test/Live ключі для вебхуків (потрібні лише для Meta Conversions API) — на окремій сторінці <a href="<?php echo esc_url(admin_url('admin.php?page=vip-tattoo-plan-payments')); ?>">«VIP Tattoo План: Оплата»</a>.</p>
+            <h2>Кнопки</h2>
+            <p class="description">Кнопка «<?php echo esc_html($vals['vip_tattoo_plan_cta_text']); ?>» створює оплату через Stripe/PayPal API (ключі, ціна, товар — на окремій сторінці <a href="<?php echo esc_url(admin_url('admin.php?page=vip-tattoo-plan-payments')); ?>">«VIP Tattoo План: Оплата»</a>) і одразу переадресовує на сторінку оплати — без жодної форми на цьому сайті.</p>
             <table class="form-table">
-                <tr>
-                    <th><label for="vip_tattoo_plan_stripe_url">Посилання на оплату (Stripe Payment Link)</label></th>
-                    <td>
-                        <input type="url" class="regular-text" id="vip_tattoo_plan_stripe_url" name="vip_tattoo_plan_stripe_url" value="<?php echo esc_attr($vals['vip_tattoo_plan_stripe_url']); ?>" />
-                        <p class="description">Куди веде кнопка «<?php echo esc_html($vals['vip_tattoo_plan_cta_text']); ?>» — готове посилання Stripe Checkout (buy.stripe.com/...), відкривається в новій вкладці. Ніякого проміжного REST-роуту чи форми — Stripe сам приймає оплату і сам робить редирект після неї (налаштовується в кабінеті Stripe).</p>
-                    </td>
-                </tr>
                 <tr>
                     <th><label for="vip_tattoo_plan_cta_text">Текст кнопки оплати</label></th>
                     <td><input type="text" class="regular-text" id="vip_tattoo_plan_cta_text" name="vip_tattoo_plan_cta_text" value="<?php echo esc_attr($vals['vip_tattoo_plan_cta_text']); ?>" /></td>
