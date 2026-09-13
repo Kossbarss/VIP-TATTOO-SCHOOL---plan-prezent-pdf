@@ -65,10 +65,11 @@
   }
   .cta-bar .btn-outline{
     flex:1 1 220px;
-    color:#f98658; background:transparent;
-    border:1.5px solid #f98658;
+    color:#1a1a1a; font-weight:800;
+    background:linear-gradient(105deg,#8fb4fb 0%,#7ba6fa 50%,#8fb4fb 100%);
+    border:1.5px solid #7ba6fa;
   }
-  .cta-bar .btn-outline:hover{ background:rgba(249,134,88,0.1); }
+  .cta-bar .btn-outline:hover{ background:linear-gradient(105deg,#9dbefb 0%,#8bb1fa 50%,#9dbefb 100%); }
 
   /* ---- Shine sweep on every orange/red square icon -------------------
      Reuses the CTA button's shine animation (cta-btn-shine) on a thin
