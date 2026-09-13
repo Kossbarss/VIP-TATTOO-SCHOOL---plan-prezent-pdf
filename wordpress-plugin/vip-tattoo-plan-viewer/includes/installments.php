@@ -787,7 +787,7 @@ function vip_tattoo_plan_sheets_append_row($values) {
         return $token;
     }
 
-    $url = "https://sheets.googleapis.com/v4/spreadsheets/{$sheet_id}/values/A:O:append?valueInputOption=USER_ENTERED";
+    $url = "https://sheets.googleapis.com/v4/spreadsheets/{$sheet_id}/values/A:O:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS";
     $response = wp_remote_post($url, [
         'headers' => ['Authorization' => 'Bearer ' . $token, 'Content-Type' => 'application/json'],
         'body'    => wp_json_encode(['values' => [$values]]),
