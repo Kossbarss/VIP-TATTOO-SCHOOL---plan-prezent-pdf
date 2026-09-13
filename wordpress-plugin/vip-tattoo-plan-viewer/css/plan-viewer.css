@@ -36,10 +36,10 @@
   .cta-bar .btn-primary{
     flex:1 1 260px;
     color:#fff; position:relative; overflow:hidden;
-    background:linear-gradient(105deg,#f98658 0%,#f25832 24%,#e62115 52%,#f25832 78%,#f98658 100%);
-    box-shadow:0 10px 20px -10px rgba(221,0,3,0.6);
+    background:linear-gradient(105deg,#5fd645 0%,#3fbf2e 24%,#2ea023 52%,#3fbf2e 78%,#5fd645 100%);
+    box-shadow:0 10px 20px -10px rgba(46,160,35,0.6);
   }
-  .cta-bar .btn-primary:hover{ box-shadow:0 14px 24px -10px rgba(221,0,3,0.7); }
+  .cta-bar .btn-primary:hover{ box-shadow:0 14px 24px -10px rgba(46,160,35,0.7); }
   .cta-bar .btn-primary::before{
     content:"";
     position:absolute; inset:0;
