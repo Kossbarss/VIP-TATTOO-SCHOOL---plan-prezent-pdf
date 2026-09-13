@@ -496,6 +496,21 @@ function vip_tattoo_plan_stripe_webhook_secret() {
         : get_option('vip_tattoo_plan_stripe_test_webhook_secret', '');
 }
 
+/**
+ * Two separate Stripe dashboard "destinations" deliver to the same
+ * /stripe-webhook URL (the original one-time-payment endpoint, and a
+ * second one added for the installment events) -- each has its own
+ * signing secret, so verification must accept either, not just the
+ * one originally configured.
+ */
+function vip_tattoo_plan_stripe_webhook_secrets() {
+    $secrets = [vip_tattoo_plan_stripe_webhook_secret()];
+    $secrets[] = vip_tattoo_plan_stripe_mode() === 'live'
+        ? get_option('vip_tattoo_plan_stripe_live_webhook_secret_installment', '')
+        : get_option('vip_tattoo_plan_stripe_test_webhook_secret_installment', '');
+    return array_filter($secrets);
+}
+
 function vip_tattoo_plan_stripe_price_id() {
     return trim(vip_tattoo_plan_stripe_mode() === 'live'
         ? get_option('vip_tattoo_plan_stripe_live_price_id', '')
@@ -572,8 +587,8 @@ function vip_tattoo_plan_stripe_capture_and_mark_paid($session_id) {
 }
 
 function vip_tattoo_plan_verify_stripe_webhook(WP_REST_Request $request) {
-    $webhook_secret = vip_tattoo_plan_stripe_webhook_secret();
-    if (!$webhook_secret) return true;
+    $webhook_secrets = vip_tattoo_plan_stripe_webhook_secrets();
+    if (!$webhook_secrets) return true;
 
     $signature_header = $request->get_header('stripe-signature');
     if (!$signature_header) return false;
@@ -588,9 +603,11 @@ function vip_tattoo_plan_verify_stripe_webhook(WP_REST_Request $request) {
     }
     if (!$timestamp || !$signatures) return false;
 
-    $expected = hash_hmac('sha256', $timestamp . '.' . $request->get_body(), $webhook_secret);
-    foreach ($signatures as $signature) {
-        if (hash_equals($expected, $signature)) return true;
+    foreach ($webhook_secrets as $webhook_secret) {
+        $expected = hash_hmac('sha256', $timestamp . '.' . $request->get_body(), $webhook_secret);
+        foreach ($signatures as $signature) {
+            if (hash_equals($expected, $signature)) return true;
+        }
     }
     return false;
 }

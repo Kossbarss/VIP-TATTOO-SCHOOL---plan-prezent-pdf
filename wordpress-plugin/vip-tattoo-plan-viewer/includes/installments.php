@@ -31,6 +31,8 @@ function vip_tattoo_plan_installment_fields() {
     return [
         'vip_tattoo_plan_stripe_test_installment_price_id' => '',
         'vip_tattoo_plan_stripe_live_installment_price_id' => '',
+        'vip_tattoo_plan_stripe_test_webhook_secret_installment' => '',
+        'vip_tattoo_plan_stripe_live_webhook_secret_installment' => '',
 
         'vip_tattoo_plan_paypal_sandbox_installment_plan_id' => '',
         'vip_tattoo_plan_paypal_live_installment_plan_id'    => '',
@@ -136,7 +138,21 @@ function vip_tattoo_plan_render_installment_settings() {
                 </tr>
                 <tr>
                     <th><label>Вебхуки Stripe</label></th>
-                    <td><p class="description">Використовується той самий Stripe webhook endpoint, що і для повної оплати (сторінка «Оплата» вище) — додатково увімкни там події <code>invoice.payment_succeeded</code>, <code>invoice.payment_failed</code>, <code>customer.subscription.deleted</code>.</p></td>
+                    <td><p class="description">Можна або додати ці 3 події до того самого Stripe webhook endpoint, що і для повної оплати (сторінка «Оплата» вище), або створити для них окремий пункт призначення з тим самим URL — обидва варіанти працюють. Потрібні події: <code>invoice.payment_succeeded</code>, <code>invoice.payment_failed</code>, <code>customer.subscription.deleted</code>.</p></td>
+                </tr>
+                <tr>
+                    <th><label for="vip_tattoo_plan_stripe_test_webhook_secret_installment">Test Signing secret (окремий вебхук)</label></th>
+                    <td>
+                        <input type="password" class="regular-text" autocomplete="off" id="vip_tattoo_plan_stripe_test_webhook_secret_installment" name="vip_tattoo_plan_stripe_test_webhook_secret_installment" value="<?php echo esc_attr($vals['vip_tattoo_plan_stripe_test_webhook_secret_installment']); ?>" placeholder="whsec_..." />
+                        <p class="description">Заповнюй лише якщо створив ОКРЕМИЙ пункт призначення для цих 3 подій (у нього свій "Секрет підписання"/Signing secret, відмінний від основного вебхука). Якщо додав ці події до вже існуючого вебхука — залиш порожнім.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="vip_tattoo_plan_stripe_live_webhook_secret_installment">Live Signing secret (окремий вебхук)</label></th>
+                    <td>
+                        <input type="password" class="regular-text" autocomplete="off" id="vip_tattoo_plan_stripe_live_webhook_secret_installment" name="vip_tattoo_plan_stripe_live_webhook_secret_installment" value="<?php echo esc_attr($vals['vip_tattoo_plan_stripe_live_webhook_secret_installment']); ?>" placeholder="whsec_..." />
+                        <p class="description">Те саме, але для Live mode окремого пункту призначення.</p>
+                    </td>
                 </tr>
             </table>
 
