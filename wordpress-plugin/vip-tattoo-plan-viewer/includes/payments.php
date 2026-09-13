@@ -47,6 +47,12 @@ function vip_tattoo_plan_payments_activate() {
         delivered_at DATETIME DEFAULT NULL,
         created_at DATETIME NOT NULL,
         paid_at DATETIME DEFAULT NULL,
+        plan_type VARCHAR(20) NOT NULL DEFAULT 'full',
+        installment_step SMALLINT NOT NULL DEFAULT 0,
+        total_paid_cents BIGINT NOT NULL DEFAULT 0,
+        stripe_subscription_id VARCHAR(191) DEFAULT NULL,
+        stripe_schedule_id VARCHAR(191) DEFAULT NULL,
+        installment_final_at DATETIME DEFAULT NULL,
         PRIMARY KEY  (id),
         UNIQUE KEY token (token)
     ) {$charset_collate};";
@@ -59,7 +65,7 @@ function vip_tattoo_plan_payments_activate() {
 }
 register_activation_hook(VIP_TATTOO_PLAN_PLUGIN_DIR . 'vip-tattoo-plan-viewer.php', 'vip_tattoo_plan_payments_activate');
 
-define('VIP_TATTOO_PLAN_PAYMENTS_DB_VERSION', 1);
+define('VIP_TATTOO_PLAN_PAYMENTS_DB_VERSION', 2);
 add_action('admin_init', function () {
     if ((int) get_option('vip_tattoo_plan_payments_db_version', 0) < VIP_TATTOO_PLAN_PAYMENTS_DB_VERSION) {
         vip_tattoo_plan_payments_activate();
@@ -730,14 +736,23 @@ function vip_tattoo_plan_rest_create_checkout(WP_REST_Request $request) {
     global $wpdb;
 
     $provider = vip_tattoo_plan_payment_provider();
+    $plan_type = $request->get_param('plan_type') === 'installment' ? 'installment' : 'full';
     $token = wp_generate_password(40, false, false);
     $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
     $wpdb->insert($table, [
         'token'      => $token,
         'provider'   => $provider,
         'status'     => 'pending',
+        'plan_type'  => $plan_type,
         'created_at' => current_time('mysql'),
     ]);
+
+    if ($plan_type === 'installment') {
+        if ($provider === 'stripe') {
+            return vip_tattoo_plan_stripe_start_installment_checkout($token);
+        }
+        return vip_tattoo_plan_paypal_start_installment_checkout($token);
+    }
 
     $price_cents = (int) get_option('vip_tattoo_plan_price_cents', 27500);
     $currency = strtoupper(get_option('vip_tattoo_plan_currency', 'EUR'));
@@ -923,6 +938,14 @@ function vip_tattoo_plan_rest_paypal_webhook(WP_REST_Request $request) {
     } elseif ($event_type === 'PAYMENT.CAPTURE.COMPLETED') {
         $order_id = $resource['supplementary_data']['related_ids']['order_id'] ?? '';
         vip_tattoo_plan_paypal_capture_and_mark_paid($order_id);
+    } elseif ($event_type === 'PAYMENT.SALE.COMPLETED') {
+        $subscription_id = $resource['billing_agreement_id'] ?? '';
+        vip_tattoo_plan_paypal_installment_sale_completed($subscription_id, $resource);
+    } elseif (in_array($event_type, ['PAYMENT.SALE.DENIED', 'BILLING.SUBSCRIPTION.PAYMENT.FAILED'], true)) {
+        $subscription_id = $resource['billing_agreement_id'] ?? ($resource['id'] ?? '');
+        vip_tattoo_plan_paypal_installment_payment_failed($subscription_id);
+    } elseif ($event_type === 'BILLING.SUBSCRIPTION.CANCELLED') {
+        vip_tattoo_plan_paypal_installment_subscription_cancelled($resource['id'] ?? '');
     }
 
     return new WP_REST_Response(['received' => true], 200);
@@ -937,8 +960,22 @@ function vip_tattoo_plan_rest_stripe_webhook(WP_REST_Request $request) {
     $event_type = $event['type'] ?? '';
 
     if ($event_type === 'checkout.session.completed') {
-        $session_id = $event['data']['object']['id'] ?? '';
-        vip_tattoo_plan_stripe_capture_and_mark_paid($session_id);
+        $session = $event['data']['object'] ?? [];
+        $session_id = $session['id'] ?? '';
+        if (($session['mode'] ?? '') === 'subscription' && !empty($session['subscription'])) {
+            vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $session['subscription']);
+        } else {
+            vip_tattoo_plan_stripe_capture_and_mark_paid($session_id);
+        }
+    } elseif ($event_type === 'invoice.payment_succeeded') {
+        $invoice = $event['data']['object'] ?? [];
+        vip_tattoo_plan_stripe_installment_invoice_paid($invoice);
+    } elseif ($event_type === 'invoice.payment_failed') {
+        $invoice = $event['data']['object'] ?? [];
+        vip_tattoo_plan_stripe_installment_invoice_failed($invoice);
+    } elseif ($event_type === 'customer.subscription.deleted') {
+        $subscription = $event['data']['object'] ?? [];
+        vip_tattoo_plan_stripe_installment_subscription_deleted($subscription);
     }
 
     return new WP_REST_Response(['received' => true], 200);

@@ -1,42 +1,49 @@
 /**
- * No form, no popup: clicking "Открыть доступ к обучению" calls
- * /vip-tattoo-plan/v1/create-checkout directly and redirects to whatever
- * Stripe Checkout Session or PayPal Order URL comes back. This site never
- * asks the visitor for an email or phone -- if the active provider's
- * hosted page happens to collect one, that only ever reaches our server
- * later via its webhook (see includes/payments.php), never through this
- * click.
+ * No form, no popup: clicking either payment button calls
+ * /vip-tattoo-plan/v1/create-checkout directly (with plan_type=full or
+ * plan_type=installment) and redirects to whatever Stripe Checkout Session
+ * or PayPal Order/Subscription URL comes back. This site never asks the
+ * visitor for an email or phone -- if the active provider's hosted page
+ * happens to collect one, that only ever reaches our server later via its
+ * webhook (see includes/payments.php and includes/installments.php),
+ * never through this click.
  */
 (function () {
-  var cta = document.getElementById('vtpCheckoutCta');
-  if (!cta) return;
+  var buttons = [
+    document.getElementById('vtpCheckoutCta'),
+    document.getElementById('vtpCheckoutCtaInstallment')
+  ].filter(Boolean);
 
-  var originalLabel = cta.innerHTML;
+  buttons.forEach(function (cta) {
+    var originalLabel = cta.innerHTML;
+    var planType = cta.getAttribute('data-plan-type') || 'full';
 
-  cta.addEventListener('click', function () {
-    if (cta.disabled) return;
-    cta.disabled = true;
-    cta.innerHTML = '<span>Завантаження…</span>';
+    cta.addEventListener('click', function () {
+      if (cta.disabled) return;
+      cta.disabled = true;
+      cta.innerHTML = '<span>Завантаження…</span>';
 
-    fetch(window.VIP_TATTOO_PLAN_REST_URL + 'create-checkout', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-WP-Nonce': window.VIP_TATTOO_PLAN_NONCE || ''
-      }
-    })
-      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
-      .then(function (result) {
-        if (result.ok && result.data.checkout_url) {
-          window.location.href = result.data.checkout_url;
-        } else {
-          throw new Error(result.data.error || 'Не вдалося відкрити оплату.');
-        }
+      fetch(window.VIP_TATTOO_PLAN_REST_URL + 'create-checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-WP-Nonce': window.VIP_TATTOO_PLAN_NONCE || ''
+        },
+        body: JSON.stringify({ plan_type: planType })
       })
-      .catch(function (err) {
-        cta.disabled = false;
-        cta.innerHTML = originalLabel;
-        alert(err.message || 'Помилка мережі. Спробуй ще раз.');
-      });
+        .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+        .then(function (result) {
+          if (result.ok && result.data.checkout_url) {
+            window.location.href = result.data.checkout_url;
+          } else {
+            throw new Error(result.data.error || 'Не вдалося відкрити оплату.');
+          }
+        })
+        .catch(function (err) {
+          cta.disabled = false;
+          cta.innerHTML = originalLabel;
+          alert(err.message || 'Помилка мережі. Спробуй ще раз.');
+        });
+    });
   });
 })();
