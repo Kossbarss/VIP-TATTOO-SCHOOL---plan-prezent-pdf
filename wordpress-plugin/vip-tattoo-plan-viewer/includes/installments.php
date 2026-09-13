@@ -288,7 +288,7 @@ function vip_tattoo_plan_stripe_start_installment_checkout($token) {
         'client_reference_id'     => $token,
         'metadata'                => ['token' => $token, 'plan_type' => 'installment'],
         'subscription_data'       => ['metadata' => ['token' => $token, 'plan_type' => 'installment']],
-        'phone_number_collection' => ['enabled' => true],
+        'phone_number_collection' => ['enabled' => 'true'],
         'line_items'              => [['price' => $price_id, 'quantity' => 1]],
     ];
 
