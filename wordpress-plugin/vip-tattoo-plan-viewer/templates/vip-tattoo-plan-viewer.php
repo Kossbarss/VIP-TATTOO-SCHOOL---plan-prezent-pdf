@@ -26,13 +26,13 @@ if (!defined('ABSPATH')) exit;
 <link rel="apple-touch-icon" href="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/favicon/favicon-180x180.png'); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700;1,900&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'css/plan-viewer.css'); ?>">
+<link rel="stylesheet" href="<?php echo esc_url(add_query_arg('v', filemtime(VIP_TATTOO_PLAN_PLUGIN_DIR . 'css/plan-viewer.css'), VIP_TATTOO_PLAN_PLUGIN_URL . 'css/plan-viewer.css')); ?>">
 <?php vip_tattoo_plan_render_pixels(); ?>
 </head>
 <body>
 <?php vip_tattoo_plan_render_globals(); ?>
 <?php vip_tattoo_plan_render_body(); ?>
-<script src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'js/track.js'); ?>" defer></script>
-<script src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'js/checkout.js'); ?>" defer></script>
+<script src="<?php echo esc_url(add_query_arg('v', filemtime(VIP_TATTOO_PLAN_PLUGIN_DIR . 'js/track.js'), VIP_TATTOO_PLAN_PLUGIN_URL . 'js/track.js')); ?>" defer></script>
+<script src="<?php echo esc_url(add_query_arg('v', filemtime(VIP_TATTOO_PLAN_PLUGIN_DIR . 'js/checkout.js'), VIP_TATTOO_PLAN_PLUGIN_URL . 'js/checkout.js')); ?>" defer></script>
 </body>
 </html>
