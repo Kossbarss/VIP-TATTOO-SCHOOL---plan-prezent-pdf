@@ -145,7 +145,7 @@
      certificate photo, first bullet list and CTA buttons are untouched. */
   .slide-wrap{ position:relative; }
   .ov{ position:absolute; font-family:'Nunito',sans-serif; }
-  .ov-s22-included{ left:3.7%; top:61.92%; height:38.09%; width:46%; color:#e9e0d3; display:flex; flex-direction:column; justify-content:flex-start; }
+  .ov-s22-included{ left:3.7%; top:57.04%; height:42.96%; width:46%; color:#e9e0d3; display:flex; flex-direction:column; justify-content:flex-start; }
   /* ---- Non-clickable discount banner, styled after the landing page's
      sticky-bar (same ink->blood-dark->blood gradient, gold hairline,
      struck-through old price + gold new price) but as a static inline
