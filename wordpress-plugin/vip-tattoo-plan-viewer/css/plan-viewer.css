@@ -65,11 +65,29 @@
   }
   .cta-bar .btn-outline{
     flex:1 1 220px;
-    color:#1a1a1a; font-weight:800;
+    color:#fff; font-weight:800; position:relative; overflow:hidden;
     background:linear-gradient(105deg,#8fb4fb 0%,#7ba6fa 50%,#8fb4fb 100%);
     border:1.5px solid #7ba6fa;
+    box-shadow:0 10px 20px -10px rgba(123,166,250,0.6);
   }
-  .cta-bar .btn-outline:hover{ background:linear-gradient(105deg,#9dbefb 0%,#8bb1fa 50%,#9dbefb 100%); }
+  .cta-bar .btn-outline:hover{
+    background:linear-gradient(105deg,#9dbefb 0%,#8bb1fa 50%,#9dbefb 100%);
+    box-shadow:0 14px 24px -10px rgba(123,166,250,0.7);
+  }
+  .cta-bar .btn-outline::before{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 22% 18%, rgba(255,255,255,0.35), transparent 55%);
+    pointer-events:none;
+  }
+  .cta-bar .btn-outline::after{
+    content:"";
+    position:absolute; top:0; left:-60%; width:45%; height:100%;
+    background:linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
+    animation:cta-btn-shine 3.6s ease-in-out infinite;
+    pointer-events:none;
+  }
+  .cta-bar .btn-outline span{ position:relative; z-index:1; }
 
   /* ---- Shine sweep on every orange/red square icon -------------------
      Reuses the CTA button's shine animation (cta-btn-shine) on a thin
