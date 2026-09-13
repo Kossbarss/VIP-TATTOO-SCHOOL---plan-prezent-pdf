@@ -21,7 +21,7 @@
     cta.addEventListener('click', function () {
       if (cta.disabled) return;
       cta.disabled = true;
-      cta.innerHTML = '<span>Завантаження…</span>';
+      cta.innerHTML = '<span>Загрузка...</span>';
 
       fetch(window.VIP_TATTOO_PLAN_REST_URL + 'create-checkout', {
         method: 'POST',
@@ -36,13 +36,13 @@
           if (result.ok && result.data.checkout_url) {
             window.location.href = result.data.checkout_url;
           } else {
-            throw new Error(result.data.error || 'Не вдалося відкрити оплату.');
+            throw new Error(result.data.error || 'Не удалось открыть оплату.');
           }
         })
         .catch(function (err) {
           cta.disabled = false;
           cta.innerHTML = originalLabel;
-          alert(err.message || 'Помилка мережі. Спробуй ще раз.');
+          alert(err.message || 'Ошибка сети. Попробуй ещё раз.');
         });
     });
   });
