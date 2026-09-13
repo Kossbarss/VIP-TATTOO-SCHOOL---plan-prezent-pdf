@@ -191,9 +191,9 @@
   }
   .ov-s22-included .s22-installment-banner{ width:100%; height:auto; border-radius:0.8cqw; display:block; }
   .ov-s22-right{ left:51.5%; top:70.4%; height:29.6%; width:44%; color:#cabfae; display:flex; flex-direction:column; justify-content:center; }
-  .ov-s22-right h3{ font-family:'Playfair Display',serif; font-weight:700; font-size:2.5cqw; line-height:1.25; color:#fff; margin:0 0 1.7cqw; }
-  .ov-s22-right p{ font-size:1.4cqw; line-height:1.7; font-weight:800; color:#fff; margin:0 0 1.9cqw; }
-  .ov-s22-right .byline{ padding-top:1.6cqw; border-top:1px solid rgba(242,233,218,0.2); font-style:italic; font-size:1.45cqw; color:#a89a86; }
+  .ov-s22-right h3{ font-family:'Playfair Display',serif; font-weight:700; font-size:2.05cqw; line-height:1.2; color:#fff; margin:0 0 1.3cqw; }
+  .ov-s22-right p{ font-size:1.22cqw; line-height:1.5; font-weight:800; color:#fff; margin:0 0 1.4cqw; }
+  .ov-s22-right .byline{ padding-top:1.2cqw; border-top:1px solid rgba(242,233,218,0.2); font-style:italic; font-size:1.28cqw; color:#a89a86; }
 
   /* ---- Enlarged text on the slide-2 program cards -----------------
      Each card's number and block name were erased from slide-02.jpg
