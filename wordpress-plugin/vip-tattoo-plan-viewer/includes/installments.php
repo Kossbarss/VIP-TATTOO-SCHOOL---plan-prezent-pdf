@@ -1,6 +1,6 @@
 <?php
 /**
- * Розтермінування на 2 платежі (137.50 EUR кожен, раз на тиждень) —
+ * Оплата частинами на 2 платежі (137.50 EUR кожен, раз на тиждень) —
  * той самий товар, другий спосіб оплати поруч із повною оплатою.
  *
  * Stripe: Checkout Session у режимі subscription на тижневу ціну,
@@ -54,8 +54,8 @@ function vip_tattoo_plan_installment_fields() {
 add_action('admin_menu', function () {
     add_submenu_page(
         'vip-tattoo-plan-payments',
-        'Розтермінування',
-        'Розтермінування',
+        'Оплата частинами',
+        'Оплата частинами',
         'manage_options',
         'vip-tattoo-plan-installments',
         'vip_tattoo_plan_render_installment_settings'
@@ -86,7 +86,7 @@ function vip_tattoo_plan_render_installment_settings() {
     if (isset($_POST['vip_tattoo_plan_set_installment_telegram_webhook']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
         $result = vip_tattoo_plan_set_installment_telegram_webhook();
         if ($result === true) {
-            echo '<div class="notice notice-success"><p>Telegram webhook (розтермінування) встановлено успішно.</p></div>';
+            echo '<div class="notice notice-success"><p>Telegram webhook (оплати частинами) встановлено успішно.</p></div>';
         } else {
             echo '<div class="notice notice-error"><p>Помилка встановлення webhook: ' . esc_html($result) . '</p></div>';
         }
@@ -112,7 +112,7 @@ function vip_tattoo_plan_render_installment_settings() {
     $installment_telegram_webhook_url = rest_url('vip-tattoo-plan/v1/installment-telegram-webhook');
     ?>
     <div class="wrap">
-        <h1>Розтермінування — 2 платежі по 137.50€</h1>
+        <h1>Оплата частинами — 2 платежі по 137.50€</h1>
         <p class="description">Той самий товар (курс), другий спосіб оплати поруч із повною оплатою 275€ одразу. Провайдер (Stripe/PayPal) і базова ціна беруться з основної сторінки «VIP Tattoo План: Оплата».</p>
 
         <form method="post">
@@ -184,7 +184,7 @@ function vip_tattoo_plan_render_installment_settings() {
                 </tr>
             </table>
 
-            <h2>Google Sheets (журнал платежів розтермінування)</h2>
+            <h2>Google Sheets (журнал платежів оплати частинами)</h2>
             <table class="form-table">
                 <tr>
                     <th><label for="vip_tattoo_plan_google_sheet_id">ID таблиці</label></th>
@@ -205,7 +205,7 @@ function vip_tattoo_plan_render_installment_settings() {
                 </tr>
             </table>
 
-            <h2>Telegram-доступ до розтермінування</h2>
+            <h2>Telegram-доступ до оплати частинами</h2>
             <table class="form-table">
                 <tr>
                     <th><label for="vip_tattoo_plan_installment_telegram_bot_token">Bot Token</label></th>
@@ -249,7 +249,7 @@ function vip_tattoo_plan_render_installment_settings() {
             </form>
             <form method="post" style="display:inline-block;">
                 <?php wp_nonce_field('vip_tattoo_plan_installment_settings', 'vip_tattoo_plan_installment_nonce'); ?>
-                <button type="submit" name="vip_tattoo_plan_set_installment_telegram_webhook" value="1" class="button">Встановити Telegram webhook (розтермінування)</button>
+                <button type="submit" name="vip_tattoo_plan_set_installment_telegram_webhook" value="1" class="button">Встановити Telegram webhook (оплати частинами)</button>
             </form>
         </p>
     </div>
@@ -272,7 +272,7 @@ function vip_tattoo_plan_stripe_start_installment_checkout($token) {
 
     $price_id = vip_tattoo_plan_stripe_installment_price_id();
     if (!$price_id) {
-        return new WP_REST_Response(['error' => 'Розтермінування через Stripe ще не налаштоване (немає Price ID).'], 500);
+        return new WP_REST_Response(['error' => 'Оплата частинами через Stripe ще не налаштоване (немає Price ID).'], 500);
     }
 
     $return_url = add_query_arg([
@@ -388,7 +388,7 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
         $order->created_at,
         $email,
         $phone,
-        'Розтермінування',
+        'Оплата частинами',
         'Stripe',
         $subscription_id,
         $step . '/2',
@@ -431,7 +431,7 @@ function vip_tattoo_plan_stripe_installment_invoice_failed($invoice) {
     $email = $invoice['customer_email'] ?? ($order->email ?? '');
 
     vip_tattoo_plan_sheets_append_row([
-        $order->id, $order->created_at, $email, $order->phone ?? '', 'Розтермінування', 'Stripe',
+        $order->id, $order->created_at, $email, $order->phone ?? '', 'Оплата частинами', 'Stripe',
         $subscription_id, '2/2 — помилка', '', number_format((int) $order->total_paid_cents / 100, 2, '.', ''),
         'Платіж не пройшов', $order->paid_at ?? '', '', $order->telegram_chat_id ?? '', $now,
     ]);
@@ -485,7 +485,7 @@ function vip_tattoo_plan_check_and_kick_installment_order($order_id) {
     $wpdb->update($table, ['status' => 'access_revoked'], ['id' => $order->id]);
 
     vip_tattoo_plan_sheets_append_row([
-        $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', 'Розтермінування', $order->provider,
+        $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', 'Оплата частинами', $order->provider,
         $order->stripe_subscription_id ?? '', '2/2 — не оплачено', '', number_format((int) $order->total_paid_cents / 100, 2, '.', ''),
         'Доступ закрито (2-й платіж не оплачено)', $order->paid_at ?? '', '', $order->telegram_chat_id, current_time('mysql'),
     ]);
@@ -507,7 +507,7 @@ function vip_tattoo_plan_paypal_installment_plan_id() {
 
 function vip_tattoo_plan_paypal_create_installment_plan() {
     $product = vip_tattoo_plan_paypal_request('POST', '/v1/catalogs/products', [
-        'name'        => get_option('vip_tattoo_plan_product_name', 'VIP tattoo school — курс') . ' (розтермінування)',
+        'name'        => get_option('vip_tattoo_plan_product_name', 'VIP tattoo school — курс') . ' (оплати частинами)',
         'type'        => 'SERVICE',
         'category'    => 'EDUCATIONAL_SERVICES_AND_LEARNING_COURSES',
     ]);
@@ -518,7 +518,7 @@ function vip_tattoo_plan_paypal_create_installment_plan() {
 
     $plan = vip_tattoo_plan_paypal_request('POST', '/v1/billing/plans', [
         'product_id'          => $product['id'],
-        'name'                => 'Розтермінування 2 платежі',
+        'name'                => 'Оплата частинами 2 платежі',
         'billing_cycles'      => [[
             'frequency'      => ['interval_unit' => 'WEEK', 'interval_count' => 1],
             'tenure_type'    => 'REGULAR',
@@ -547,7 +547,7 @@ function vip_tattoo_plan_paypal_start_installment_checkout($token) {
 
     $plan_id = vip_tattoo_plan_paypal_installment_plan_id();
     if (!$plan_id) {
-        return new WP_REST_Response(['error' => 'Розтермінування через PayPal ще не налаштоване (немає Plan ID).'], 500);
+        return new WP_REST_Response(['error' => 'Оплата частинами через PayPal ще не налаштоване (немає Plan ID).'], 500);
     }
 
     $return_url = add_query_arg('vip_token', $token, rest_url('vip-tattoo-plan/v1/paypal-return'));
@@ -607,7 +607,7 @@ function vip_tattoo_plan_paypal_installment_sale_completed($subscription_id, $re
     }
 
     vip_tattoo_plan_sheets_append_row([
-        $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', 'Розтермінування', 'PayPal',
+        $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', 'Оплата частинами', 'PayPal',
         $subscription_id, $step . '/2', number_format($paid_now_cents / 100, 2, '.', ''), number_format($total_paid / 100, 2, '.', ''),
         $step >= 2 ? 'Повністю оплачено (2/2)' : 'Частково оплачено (1/2)',
         $step === 1 ? $now : ($order->paid_at ?? ''), $step >= 2 ? $now : '', $order->telegram_chat_id ?? '', $now,
@@ -644,7 +644,7 @@ function vip_tattoo_plan_paypal_installment_subscription_cancelled($subscription
 }
 
 /* ------------------------------------------------------------------ */
-/* Telegram: бот розтермінування + видалення з груп                    */
+/* Telegram: бот оплати частинами + видалення з груп                    */
 /* ------------------------------------------------------------------ */
 
 function vip_tattoo_plan_installment_telegram_api($method, $params = []) {
@@ -792,7 +792,7 @@ function vip_tattoo_plan_sheets_append_row($values) {
 }
 
 /* ------------------------------------------------------------------ */
-/* REST: окремий webhook для бота розтермінування                      */
+/* REST: окремий webhook для бота оплати частинами                      */
 /* ------------------------------------------------------------------ */
 
 add_action('rest_api_init', function () {
