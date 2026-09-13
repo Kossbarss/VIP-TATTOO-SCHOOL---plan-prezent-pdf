@@ -170,16 +170,7 @@
     color:#1a120c; font-weight:800; background:linear-gradient(100deg,#f0c883,#c9a15a);
     padding:0.5cqw 1.1cqw; border-radius:999px; margin-bottom:1.35cqw; line-height:1;
   }
-  .ov-s22-included ul{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; column-gap:1.5cqw; row-gap:1.5cqw; }
-  .ov-s22-included li{ font-size:1.12cqw; line-height:1.4; font-weight:800; color:#fff; padding-left:2.1cqw; position:relative; }
-  .ov-s22-included li::before{
-    content:"✓"; position:absolute; left:0; top:0.12cqw;
-    color:#1a120c; background:linear-gradient(100deg,#f0c883,#c9a15a);
-    width:1.05cqw; height:1.05cqw; min-width:1.05cqw; border-radius:50%;
-    font-size:0.65cqw; font-weight:800; line-height:1;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 0 0 2px rgba(201,161,90,0.22);
-  }
+  .ov-s22-included .s22-installment-banner{ width:100%; height:auto; border-radius:0.8cqw; display:block; }
   .ov-s22-right{ left:51.5%; top:70.4%; height:29.6%; width:44%; color:#cabfae; display:flex; flex-direction:column; justify-content:center; }
   .ov-s22-right h3{ font-family:'Playfair Display',serif; font-weight:700; font-size:1.9cqw; color:#fff; margin:0 0 1.1cqw; }
   .ov-s22-right p{ font-size:1.12cqw; line-height:1.4; font-weight:800; color:#fff; margin:0 0 1.3cqw; }
