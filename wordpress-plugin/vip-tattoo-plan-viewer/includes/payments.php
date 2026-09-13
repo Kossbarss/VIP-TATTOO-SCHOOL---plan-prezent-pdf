@@ -831,7 +831,7 @@ function vip_tattoo_plan_rest_paypal_return(WP_REST_Request $request) {
         vip_tattoo_plan_paypal_capture_and_mark_paid($paypal_order_id);
     }
 
-    $bot_username = get_option('vip_tattoo_plan_telegram_access_bot_username', 'vip_tattoo_school_viktori_bot');
+    $bot_username = vip_tattoo_plan_telegram_bot_username_for_token($vip_token);
     $redirect_to = $vip_token
         ? ('https://t.me/' . $bot_username . '?start=' . $vip_token)
         : vip_tattoo_plan_page_url();
@@ -913,13 +913,35 @@ function vip_tattoo_plan_rest_stripe_return(WP_REST_Request $request) {
         vip_tattoo_plan_stripe_capture_and_mark_paid($session_id);
     }
 
-    $bot_username = get_option('vip_tattoo_plan_telegram_access_bot_username', 'vip_tattoo_school_viktori_bot');
+    $bot_username = vip_tattoo_plan_telegram_bot_username_for_token($vip_token);
     $redirect_to = $vip_token
         ? ('https://t.me/' . $bot_username . '?start=' . $vip_token)
         : vip_tattoo_plan_page_url();
 
     wp_redirect($redirect_to);
     exit;
+}
+
+/**
+ * The "full" and "installment" plans each have their own Telegram bot
+ * (and their own webhook, which is what actually records telegram_chat_id
+ * on the order) -- this picks the right one for a given checkout token so
+ * the customer lands in the bot that will recognize their /start payload,
+ * instead of always the full-payment bot regardless of which plan they
+ * bought.
+ */
+function vip_tattoo_plan_telegram_bot_username_for_token($token) {
+    global $wpdb;
+    $full_bot_username = get_option('vip_tattoo_plan_telegram_access_bot_username', 'vip_tattoo_school_viktori_bot');
+    if (!$token) return $full_bot_username;
+
+    $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
+    $plan_type = $wpdb->get_var($wpdb->prepare("SELECT plan_type FROM {$table} WHERE token = %s", $token));
+
+    if ($plan_type === 'installment') {
+        return get_option('vip_tattoo_plan_installment_telegram_bot_username', 'vip_tattoo_payment_bot');
+    }
+    return $full_bot_username;
 }
 
 function vip_tattoo_plan_verify_paypal_webhook(WP_REST_Request $request) {
