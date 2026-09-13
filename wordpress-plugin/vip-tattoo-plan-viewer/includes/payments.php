@@ -102,11 +102,11 @@ function vip_tattoo_plan_payment_fields() {
 
         'vip_tattoo_plan_price_cents'                => '27500',
         'vip_tattoo_plan_currency'                   => 'EUR',
-        'vip_tattoo_plan_product_name'               => 'VIP tattoo school — курс',
+        'vip_tattoo_plan_product_name'               => 'VIP tattoo school - курс',
 
         'vip_tattoo_plan_telegram_access_bot_token'    => '',
         'vip_tattoo_plan_telegram_access_bot_username' => 'vip_tattoo_school_viktori_bot',
-        'vip_tattoo_plan_telegram_access_message'      => "Спасибо за покупку обучения! Ваша оплата успешно прошла 🎉\n\nПереходите и присоединяйтесь к учебной программе, где вы сейчас увидите 15 блоков, наполненных материалами и уроками, по этой ссылке (сделайте запрос, и администратор сразу вас добавит):\n\nhttps://t.me/+cUtIkWv6ljo5NmQy\n\nСсылка для доступа к материалам:\n\nhttps://t.me/+F_eC8wV1jqtiMWQy\n\nНа этом доступе находится общий чат, а также в нем есть навигация по всему курсу, чтобы вам было проще найти необходимый материал и загрузить его, ссылка (доступ):\n\nhttps://t.me/+XUvrwztuyXQ2NGZi\n\nМоя рекомендация вам - сначала просмотрите всё наполнение, то есть «пробегитесь» по всем блокам и всему обучению, чтобы понять, где и что находится и как работает «навигатор», и только после этого, в уверенном настроении, начинайте обучение по урокам, и конечно, не забывайте о общении в чате.\n\nУточнение: если что-то не получается загрузить или любая «кнопка» не работает, сразу пишите в чат поддержки.\n\nЕсли возникнут какие-либо вопросы — я всегда на связи 👌",
+        'vip_tattoo_plan_telegram_access_message'      => "Спасибо за покупку обучения! Ваша оплата успешно прошла 🎉\n\nПереходите и присоединяйтесь к учебной программе, где вы сейчас увидите 15 блоков, наполненных материалами и уроками, по этой ссылке (сделайте запрос, и администратор сразу вас добавит):\n\nhttps://t.me/+cUtIkWv6ljo5NmQy\n\nСсылка для доступа к материалам:\n\nhttps://t.me/+F_eC8wV1jqtiMWQy\n\nНа этом доступе находится общий чат, а также в нем есть навигация по всему курсу, чтобы вам было проще найти необходимый материал и загрузить его, ссылка (доступ):\n\nhttps://t.me/+XUvrwztuyXQ2NGZi\n\nМоя рекомендация вам - сначала просмотрите всё наполнение, то есть «пробегитесь» по всем блокам и всему обучению, чтобы понять, где и что находится и как работает «навигатор», и только после этого, в уверенном настроении, начинайте обучение по урокам, и конечно, не забывайте о общении в чате.\n\nУточнение: если что-то не получается загрузить или любая «кнопка» не работает, сразу пишите в чат поддержки.\n\nЕсли возникнут какие-либо вопросы - я всегда на связи 👌",
     ];
 }
 
@@ -756,7 +756,7 @@ function vip_tattoo_plan_rest_create_checkout(WP_REST_Request $request) {
 
     $price_cents = (int) get_option('vip_tattoo_plan_price_cents', 27500);
     $currency = strtoupper(get_option('vip_tattoo_plan_currency', 'EUR'));
-    $product_name = get_option('vip_tattoo_plan_product_name', 'VIP tattoo school — курс');
+    $product_name = get_option('vip_tattoo_plan_product_name', 'VIP tattoo school - курс');
     $amount_value = number_format($price_cents / 100, 2, '.', '');
 
     if ($provider === 'stripe') {
@@ -1007,7 +1007,7 @@ function vip_tattoo_plan_rest_telegram_webhook(WP_REST_Request $request) {
             } else {
                 vip_tattoo_plan_telegram_access_api('sendMessage', [
                     'chat_id' => $chat_id,
-                    'text'    => 'Дякуємо! Обробляємо твою оплату — доступ надішлемо сюди протягом хвилини.',
+                    'text'    => 'Дякуємо! Обробляємо твою оплату - доступ надішлемо сюди протягом хвилини.',
                 ]);
             }
         } else {

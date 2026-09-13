@@ -402,11 +402,11 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
     ]);
 
     $subject = $step === 1
-        ? 'Оплата 1/2 отримана — доступ до курсу відкрито'
-        : 'Оплата 2/2 отримана — курс повністю оплачено';
+        ? 'Оплата 1/2 отримана - доступ до курсу відкрито'
+        : 'Оплата 2/2 отримана - курс повністю оплачено';
     $body = $step === 1
         ? "Дякуємо! Перший платіж (137.50€) успішно отримано.\n\nДоступ до курсу вже надіслано в Telegram.\n\nДругий платіж (137.50€) спишеться автоматично через 7 днів."
-        : "Дякуємо! Другий платіж (137.50€) успішно отримано — курс повністю оплачено (275€).\n\nПодальших списань не буде.";
+        : "Дякуємо! Другий платіж (137.50€) успішно отримано - курс повністю оплачено (275€).\n\nПодальших списань не буде.";
     if ($email) {
         vip_tattoo_plan_send_email($email, $subject, $body);
     }
@@ -507,7 +507,7 @@ function vip_tattoo_plan_paypal_installment_plan_id() {
 
 function vip_tattoo_plan_paypal_create_installment_plan() {
     $product = vip_tattoo_plan_paypal_request('POST', '/v1/catalogs/products', [
-        'name'        => get_option('vip_tattoo_plan_product_name', 'VIP tattoo school — курс') . ' (оплати частинами)',
+        'name'        => get_option('vip_tattoo_plan_product_name', 'VIP tattoo school - курс') . ' (оплати частинами)',
         'type'        => 'SERVICE',
         'category'    => 'EDUCATIONAL_SERVICES_AND_LEARNING_COURSES',
     ]);
@@ -556,7 +556,7 @@ function vip_tattoo_plan_paypal_start_installment_checkout($token) {
         'plan_id'      => $plan_id,
         'custom_id'    => $token,
         'application_context' => [
-            'brand_name'  => get_option('vip_tattoo_plan_product_name', 'VIP tattoo school — курс'),
+            'brand_name'  => get_option('vip_tattoo_plan_product_name', 'VIP tattoo school - курс'),
             'user_action' => 'SUBSCRIBE_NOW',
             'return_url'  => $return_url,
             'cancel_url'  => vip_tattoo_plan_page_url(),
@@ -823,7 +823,7 @@ function vip_tattoo_plan_rest_installment_telegram_webhook(WP_REST_Request $requ
             } else {
                 vip_tattoo_plan_installment_telegram_api('sendMessage', [
                     'chat_id' => $chat_id,
-                    'text'    => 'Дякуємо! Обробляємо твою оплату — доступ надішлемо сюди протягом хвилини.',
+                    'text'    => 'Дякуємо! Обробляємо твою оплату - доступ надішлемо сюди протягом хвилини.',
                 ]);
             }
         } else {
