@@ -1268,6 +1268,130 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
     return ob_get_clean();
 }
 
+function vip_tattoo_plan_render_failed_payment_email_html($args) {
+    $defaults = [
+        'order_id'      => '',
+        'amount'        => '0.00',
+        'currency'      => 'EUR',
+        'product_name'  => get_option('vip_tattoo_plan_product_name', 'VIP tattoo school - курс'),
+        'date'          => date_i18n('d.m.Y, H:i'),
+        'method'        => 'Card',
+        'card_last4'    => '',
+        'card_brand'    => '',
+        'plan_label'    => '',
+        'buyer_email'   => '',
+        'buyer_phone'   => '',
+        'buyer_name'    => '',
+        'retry_url'     => '',
+        'retry_deadline'=> '',
+    ];
+    $a = array_merge($defaults, $args);
+
+    $business_name = get_option('vip_tattoo_plan_receipt_business_name', 'Vip tattoo school');
+    $site_link     = 'https://website.vip-tattoo-school.com/';
+
+    $top_rows = [];
+    $top_rows[] = ['Сайт', esc_html($site_link)];
+    $top_rows[] = ['Опис', esc_html($a['product_name']) . ($a['plan_label'] ? ' (' . esc_html($a['plan_label']) . ')' : '')];
+
+    $payment_rows = [];
+    if ($a['card_last4']) {
+        $card_label = $a['card_brand'] ? esc_html($a['card_brand']) . ' •• ' : '•••• ';
+        $payment_rows[] = ['Номер картки', $card_label . esc_html($a['card_last4'])];
+    } else {
+        $payment_rows[] = ['Способ оплаты', esc_html($a['method'])];
+    }
+    $payment_rows[] = ['Дата', esc_html($a['date'])];
+    $payment_rows[] = ['Id платежу', esc_html($a['order_id'])];
+
+    $payer_rows = [];
+    if ($a['buyer_name']) {
+        $name_parts = preg_split('/\s+/', trim($a['buyer_name']), 2);
+        $first_name = $name_parts[0] ?? '';
+        $last_name  = $name_parts[1] ?? '';
+        if ($last_name)  $payer_rows[] = ['Прізвище', esc_html($last_name)];
+        if ($first_name) $payer_rows[] = ["Ім'я", esc_html($first_name)];
+    }
+    if ($a['buyer_phone']) $payer_rows[] = ['Телефон', esc_html($a['buyer_phone'])];
+    if ($a['buyer_email']) $payer_rows[] = ['Email', esc_html($a['buyer_email'])];
+
+    $render_rows = function ($rows) {
+        $html = '';
+        foreach ($rows as $row) {
+            $html .= '<tr>'
+                . '<td style="padding:9px 0;color:#a0a0a0;font-size:17px;vertical-align:top;">' . $row[0] . ':</td>'
+                . '<td style="padding:9px 0 9px 12px;color:#ffffff;font-size:17px;text-align:right;">' . $row[1] . '</td>'
+                . '</tr>';
+        }
+        return $html;
+    };
+
+    $retry_html = '';
+    if ($a['retry_url']) {
+        $deadline_html = $a['retry_deadline']
+            ? 'Ви можете повторити оплату. Посилання буде діяти до ' . esc_html($a['retry_deadline'])
+            : 'Ви можете повторити оплату за посиланням нижче.';
+        $retry_html = '<div style="margin-top:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:16px;text-align:center;">'
+            . '<div style="color:#c9c9c9;font-size:15px;line-height:1.6;margin-bottom:14px;">' . $deadline_html . '</div>'
+            . '<a href="' . esc_url($a['retry_url']) . '" style="display:inline-block;background:#2f6fed;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:12px 28px;border-radius:8px;">Повторити оплату</a>'
+            . '</div>';
+    }
+
+    ob_start();
+    ?>
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#000000;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#000000;padding:24px 12px;font-family:Arial,Helvetica,sans-serif;">
+  <tr><td align="center">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;">
+      <tr><td style="height:6px;line-height:6px;font-size:0;background:linear-gradient(90deg,#8c1a1a 0%,#e23a3a 50%,#8c1a1a 100%);border-radius:14px 14px 0 0;">&nbsp;</td></tr>
+      <tr><td style="background:#0a0a0a;border-radius:0 0 14px 14px;padding:32px 28px 28px;">
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+          <img src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/images/receipt-logo.jpg'); ?>" alt="<?php echo esc_attr($business_name); ?>" width="200" style="width:200px;max-width:200px;height:auto;border-radius:50%;display:block;margin:0 auto 18px;" />
+        </td></tr></table>
+
+        <div style="text-align:center;color:#e2483f;font-size:24px;font-weight:800;">❌ ПЛАТІЖ НЕУСПІШНИЙ!</div>
+        <div style="text-align:center;color:#9a9a9a;font-size:14px;margin-top:8px;word-break:break-all;">№ <?php echo esc_html($a['order_id']); ?></div>
+
+        <div style="color:#d9d9d9;font-size:15px;line-height:1.7;margin-top:18px;">
+          На жаль, не вдалося здійснити оплату з вашої картки. Будь ласка, перевірте, чи вірно було вказано реквізити картки, також перевірте інтернет ліміт і спробуйте оплатити знов. Додатково Ви можете зв'язатися з Вашим банком для з'ясування причин відмови або скористатися іншою карткою.
+        </div>
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px;">
+          <tr><td style="color:#a0a0a0;font-size:17px;">Сума:</td>
+              <td style="text-align:right;"><span style="color:#4a9eff;font-size:34px;font-weight:800;"><?php echo esc_html($a['amount']); ?></span> <span style="color:#4a9eff;font-size:19px;font-weight:700;"><?php echo esc_html($a['currency']); ?></span></td></tr>
+          <?php echo $render_rows($top_rows); ?>
+        </table>
+
+        <?php echo $retry_html; ?>
+
+        <div style="color:#ffffff;font-size:16px;font-weight:800;letter-spacing:0.04em;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);">ДАНІ ПЛАТЕЖУ</div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">
+          <?php echo $render_rows($payment_rows); ?>
+        </table>
+
+        <?php if ($payer_rows) : ?>
+        <div style="color:#ffffff;font-size:16px;font-weight:800;letter-spacing:0.04em;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);">ІНФОРМАЦІЯ ПРО ПЛАТНИКА</div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">
+          <?php echo $render_rows($payer_rows); ?>
+        </table>
+        <?php endif; ?>
+
+        <div style="margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);color:#7a7a7a;font-size:13px;line-height:1.7;text-align:center;">
+          Це повідомлення про статус платежу, оброблене <?php echo esc_html($business_name); ?>.
+        </div>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>
+    <?php
+    return ob_get_clean();
+}
+
 function vip_tattoo_plan_mail_content_type_html() {
     return 'text/html';
 }
@@ -1275,6 +1399,17 @@ function vip_tattoo_plan_mail_content_type_html() {
 function vip_tattoo_plan_send_receipt_email($to, $subject, $args) {
     if (!$to || !is_email($to)) return false;
     $html = vip_tattoo_plan_render_receipt_email_html($args);
+    add_action('phpmailer_init', 'vip_tattoo_plan_configure_smtp');
+    add_filter('wp_mail_content_type', 'vip_tattoo_plan_mail_content_type_html');
+    $sent = wp_mail($to, $subject, $html);
+    remove_action('phpmailer_init', 'vip_tattoo_plan_configure_smtp');
+    remove_filter('wp_mail_content_type', 'vip_tattoo_plan_mail_content_type_html');
+    return $sent;
+}
+
+function vip_tattoo_plan_send_failed_payment_email($to, $subject, $args) {
+    if (!$to || !is_email($to)) return false;
+    $html = vip_tattoo_plan_render_failed_payment_email_html($args);
     add_action('phpmailer_init', 'vip_tattoo_plan_configure_smtp');
     add_filter('wp_mail_content_type', 'vip_tattoo_plan_mail_content_type_html');
     $sent = wp_mail($to, $subject, $html);

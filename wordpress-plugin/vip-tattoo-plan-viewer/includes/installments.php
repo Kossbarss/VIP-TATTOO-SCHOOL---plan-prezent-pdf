@@ -512,9 +512,27 @@ function vip_tattoo_plan_stripe_installment_invoice_failed($invoice) {
     $email = $invoice['customer_email'] ?? ($order->email ?? '');
 
     $warning = "Не вдалося списати другий платіж (137.50€).\n\nОновіть картку протягом 24 годин, щоб зберегти доступ до курсу.";
+
+    $delay_hours_preview = max(1, (int) get_option('vip_tattoo_plan_installment_kick_delay_hours', 24));
+    $retry_deadline = date_i18n('H:i d.m.Y', strtotime($now . ' +' . $delay_hours_preview . ' hours'));
+    $charge_details = vip_tattoo_plan_stripe_invoice_charge_details($invoice);
+    $step_eur = number_format(VIP_TATTOO_PLAN_INSTALLMENT_STEP_CENTS / 100, 2, '.', '');
+
     $warning_sent = false;
     if ($email) {
-        $warning_sent = vip_tattoo_plan_send_email($email, 'Не вдалося списати другий платіж', $warning);
+        $warning_sent = vip_tattoo_plan_send_failed_payment_email($email, 'Не вдалося списати другий платіж', array_merge([
+            'order_id'       => $order->id,
+            'amount'         => $step_eur,
+            'currency'       => 'EUR',
+            'date'           => date_i18n('d.m.Y, H:i', strtotime($now)),
+            'method'         => 'Card (Stripe)',
+            'plan_label'     => 'Оплата частями - часть 2 из 2',
+            'buyer_email'    => $email,
+            'buyer_phone'    => $order->phone ?? '',
+            'buyer_name'     => $order->name ?? '',
+            'retry_url'      => $invoice['hosted_invoice_url'] ?? '',
+            'retry_deadline' => $retry_deadline,
+        ], $charge_details));
     }
 
     vip_tattoo_plan_sheets_append_row([
