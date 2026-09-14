@@ -131,6 +131,33 @@ add_action('admin_menu', function () {
     add_submenu_page('vip-tattoo-plan-payments', 'Тести та інструменти', 'Тести та інструменти', 'manage_options', 'vip-tattoo-plan-tools', 'vip_tattoo_plan_render_tools_page');
 }, 20);
 
+/*
+ * За замовчуванням WordPress показує підменю пунктів (Загальне, Stripe,
+ * PayPal...) як спливаючий список збоку при наведенні курсору -- це
+ * стандартна поведінка адмінки для будь-якого плагіна з підменю. Тут ми
+ * примусово "приколюємо" підменю цього плагіна розкритим під основним
+ * пунктом (як акордеон), щоб не доводилось наводити курсор збоку.
+ */
+add_action('admin_head', function () {
+    ?>
+    <style>
+        #adminmenu #toplevel_page_vip-tattoo-plan-payments > .wp-submenu {
+            position: static !important;
+            display: block !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 6px 0 !important;
+            width: auto !important;
+            opacity: 1 !important;
+            clip: auto !important;
+        }
+        #adminmenu #toplevel_page_vip-tattoo-plan-payments .wp-submenu:before {
+            content: none !important;
+        }
+    </style>
+    <?php
+});
+
 function vip_tattoo_plan_save_settings_subset($keys, $defaults) {
     $textarea_keys = ['vip_tattoo_plan_telegram_access_message', 'vip_tattoo_plan_stripe_product_description', 'vip_tattoo_plan_stripe_submit_message'];
     foreach ($keys as $key) {
