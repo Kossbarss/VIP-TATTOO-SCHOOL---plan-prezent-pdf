@@ -342,33 +342,12 @@ function vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $sub
 
     $wpdb->update($table, ['stripe_subscription_id' => $subscription_id], ['id' => $order->id]);
 
-    // Перетворюємо звичайну підписку на розклад з рівно 2 циклами --
-    // Stripe сам скасує її після 2-го платежу, без ручного лічильника.
-    $schedule = vip_tattoo_plan_stripe_request('POST', '/subscription_schedules', ['from_subscription' => $subscription_id]);
-    if (is_wp_error($schedule)) {
-        error_log('[VIP Tattoo Plan] Не вдалось створити subscription schedule для ' . $subscription_id . ': ' . $schedule->get_error_message());
-        return;
-    }
-
-    $wpdb->update($table, ['stripe_schedule_id' => $schedule['id']], ['id' => $order->id]);
-
-    $current_phase = $schedule['phases'][0] ?? null;
-    if (!$current_phase) return;
-
-    $phase_items = [];
-    foreach ($current_phase['items'] as $i => $item) {
-        $phase_items[$i]['price'] = $item['price'];
-        $phase_items[$i]['quantity'] = $item['quantity'];
-    }
-
-    vip_tattoo_plan_stripe_request('POST', '/subscription_schedules/' . $schedule['id'], [
-        'end_behavior' => 'cancel',
-        'phases'       => [[
-            'items'      => $phase_items,
-            'iterations' => 2,
-            'start_date' => $current_phase['start_date'],
-        ]],
-    ]);
+    // Раніше тут перетворювали підписку на subscription_schedule з
+    // phases[iterations]=2, щоб Stripe сам зупинив її після 2-го платежу --
+    // поточна версія Stripe API більше не приймає цей параметр
+    // ("parameter_unknown: phases[iterations]"). Замість крихкого виклику
+    // Stripe API просто скасовуємо підписку самі, з нашого ж коду, одразу
+    // після того як 2-й платіж пройде (див. vip_tattoo_plan_stripe_installment_invoice_paid).
 }
 
 function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
@@ -409,6 +388,16 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
 
     if ($step === 1) {
         vip_tattoo_plan_installment_deliver_access($order);
+    }
+
+    if ($step >= 2) {
+        // Обидва платежі пройшли -- зупиняємо підписку самі, щоб Stripe
+        // більше нічого не списував (див. коментар у
+        // vip_tattoo_plan_stripe_installment_checkout_completed вище).
+        $cancel = vip_tattoo_plan_stripe_request('DELETE', '/subscriptions/' . $subscription_id);
+        if (is_wp_error($cancel)) {
+            error_log('[VIP Tattoo Plan] Не вдалось скасувати підписку ' . $subscription_id . ' після 2-го платежу: ' . $cancel->get_error_message());
+        }
     }
 
     $email = $invoice['customer_email'] ?? ($order->email ?? '');
