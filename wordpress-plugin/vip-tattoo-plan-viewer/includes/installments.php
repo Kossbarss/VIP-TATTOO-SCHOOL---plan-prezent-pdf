@@ -651,8 +651,12 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
         }
 
         // Обов'язково дублюємо квитанцію в Telegram-бот -- якщо клієнт не
-        // побачить лист на пошті, повідомлення все одно дійде.
-        if ($order->telegram_chat_id) {
+        // побачить лист на пошті, повідомлення все одно дійде. Для 1-го
+        // платежу це вже робить vip_tattoo_plan_installment_deliver_access()
+        // (там же надсилаються й матеріали курсу) -- це важливо саме тому,
+        // що chat_id може з'явитись пізніше (клієнт натиснув /start вже
+        // ПІСЛЯ того, як платіж підтверджено), а не в момент цього webhook'а.
+        if ($order->telegram_chat_id && $step !== 1) {
             vip_tattoo_plan_installment_telegram_api('sendMessage', [
                 'chat_id'    => $order->telegram_chat_id,
                 'text'       => vip_tattoo_plan_telegram_receipt_text($telegram_receipt_type, $receipt_args),
@@ -1024,8 +1028,12 @@ function vip_tattoo_plan_paypal_installment_sale_completed($subscription_id, $re
         }
 
         // Обов'язково дублюємо квитанцію в Telegram-бот -- якщо клієнт не
-        // побачить лист на пошті, повідомлення все одно дійде.
-        if ($order->telegram_chat_id) {
+        // побачить лист на пошті, повідомлення все одно дійде. Для 1-го
+        // платежу це вже робить vip_tattoo_plan_installment_deliver_access()
+        // (там же надсилаються й матеріали курсу) -- це важливо саме тому,
+        // що chat_id може з'явитись пізніше (клієнт натиснув /start вже
+        // ПІСЛЯ того, як платіж підтверджено), а не в момент цього webhook'а.
+        if ($order->telegram_chat_id && $step !== 1) {
             vip_tattoo_plan_installment_telegram_api('sendMessage', [
                 'chat_id'    => $order->telegram_chat_id,
                 'text'       => vip_tattoo_plan_telegram_receipt_text($telegram_receipt_type, $receipt_args),
@@ -1159,6 +1167,30 @@ function vip_tattoo_plan_installment_deliver_access($order) {
     if (!is_wp_error($result)) {
         $wpdb->update($table, ['delivered_at' => current_time('mysql')], ['id' => $order->id]);
     }
+
+    // Той самий структурований шаблон-квитанція, що йде на email -- сюди ж,
+    // у Telegram. Це тут (а не лише в webhook-обробнику оплати), бо якщо
+    // клієнт натискає /start у боті ПІСЛЯ того, як Stripe вже підтвердив
+    // платіж, chat_id на момент обробки платежу ще не існував і webhook
+    // не міг нікуди надіслати квитанцію -- тож дублюємо її саме тут,
+    // одразу після успішної доставки матеріалів.
+    $receipt_args = [
+        'order_id'          => $order->id,
+        'amount'            => $step_eur,
+        'currency'          => 'EUR',
+        'date'              => date_i18n('d.m.Y', strtotime($paid_at)),
+        'method'            => $order->provider === 'paypal' ? 'PayPal' : 'Card (Stripe)',
+        'plan_label'        => 'Оплата частями - часть 1 из 2',
+        'next_payment_note' => 'Второй платёж ' . $step_eur . '€ спишется автоматически ' . $next_payment_date . '.',
+        'buyer_email'       => $order->email ?? '',
+        'buyer_phone'       => $order->phone ?? '',
+        'buyer_name'        => $order->name ?? '',
+    ];
+    vip_tattoo_plan_installment_telegram_api('sendMessage', [
+        'chat_id'    => $order->telegram_chat_id,
+        'text'       => vip_tattoo_plan_telegram_receipt_text('success', $receipt_args),
+        'parse_mode' => 'HTML',
+    ]);
 }
 
 /* ------------------------------------------------------------------ */
