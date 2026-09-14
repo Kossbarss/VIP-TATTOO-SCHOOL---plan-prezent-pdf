@@ -453,7 +453,7 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
 
         if ($step === 1) {
             $next_note = 'Второй платёж ' . $step_eur . '€ спишется автоматически ' . date_i18n('d.m.Y', strtotime($now . ' +7 days')) . '.';
-            $receipt_sent = vip_tattoo_plan_send_receipt_email($email, 'Оплата 1/2 получена - доступ к курсу открыт', array_merge([
+            $receipt_args = array_merge([
                 'order_id'          => $order->id,
                 'amount'            => $step_eur,
                 'currency'          => 'EUR',
@@ -464,10 +464,12 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
                 'buyer_email'       => $email,
                 'buyer_phone'       => $order->phone ?? '',
                 'buyer_name'        => $order->name ?? '',
-            ], $charge_details));
+            ], $charge_details);
+            $receipt_sent = vip_tattoo_plan_send_receipt_email($email, 'Оплата 1/2 получена - доступ к курсу открыт', $receipt_args);
+            $telegram_receipt_type = 'success';
         } else {
             $total_eur = number_format($total_paid / 100, 2, '.', '');
-            $receipt_sent = vip_tattoo_plan_send_final_payment_email($email, 'Оплата 2/2 получена - курс полностью оплачен', array_merge([
+            $receipt_args = array_merge([
                 'order_id'      => $order->id,
                 'amount'        => $step_eur,
                 'currency'      => 'EUR',
@@ -478,7 +480,19 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
                 'buyer_email'   => $email,
                 'buyer_phone'   => $order->phone ?? '',
                 'buyer_name'    => $order->name ?? '',
-            ], $charge_details));
+            ], $charge_details);
+            $receipt_sent = vip_tattoo_plan_send_final_payment_email($email, 'Оплата 2/2 получена - курс полностью оплачен', $receipt_args);
+            $telegram_receipt_type = 'final';
+        }
+
+        // Обов'язково дублюємо квитанцію в Telegram-бот -- якщо клієнт не
+        // побачить лист на пошті, повідомлення все одно дійде.
+        if ($order->telegram_chat_id) {
+            vip_tattoo_plan_installment_telegram_api('sendMessage', [
+                'chat_id'    => $order->telegram_chat_id,
+                'text'       => vip_tattoo_plan_telegram_receipt_text($telegram_receipt_type, $receipt_args),
+                'parse_mode' => 'HTML',
+            ]);
         }
     }
 
@@ -501,12 +515,6 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
         $order->name ?? '',
         $email ? ($receipt_sent ? 'Квитанція ' . $step . '/2 надіслана' : 'Квитанція ' . $step . '/2 НЕ надіслана (помилка)') : 'Email відсутній',
     ]);
-    if ($order->telegram_chat_id) {
-        vip_tattoo_plan_installment_telegram_api('sendMessage', [
-            'chat_id' => $order->telegram_chat_id,
-            'text'    => $body,
-        ]);
-    }
 
     return 'invoice_paid: order #' . $order->id . ' step=' . $step . ' telegram_chat_id=' . ($order->telegram_chat_id ?: '(empty)') . ' delivered_at=' . ($order->delivered_at ?? '(not set on in-memory object)');
 }
@@ -523,28 +531,38 @@ function vip_tattoo_plan_stripe_installment_invoice_failed($invoice) {
     $now = current_time('mysql');
     $email = $invoice['customer_email'] ?? ($order->email ?? '');
 
-    $warning = "Не удалось списать второй платёж (137.50€).\n\nОбновите карту в течение 24 часов, чтобы сохранить доступ к курсу.";
-
     $delay_hours_preview = max(1, (int) get_option('vip_tattoo_plan_installment_kick_delay_hours', 24));
     $retry_deadline = date_i18n('H:i d.m.Y', strtotime($now . ' +' . $delay_hours_preview . ' hours'));
     $charge_details = vip_tattoo_plan_stripe_invoice_charge_details($invoice);
     $step_eur = number_format(VIP_TATTOO_PLAN_INSTALLMENT_STEP_CENTS / 100, 2, '.', '');
 
+    $failed_args = array_merge([
+        'order_id'       => $order->id,
+        'amount'         => $step_eur,
+        'currency'       => 'EUR',
+        'date'           => date_i18n('d.m.Y, H:i', strtotime($now)),
+        'method'         => 'Card (Stripe)',
+        'plan_label'     => 'Оплата частями - часть 2 из 2',
+        'buyer_email'    => $email,
+        'buyer_phone'    => $order->phone ?? '',
+        'buyer_name'     => $order->name ?? '',
+        'retry_url'      => $invoice['hosted_invoice_url'] ?? '',
+        'retry_deadline' => $retry_deadline,
+    ], $charge_details);
+
     $warning_sent = false;
     if ($email) {
-        $warning_sent = vip_tattoo_plan_send_failed_payment_email($email, 'Не удалось списать второй платёж', array_merge([
-            'order_id'       => $order->id,
-            'amount'         => $step_eur,
-            'currency'       => 'EUR',
-            'date'           => date_i18n('d.m.Y, H:i', strtotime($now)),
-            'method'         => 'Card (Stripe)',
-            'plan_label'     => 'Оплата частями - часть 2 из 2',
-            'buyer_email'    => $email,
-            'buyer_phone'    => $order->phone ?? '',
-            'buyer_name'     => $order->name ?? '',
-            'retry_url'      => $invoice['hosted_invoice_url'] ?? '',
-            'retry_deadline' => $retry_deadline,
-        ], $charge_details));
+        $warning_sent = vip_tattoo_plan_send_failed_payment_email($email, 'Не удалось списать второй платёж', $failed_args);
+    }
+
+    // Обов'язково дублюємо квитанцію в Telegram-бот -- якщо клієнт не
+    // побачить лист на пошті, повідомлення все одно дійде.
+    if ($order->telegram_chat_id) {
+        vip_tattoo_plan_installment_telegram_api('sendMessage', [
+            'chat_id'    => $order->telegram_chat_id,
+            'text'       => vip_tattoo_plan_telegram_receipt_text('failed', $failed_args),
+            'parse_mode' => 'HTML',
+        ]);
     }
 
     vip_tattoo_plan_sheets_append_row([
@@ -554,12 +572,6 @@ function vip_tattoo_plan_stripe_installment_invoice_failed($invoice) {
         $order->name ?? '',
         $email ? ($warning_sent ? 'Лист про невдалу оплату надіслано' : 'Лист про невдалу оплату НЕ надіслано (помилка)') : 'Email відсутній',
     ]);
-    if ($order->telegram_chat_id) {
-        vip_tattoo_plan_installment_telegram_api('sendMessage', [
-            'chat_id' => $order->telegram_chat_id,
-            'text'    => $warning,
-        ]);
-    }
 
     $delay_hours = max(1, (int) get_option('vip_tattoo_plan_installment_kick_delay_hours', 24));
     if (!wp_next_scheduled('vip_tattoo_plan_check_installment_access', [$order->id])) {
@@ -600,10 +612,20 @@ function vip_tattoo_plan_check_and_kick_installment_order($order_id) {
 
     $now = current_time('mysql');
 
+    $closed_message = "Оскільки другий платіж (137.50€) так і не пройшов протягом 24 годин, доступ до навчальних груп курсу було закрито.\n\nЩоб відновити доступ, зверніться до підтримки.";
+
     $closed_email_sent = false;
     if (!empty($order->email)) {
-        $closed_email_sent = vip_tattoo_plan_send_email($order->email, 'Доступ до курсу закрито', "Оскільки другий платіж (137.50€) так і не пройшов протягом 24 годин, доступ до навчальних груп курсу було закрито.\n\nЩоб відновити доступ, зверніться до підтримки.");
+        $closed_email_sent = vip_tattoo_plan_send_email($order->email, 'Доступ до курсу закрито', $closed_message);
     }
+
+    // Обов'язково дублюємо повідомлення в Telegram-бот -- якщо клієнт не
+    // побачить лист на пошті, повідомлення все одно дійде.
+    vip_tattoo_plan_installment_telegram_api('sendMessage', [
+        'chat_id'    => $order->telegram_chat_id,
+        'text'       => vip_tattoo_plan_telegram_receipt_text('closed', ['order_id' => $order->id, 'message' => $closed_message]),
+        'parse_mode' => 'HTML',
+    ]);
 
     vip_tattoo_plan_sheets_append_row([
         $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', 'Оплата частинами', $order->provider,
@@ -733,7 +755,7 @@ function vip_tattoo_plan_paypal_installment_sale_completed($subscription_id, $re
         $step_eur = number_format($paid_now_cents / 100, 2, '.', '');
         if ($step === 1) {
             $next_note = 'Второй платёж спишется автоматически через 7 дней.';
-            $receipt_sent = vip_tattoo_plan_send_receipt_email($order->email, 'Оплата 1/2 получена - доступ к курсу открыт', [
+            $receipt_args = [
                 'order_id'          => $order->id,
                 'amount'            => $step_eur,
                 'currency'          => 'EUR',
@@ -744,9 +766,11 @@ function vip_tattoo_plan_paypal_installment_sale_completed($subscription_id, $re
                 'buyer_email'       => $order->email,
                 'buyer_phone'       => $order->phone ?? '',
                 'buyer_name'        => $order->name ?? '',
-            ]);
+            ];
+            $receipt_sent = vip_tattoo_plan_send_receipt_email($order->email, 'Оплата 1/2 получена - доступ к курсу открыт', $receipt_args);
+            $telegram_receipt_type = 'success';
         } else {
-            $receipt_sent = vip_tattoo_plan_send_final_payment_email($order->email, 'Оплата 2/2 получена - курс полностью оплачен', [
+            $receipt_args = [
                 'order_id'      => $order->id,
                 'amount'        => $step_eur,
                 'currency'      => 'EUR',
@@ -757,6 +781,18 @@ function vip_tattoo_plan_paypal_installment_sale_completed($subscription_id, $re
                 'buyer_email'   => $order->email,
                 'buyer_phone'   => $order->phone ?? '',
                 'buyer_name'    => $order->name ?? '',
+            ];
+            $receipt_sent = vip_tattoo_plan_send_final_payment_email($order->email, 'Оплата 2/2 получена - курс полностью оплачен', $receipt_args);
+            $telegram_receipt_type = 'final';
+        }
+
+        // Обов'язково дублюємо квитанцію в Telegram-бот -- якщо клієнт не
+        // побачить лист на пошті, повідомлення все одно дійде.
+        if ($order->telegram_chat_id) {
+            vip_tattoo_plan_installment_telegram_api('sendMessage', [
+                'chat_id'    => $order->telegram_chat_id,
+                'text'       => vip_tattoo_plan_telegram_receipt_text($telegram_receipt_type, $receipt_args),
+                'parse_mode' => 'HTML',
             ]);
         }
     }

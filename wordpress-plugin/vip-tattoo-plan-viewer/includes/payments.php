@@ -704,7 +704,7 @@ function vip_tattoo_plan_deliver_access($order) {
 
     if (!empty($order->email)) {
         $extra = get_transient('vip_tattoo_plan_receipt_extra_' . $order->id) ?: [];
-        vip_tattoo_plan_send_receipt_email($order->email, 'Оплата прошла успешно - VIP tattoo school', [
+        $receipt_args = [
             'order_id'     => $order->id,
             'amount'       => number_format((int) get_option('vip_tattoo_plan_price_cents', 27500) / 100, 2, '.', ''),
             'currency'     => strtoupper(get_option('vip_tattoo_plan_currency', 'EUR')),
@@ -716,6 +716,15 @@ function vip_tattoo_plan_deliver_access($order) {
             'card_last4'   => $extra['card_last4'] ?? '',
             'card_brand'   => $extra['card_brand'] ?? '',
             'auth_code'    => $extra['auth_code'] ?? '',
+        ];
+        vip_tattoo_plan_send_receipt_email($order->email, 'Оплата прошла успешно - VIP tattoo school', $receipt_args);
+
+        // Обов'язково дублюємо квитанцію в Telegram-бот -- якщо клієнт не
+        // побачить лист на пошті, повідомлення все одно дійде.
+        vip_tattoo_plan_telegram_access_api('sendMessage', [
+            'chat_id'    => $order->telegram_chat_id,
+            'text'       => vip_tattoo_plan_telegram_receipt_text('success', $receipt_args),
+            'parse_mode' => 'HTML',
         ]);
     }
 }
@@ -1543,4 +1552,82 @@ function vip_tattoo_plan_send_final_payment_email($to, $subject, $args) {
     remove_action('phpmailer_init', 'vip_tattoo_plan_configure_smtp');
     remove_filter('wp_mail_content_type', 'vip_tattoo_plan_mail_content_type_html');
     return $sent;
+}
+
+/*
+ * Той самий вміст квитанції, що й у листі, продубльований у Telegram —
+ * якщо клієнт не побачить лист на пошті, повідомлення обов'язково
+ * прийде і в бот, яким він активував доступ до курсу.
+ */
+function vip_tattoo_plan_telegram_receipt_text($type, $args) {
+    $e = function ($s) { return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8'); };
+
+    $headline = [
+        'success' => '✅ <b>УСПЕШНАЯ ОПЛАТА!</b>',
+        'final'   => '🎓 <b>КУРС ПОЛНОСТЬЮ ОПЛАЧЕН!</b>',
+        'failed'  => '❌ <b>ПЛАТЁЖ НЕ ПРОШЁЛ!</b>',
+        'closed'  => '⛔ <b>ДОСТУП К КУРСУ ЗАКРЫТ</b>',
+    ][$type] ?? '<b>Уведомление об оплате</b>';
+
+    $lines = [$headline];
+    if (!empty($args['order_id'])) $lines[] = '№ ' . $e($args['order_id']);
+    $lines[] = '';
+
+    if ($type === 'closed') {
+        $lines[] = $e($args['message'] ?? '');
+    } else {
+        if (isset($args['amount'])) {
+            $lines[] = 'Сумма: <b>' . $e($args['amount']) . ' ' . $e($args['currency'] ?? 'EUR') . '</b>';
+        }
+        $lines[] = 'Сайт: https://website.vip-tattoo-school.com/';
+        if (!empty($args['product_name']) || !empty($args['plan_label'])) {
+            $lines[] = 'Описание: ' . $e($args['product_name'] ?? '') . (!empty($args['plan_label']) ? ' (' . $e($args['plan_label']) . ')' : '');
+        }
+
+        if ($type === 'failed') {
+            $lines[] = '';
+            $lines[] = 'Не удалось провести оплату с вашей карты. Проверьте реквизиты и интернет-лимит, попробуйте снова.';
+            if (!empty($args['retry_url'])) {
+                $lines[] = '';
+                $lines[] = '🔁 Повторить оплату: ' . $e($args['retry_url']);
+                if (!empty($args['retry_deadline'])) {
+                    $lines[] = 'Ссылка действует до ' . $e($args['retry_deadline']);
+                }
+            }
+        }
+
+        $lines[] = '';
+        $lines[] = '<b>ДАННЫЕ ПЛАТЕЖА</b>';
+        if (!empty($args['card_last4'])) {
+            $lines[] = 'Карта: ' . ($args['card_brand'] ? $e($args['card_brand']) . ' •• ' : '•••• ') . $e($args['card_last4']);
+        } elseif (!empty($args['method'])) {
+            $lines[] = 'Способ оплаты: ' . $e($args['method']);
+        }
+        if (!empty($args['date'])) $lines[] = 'Дата: ' . $e($args['date']);
+        if (!empty($args['order_id'])) $lines[] = 'Id платежа: ' . $e($args['order_id']);
+        if (!empty($args['auth_code'])) $lines[] = 'Код авторизации: ' . $e($args['auth_code']);
+
+        if (!empty($args['buyer_name']) || !empty($args['buyer_phone']) || !empty($args['buyer_email'])) {
+            $lines[] = '';
+            $lines[] = '<b>ИНФОРМАЦИЯ О ПЛАТЕЛЬЩИКЕ</b>';
+            if (!empty($args['buyer_name'])) {
+                $name_parts = preg_split('/\s+/', trim($args['buyer_name']), 2);
+                if (!empty($name_parts[1])) $lines[] = 'Фамилия: ' . $e($name_parts[1]);
+                if (!empty($name_parts[0])) $lines[] = 'Имя: ' . $e($name_parts[0]);
+            }
+            if (!empty($args['buyer_phone'])) $lines[] = 'Телефон: ' . $e($args['buyer_phone']);
+            if (!empty($args['buyer_email'])) $lines[] = 'Email: ' . $e($args['buyer_email']);
+        }
+
+        if ($type === 'success' && !empty($args['next_payment_note'])) {
+            $lines[] = '';
+            $lines[] = 'ℹ️ ' . $e($args['next_payment_note']);
+        }
+        if ($type === 'final') {
+            $lines[] = '';
+            $lines[] = '🎉 Поздравляем! Курс оплачен в полном объёме' . (!empty($args['total_amount']) ? ' (' . $e($args['total_amount']) . ' ' . $e($args['currency'] ?? 'EUR') . ')' : '') . '. Дальнейших списаний не будет.';
+        }
+    }
+
+    return implode("\n", $lines);
 }
