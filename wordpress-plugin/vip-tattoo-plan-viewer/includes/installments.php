@@ -449,25 +449,37 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
     if ($email) {
         $step_eur = number_format(VIP_TATTOO_PLAN_INSTALLMENT_STEP_CENTS / 100, 2, '.', '');
         $paid_date = date_i18n('d.m.Y', strtotime($step === 1 ? $now : ($order->paid_at ?? $now)));
-        $subject = $step === 1
-            ? 'Оплата 1/2 получена - доступ к курсу открыт'
-            : 'Оплата 2/2 получена - курс полностью оплачен';
-        $next_note = $step === 1
-            ? 'Второй платёж ' . $step_eur . '€ спишется автоматически ' . date_i18n('d.m.Y', strtotime($now . ' +7 days')) . '.'
-            : 'Оплата завершена (275€ всего). Дальнейших списаний не будет.';
         $charge_details = vip_tattoo_plan_stripe_invoice_charge_details($invoice);
-        $receipt_sent = vip_tattoo_plan_send_receipt_email($email, $subject, array_merge([
-            'order_id'          => $order->id,
-            'amount'            => $step_eur,
-            'currency'          => 'EUR',
-            'date'              => $paid_date,
-            'method'            => 'Card (Stripe)',
-            'plan_label'        => 'Оплата частями - часть ' . $step . ' из 2',
-            'next_payment_note' => $next_note,
-            'buyer_email'       => $email,
-            'buyer_phone'       => $order->phone ?? '',
-            'buyer_name'        => $order->name ?? '',
-        ], $charge_details));
+
+        if ($step === 1) {
+            $next_note = 'Второй платёж ' . $step_eur . '€ спишется автоматически ' . date_i18n('d.m.Y', strtotime($now . ' +7 days')) . '.';
+            $receipt_sent = vip_tattoo_plan_send_receipt_email($email, 'Оплата 1/2 получена - доступ к курсу открыт', array_merge([
+                'order_id'          => $order->id,
+                'amount'            => $step_eur,
+                'currency'          => 'EUR',
+                'date'              => $paid_date,
+                'method'            => 'Card (Stripe)',
+                'plan_label'        => 'Оплата частями - часть 1 из 2',
+                'next_payment_note' => $next_note,
+                'buyer_email'       => $email,
+                'buyer_phone'       => $order->phone ?? '',
+                'buyer_name'        => $order->name ?? '',
+            ], $charge_details));
+        } else {
+            $total_eur = number_format($total_paid / 100, 2, '.', '');
+            $receipt_sent = vip_tattoo_plan_send_final_payment_email($email, 'Оплата 2/2 получена - курс полностью оплачен', array_merge([
+                'order_id'      => $order->id,
+                'amount'        => $step_eur,
+                'currency'      => 'EUR',
+                'total_amount'  => $total_eur,
+                'date'          => $paid_date,
+                'method'        => 'Card (Stripe)',
+                'plan_label'    => 'Оплата частями - часть 2 из 2',
+                'buyer_email'   => $email,
+                'buyer_phone'   => $order->phone ?? '',
+                'buyer_name'    => $order->name ?? '',
+            ], $charge_details));
+        }
     }
 
     vip_tattoo_plan_sheets_append_row([
@@ -719,24 +731,34 @@ function vip_tattoo_plan_paypal_installment_sale_completed($subscription_id, $re
     $receipt_sent = false;
     if (!empty($order->email)) {
         $step_eur = number_format($paid_now_cents / 100, 2, '.', '');
-        $subject = $step === 1
-            ? 'Оплата 1/2 получена - доступ к курсу открыт'
-            : 'Оплата 2/2 получена - курс полностью оплачен';
-        $next_note = $step === 1
-            ? 'Второй платёж спишется автоматически через 7 дней.'
-            : 'Оплата завершена. Дальнейших списаний не будет.';
-        $receipt_sent = vip_tattoo_plan_send_receipt_email($order->email, $subject, [
-            'order_id'          => $order->id,
-            'amount'            => $step_eur,
-            'currency'          => 'EUR',
-            'date'              => date_i18n('d.m.Y', strtotime($now)),
-            'method'            => 'PayPal',
-            'plan_label'        => 'Оплата частями - часть ' . $step . ' из 2',
-            'next_payment_note' => $next_note,
-            'buyer_email'       => $order->email,
-            'buyer_phone'       => $order->phone ?? '',
-            'buyer_name'        => $order->name ?? '',
-        ]);
+        if ($step === 1) {
+            $next_note = 'Второй платёж спишется автоматически через 7 дней.';
+            $receipt_sent = vip_tattoo_plan_send_receipt_email($order->email, 'Оплата 1/2 получена - доступ к курсу открыт', [
+                'order_id'          => $order->id,
+                'amount'            => $step_eur,
+                'currency'          => 'EUR',
+                'date'              => date_i18n('d.m.Y', strtotime($now)),
+                'method'            => 'PayPal',
+                'plan_label'        => 'Оплата частями - часть 1 из 2',
+                'next_payment_note' => $next_note,
+                'buyer_email'       => $order->email,
+                'buyer_phone'       => $order->phone ?? '',
+                'buyer_name'        => $order->name ?? '',
+            ]);
+        } else {
+            $receipt_sent = vip_tattoo_plan_send_final_payment_email($order->email, 'Оплата 2/2 получена - курс полностью оплачен', [
+                'order_id'      => $order->id,
+                'amount'        => $step_eur,
+                'currency'      => 'EUR',
+                'total_amount'  => number_format($total_paid / 100, 2, '.', ''),
+                'date'          => date_i18n('d.m.Y', strtotime($now)),
+                'method'        => 'PayPal',
+                'plan_label'    => 'Оплата частями - часть 2 из 2',
+                'buyer_email'   => $order->email,
+                'buyer_phone'   => $order->phone ?? '',
+                'buyer_name'    => $order->name ?? '',
+            ]);
+        }
     }
 
     vip_tattoo_plan_sheets_append_row([
