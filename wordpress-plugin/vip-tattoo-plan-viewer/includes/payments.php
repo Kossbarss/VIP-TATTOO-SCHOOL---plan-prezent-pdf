@@ -1178,6 +1178,9 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0f0d0b;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;">
   <tr><td align="center">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#1c1613;border-radius:16px;overflow:hidden;border:1px solid rgba(201,161,90,0.25);">
+      <tr><td style="background:#0f0d0b;padding:20px 24px 4px;text-align:center;">
+        <img src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/images/receipt-logo.jpg'); ?>" alt="Vip tattoo school" width="120" style="width:120px;max-width:120px;height:auto;border-radius:12px;display:inline-block;" />
+      </td></tr>
       <tr><td style="background:linear-gradient(90deg,#0f150f 0%,#1e8c1a 55%,#2ea023 100%);padding:28px 24px;text-align:center;">
         <div style="width:48px;height:48px;line-height:48px;border-radius:50%;background:linear-gradient(100deg,#f0c883,#c9a15a);color:#1a120c;font-size:26px;font-weight:800;margin:0 auto 10px;">✓</div>
         <div style="color:#fff;font-size:20px;font-weight:800;letter-spacing:0.02em;">УСПЕШНАЯ ОПЛАТА!</div>
