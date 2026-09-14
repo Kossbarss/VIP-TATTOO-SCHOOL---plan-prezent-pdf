@@ -1319,8 +1319,8 @@ function vip_tattoo_plan_render_failed_payment_email_html($args) {
         $html = '';
         foreach ($rows as $row) {
             $html .= '<tr>'
-                . '<td style="padding:10px 0;color:#a0a0a0;font-size:19px;vertical-align:top;">' . $row[0] . ':</td>'
-                . '<td style="padding:10px 0 10px 12px;color:#ffffff;font-size:19px;text-align:right;">' . $row[1] . '</td>'
+                . '<td style="padding:12px 0;color:#b5b5b5;font-size:23px;vertical-align:top;">' . $row[0] . ':</td>'
+                . '<td style="padding:12px 0 12px 12px;color:#ffffff;font-size:23px;text-align:right;">' . $row[1] . '</td>'
                 . '</tr>';
         }
         return $html;
@@ -1331,9 +1331,9 @@ function vip_tattoo_plan_render_failed_payment_email_html($args) {
         $deadline_html = $a['retry_deadline']
             ? 'Вы можете повторить оплату. Ссылка будет действовать до ' . esc_html($a['retry_deadline'])
             : 'Вы можете повторить оплату по ссылке ниже.';
-        $retry_html = '<div style="margin-top:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:18px;text-align:center;">'
-            . '<div style="color:#c9c9c9;font-size:17px;line-height:1.6;margin-bottom:16px;">' . $deadline_html . '</div>'
-            . '<a href="' . esc_url($a['retry_url']) . '" style="display:inline-block;background:#2f6fed;color:#ffffff;text-decoration:none;font-size:18px;font-weight:700;padding:14px 30px;border-radius:8px;">Повторить оплату</a>'
+        $retry_html = '<div style="margin-top:22px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:20px;text-align:center;">'
+            . '<div style="color:#d6d6d6;font-size:20px;line-height:1.6;margin-bottom:18px;">' . $deadline_html . '</div>'
+            . '<a href="' . esc_url($a['retry_url']) . '" style="display:inline-block;background:#2f6fed;color:#ffffff;text-decoration:none;font-size:22px;font-weight:700;padding:16px 34px;border-radius:8px;">Повторить оплату</a>'
             . '</div>';
     }
 
@@ -1344,7 +1344,7 @@ function vip_tattoo_plan_render_failed_payment_email_html($args) {
 <body style="margin:0;padding:0;background:#000000;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#000000;padding:24px 12px;font-family:Arial,Helvetica,sans-serif;">
   <tr><td align="center">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;">
       <tr><td style="height:6px;line-height:6px;font-size:0;background:linear-gradient(90deg,#8c1a1a 0%,#e23a3a 50%,#8c1a1a 100%);border-radius:14px 14px 0 0;">&nbsp;</td></tr>
       <tr><td style="background:#0a0a0a;border-radius:0 0 14px 14px;padding:32px 28px 28px;">
 
@@ -1352,34 +1352,34 @@ function vip_tattoo_plan_render_failed_payment_email_html($args) {
           <img src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/images/receipt-logo.jpg'); ?>" alt="<?php echo esc_attr($business_name); ?>" width="200" style="width:200px;max-width:200px;height:auto;border-radius:50%;display:block;margin:0 auto 18px;" />
         </td></tr></table>
 
-        <div style="text-align:center;color:#e2483f;font-size:27px;font-weight:800;">❌ ПЛАТЁЖ НЕ ПРОШЁЛ!</div>
-        <div style="text-align:center;color:#9a9a9a;font-size:15px;margin-top:8px;word-break:break-all;">№ <?php echo esc_html($a['order_id']); ?></div>
+        <div style="text-align:center;color:#e2483f;font-size:32px;font-weight:800;">❌ ПЛАТЁЖ НЕ ПРОШЁЛ!</div>
+        <div style="text-align:center;color:#a8a8a8;font-size:17px;margin-top:10px;word-break:break-all;">№ <?php echo esc_html($a['order_id']); ?></div>
 
-        <div style="color:#d9d9d9;font-size:17px;line-height:1.7;margin-top:18px;">
+        <div style="color:#e2e2e2;font-size:20px;line-height:1.7;margin-top:20px;">
           К сожалению, не удалось провести оплату с вашей карты. Пожалуйста, проверьте правильность реквизитов карты, а также проверьте интернет-лимит и попробуйте оплатить снова. Дополнительно вы можете связаться с вашим банком для выяснения причины отказа или воспользоваться другой картой.
         </div>
 
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px;">
-          <tr><td style="color:#a0a0a0;font-size:19px;">Сумма:</td>
-              <td style="text-align:right;"><span style="color:#4a9eff;font-size:36px;font-weight:800;"><?php echo esc_html($a['amount']); ?></span> <span style="color:#4a9eff;font-size:21px;font-weight:700;"><?php echo esc_html($a['currency']); ?></span></td></tr>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:26px;">
+          <tr><td style="color:#b5b5b5;font-size:23px;">Сумма:</td>
+              <td style="text-align:right;"><span style="color:#4a9eff;font-size:42px;font-weight:800;"><?php echo esc_html($a['amount']); ?></span> <span style="color:#4a9eff;font-size:24px;font-weight:700;"><?php echo esc_html($a['currency']); ?></span></td></tr>
           <?php echo $render_rows($top_rows); ?>
         </table>
 
         <?php echo $retry_html; ?>
 
-        <div style="color:#ffffff;font-size:18px;font-weight:800;letter-spacing:0.04em;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);">ДАННЫЕ ПЛАТЕЖА</div>
+        <div style="color:#ffffff;font-size:21px;font-weight:800;letter-spacing:0.04em;margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);">ДАННЫЕ ПЛАТЕЖА</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">
           <?php echo $render_rows($payment_rows); ?>
         </table>
 
         <?php if ($payer_rows) : ?>
-        <div style="color:#ffffff;font-size:18px;font-weight:800;letter-spacing:0.04em;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);">ИНФОРМАЦИЯ О ПЛАТЕЛЬЩИКЕ</div>
+        <div style="color:#ffffff;font-size:21px;font-weight:800;letter-spacing:0.04em;margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);">ИНФОРМАЦИЯ О ПЛАТЕЛЬЩИКЕ</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">
           <?php echo $render_rows($payer_rows); ?>
         </table>
         <?php endif; ?>
 
-        <div style="margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);color:#7a7a7a;font-size:14px;line-height:1.7;text-align:center;">
+        <div style="margin-top:26px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);color:#8a8a8a;font-size:16px;line-height:1.7;text-align:center;">
           Это письмо о статусе платежа, обработанного <?php echo esc_html($business_name); ?>.
         </div>
       </td></tr>
