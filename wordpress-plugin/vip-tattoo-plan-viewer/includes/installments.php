@@ -338,7 +338,7 @@ function vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $sub
     global $wpdb;
     $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
     $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE provider_order_id = %s", $session_id));
-    if (!$order) return;
+    if (!$order) return 'checkout_completed: order NOT FOUND for session_id=' . $session_id;
 
     $wpdb->update($table, ['stripe_subscription_id' => $subscription_id], ['id' => $order->id]);
 
@@ -348,19 +348,21 @@ function vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $sub
     // ("parameter_unknown: phases[iterations]"). Замість крихкого виклику
     // Stripe API просто скасовуємо підписку самі, з нашого ж коду, одразу
     // після того як 2-й платіж пройде (див. vip_tattoo_plan_stripe_installment_invoice_paid).
+
+    return 'checkout_completed: order #' . $order->id . ' linked to subscription_id=' . $subscription_id;
 }
 
 function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
     global $wpdb;
     $subscription_id = $invoice['subscription'] ?? '';
-    if (!$subscription_id) return;
+    if (!$subscription_id) return 'invoice_paid: no subscription_id on invoice';
 
     $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
     $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE stripe_subscription_id = %s", $subscription_id));
-    if (!$order) return;
+    if (!$order) return 'invoice_paid: order NOT FOUND for subscription_id=' . $subscription_id;
 
     $step = (int) $order->installment_step + 1;
-    if ($step > 2) return; // ідемпотентність: цей інвойс вже обробляли
+    if ($step > 2) return 'invoice_paid: order #' . $order->id . ' already at step ' . $order->installment_step . ', ignoring (idempotency)';
 
     $paid_now_cents = (int) ($invoice['amount_paid'] ?? VIP_TATTOO_PLAN_INSTALLMENT_STEP_CENTS);
     $total_paid = (int) $order->total_paid_cents + $paid_now_cents;
@@ -436,6 +438,8 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
             'text'    => $body,
         ]);
     }
+
+    return 'invoice_paid: order #' . $order->id . ' step=' . $step . ' telegram_chat_id=' . ($order->telegram_chat_id ?: '(empty)') . ' delivered_at=' . ($order->delivered_at ?? '(not set on in-memory object)');
 }
 
 function vip_tattoo_plan_stripe_installment_invoice_failed($invoice) {

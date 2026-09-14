@@ -1013,18 +1013,20 @@ function vip_tattoo_plan_rest_stripe_webhook(WP_REST_Request $request) {
 
     $event = json_decode($request->get_body(), true);
     $event_type = $event['type'] ?? '';
+    $debug = 'no handler matched event_type=' . $event_type;
 
     if ($event_type === 'checkout.session.completed') {
         $session = $event['data']['object'] ?? [];
         $session_id = $session['id'] ?? '';
         if (($session['mode'] ?? '') === 'subscription' && !empty($session['subscription'])) {
-            vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $session['subscription']);
+            $debug = vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $session['subscription']);
         } else {
             vip_tattoo_plan_stripe_capture_and_mark_paid($session_id);
+            $debug = 'full payment capture ran for session=' . $session_id;
         }
     } elseif ($event_type === 'invoice.payment_succeeded') {
         $invoice = $event['data']['object'] ?? [];
-        vip_tattoo_plan_stripe_installment_invoice_paid($invoice);
+        $debug = vip_tattoo_plan_stripe_installment_invoice_paid($invoice);
     } elseif ($event_type === 'invoice.payment_failed') {
         $invoice = $event['data']['object'] ?? [];
         vip_tattoo_plan_stripe_installment_invoice_failed($invoice);
@@ -1033,7 +1035,11 @@ function vip_tattoo_plan_rest_stripe_webhook(WP_REST_Request $request) {
         vip_tattoo_plan_stripe_installment_subscription_deleted($subscription);
     }
 
-    return new WP_REST_Response(['received' => true], 200);
+    // The `debug` field is a temporary diagnostic aid (visible in Stripe's
+    // dashboard under Event deliveries -> Response body) to see exactly
+    // which branch ran and why, without needing server log access -- safe
+    // to remove once the installment webhook chain is confirmed working.
+    return new WP_REST_Response(['received' => true, 'debug' => $debug], 200);
 }
 
 function vip_tattoo_plan_rest_telegram_webhook(WP_REST_Request $request) {
