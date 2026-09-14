@@ -391,6 +391,9 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
     $order->installment_step = $step;
     $order->total_paid_cents = $total_paid;
     $order->status = $step === 1 ? 'paid' : $order->status;
+    if ($step === 1) {
+        $order->paid_at = $now;
+    }
 
     if ($step === 1) {
         vip_tattoo_plan_installment_deliver_access($order);
@@ -617,6 +620,9 @@ function vip_tattoo_plan_paypal_installment_sale_completed($subscription_id, $re
 
     $order->installment_step = $step;
     $order->status = $step === 1 ? 'paid' : $order->status;
+    if ($step === 1) {
+        $order->paid_at = $now;
+    }
 
     if ($step === 1) {
         vip_tattoo_plan_installment_deliver_access($order);
@@ -730,9 +736,9 @@ function vip_tattoo_plan_installment_deliver_access($order) {
     $next_payment_date = date_i18n('d.m.Y', strtotime($paid_at . ' +7 days'));
     $step_eur = number_format(VIP_TATTOO_PLAN_INSTALLMENT_STEP_CENTS / 100, 2, '.', '');
 
-    $installment_notice = "Оплата отримана: {$step_eur}€ (частина 1 з 2), дата: " . date_i18n('d.m.Y', strtotime($paid_at)) . ".\n"
-        . "Другий платіж {$step_eur}€ спишеться автоматично {$next_payment_date}.\n"
-        . "Доступ до курсу вже відкрито нижче:\n\n";
+    $installment_notice = "Оплата получена: {$step_eur}€ (часть 1 из 2), дата: " . date_i18n('d.m.Y', strtotime($paid_at)) . ".\n"
+        . "Второй платёж {$step_eur}€ спишется автоматически {$next_payment_date}.\n"
+        . "Доступ к курсу уже открыт ниже:\n\n";
 
     $message = $installment_notice . get_option('vip_tattoo_plan_telegram_access_message');
     $result = vip_tattoo_plan_installment_telegram_api('sendMessage', [
