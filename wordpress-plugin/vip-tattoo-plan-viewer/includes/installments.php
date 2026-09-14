@@ -316,8 +316,9 @@ function vip_tattoo_plan_stripe_start_installment_checkout($token) {
         'client_reference_id'     => $token,
         'metadata'                => ['token' => $token, 'plan_type' => 'installment'],
         'subscription_data'       => ['metadata' => ['token' => $token, 'plan_type' => 'installment']],
-        'phone_number_collection' => ['enabled' => 'true'],
-        'line_items'              => [['price' => $price_id, 'quantity' => 1]],
+        'phone_number_collection'    => ['enabled' => 'true'],
+        'billing_address_collection' => 'required',
+        'line_items'                 => [['price' => $price_id, 'quantity' => 1]],
     ];
 
     $result = vip_tattoo_plan_stripe_request('POST', '/checkout/sessions', $body);
@@ -334,13 +335,16 @@ function vip_tattoo_plan_stripe_start_installment_checkout($token) {
 }
 
 // Викликається з webhook на checkout.session.completed, коли mode=subscription.
-function vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $subscription_id) {
+function vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $subscription_id, $buyer_name = '') {
     global $wpdb;
     $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
     $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE provider_order_id = %s", $session_id));
     if (!$order) return 'checkout_completed: order NOT FOUND for session_id=' . $session_id;
 
-    $wpdb->update($table, ['stripe_subscription_id' => $subscription_id], ['id' => $order->id]);
+    $wpdb->update($table, [
+        'stripe_subscription_id' => $subscription_id,
+        'name'                   => $buyer_name ?: null,
+    ], ['id' => $order->id]);
 
     // Раніше тут перетворювали підписку на subscription_schedule з
     // phases[iterations]=2, щоб Stripe сам зупинив її після 2-го платежу --
@@ -441,6 +445,31 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
     $email = $invoice['customer_email'] ?? ($order->email ?? '');
     $phone = $order->phone ?? '';
 
+    $receipt_sent = false;
+    if ($email) {
+        $step_eur = number_format(VIP_TATTOO_PLAN_INSTALLMENT_STEP_CENTS / 100, 2, '.', '');
+        $paid_date = date_i18n('d.m.Y', strtotime($step === 1 ? $now : ($order->paid_at ?? $now)));
+        $subject = $step === 1
+            ? 'Оплата 1/2 получена - доступ к курсу открыт'
+            : 'Оплата 2/2 получена - курс полностью оплачен';
+        $next_note = $step === 1
+            ? 'Второй платёж ' . $step_eur . '€ спишется автоматически ' . date_i18n('d.m.Y', strtotime($now . ' +7 days')) . '.'
+            : 'Оплата завершена (275€ всего). Дальнейших списаний не будет.';
+        $charge_details = vip_tattoo_plan_stripe_invoice_charge_details($invoice);
+        $receipt_sent = vip_tattoo_plan_send_receipt_email($email, $subject, array_merge([
+            'order_id'          => $order->id,
+            'amount'            => $step_eur,
+            'currency'          => 'EUR',
+            'date'              => $paid_date,
+            'method'            => 'Card (Stripe)',
+            'plan_label'        => 'Оплата частями - часть ' . $step . ' из 2',
+            'next_payment_note' => $next_note,
+            'buyer_email'       => $email,
+            'buyer_phone'       => $order->phone ?? '',
+            'buyer_name'        => $order->name ?? '',
+        ], $charge_details));
+    }
+
     vip_tattoo_plan_sheets_append_row([
         $order->id,
         $order->created_at,
@@ -457,30 +486,9 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
         $step >= 2 ? $now : '',
         $order->telegram_chat_id ?? '',
         $now,
+        $order->name ?? '',
+        $email ? ($receipt_sent ? 'Квитанція ' . $step . '/2 надіслана' : 'Квитанція ' . $step . '/2 НЕ надіслана (помилка)') : 'Email відсутній',
     ]);
-
-    if ($email) {
-        $step_eur = number_format(VIP_TATTOO_PLAN_INSTALLMENT_STEP_CENTS / 100, 2, '.', '');
-        $paid_date = date_i18n('d.m.Y', strtotime($step === 1 ? $now : ($order->paid_at ?? $now)));
-        $subject = $step === 1
-            ? 'Оплата 1/2 получена - доступ к курсу открыт'
-            : 'Оплата 2/2 получена - курс полностью оплачен';
-        $next_note = $step === 1
-            ? 'Второй платёж ' . $step_eur . '€ спишется автоматически ' . date_i18n('d.m.Y', strtotime($now . ' +7 days')) . '.'
-            : 'Оплата завершена (275€ всего). Дальнейших списаний не будет.';
-        $charge_details = vip_tattoo_plan_stripe_invoice_charge_details($invoice);
-        vip_tattoo_plan_send_receipt_email($email, $subject, array_merge([
-            'order_id'          => $order->id,
-            'amount'            => $step_eur,
-            'currency'          => 'EUR',
-            'date'              => $paid_date,
-            'method'            => 'Card (Stripe)',
-            'plan_label'        => 'Оплата частями - часть ' . $step . ' из 2',
-            'next_payment_note' => $next_note,
-            'buyer_email'       => $email,
-            'buyer_phone'       => $order->phone ?? '',
-        ], $charge_details));
-    }
     if ($order->telegram_chat_id) {
         vip_tattoo_plan_installment_telegram_api('sendMessage', [
             'chat_id' => $order->telegram_chat_id,
@@ -503,16 +511,19 @@ function vip_tattoo_plan_stripe_installment_invoice_failed($invoice) {
     $now = current_time('mysql');
     $email = $invoice['customer_email'] ?? ($order->email ?? '');
 
+    $warning = "Не вдалося списати другий платіж (137.50€).\n\nОновіть картку протягом 24 годин, щоб зберегти доступ до курсу.";
+    $warning_sent = false;
+    if ($email) {
+        $warning_sent = vip_tattoo_plan_send_email($email, 'Не вдалося списати другий платіж', $warning);
+    }
+
     vip_tattoo_plan_sheets_append_row([
         $order->id, $order->created_at, $email, $order->phone ?? '', 'Оплата частинами', 'Stripe',
         $subscription_id, '2/2 — помилка', '', number_format((int) $order->total_paid_cents / 100, 2, '.', ''),
         'Платіж не пройшов', $order->paid_at ?? '', '', $order->telegram_chat_id ?? '', $now,
+        $order->name ?? '',
+        $email ? ($warning_sent ? 'Лист про невдалу оплату надіслано' : 'Лист про невдалу оплату НЕ надіслано (помилка)') : 'Email відсутній',
     ]);
-
-    $warning = "Не вдалося списати другий платіж (137.50€).\n\nОновіть картку протягом 24 годин, щоб зберегти доступ до курсу.";
-    if ($email) {
-        vip_tattoo_plan_send_email($email, 'Не вдалося списати другий платіж', $warning);
-    }
     if ($order->telegram_chat_id) {
         vip_tattoo_plan_installment_telegram_api('sendMessage', [
             'chat_id' => $order->telegram_chat_id,
@@ -557,15 +568,20 @@ function vip_tattoo_plan_check_and_kick_installment_order($order_id) {
 
     $wpdb->update($table, ['status' => 'access_revoked'], ['id' => $order->id]);
 
+    $now = current_time('mysql');
+
+    $closed_email_sent = false;
+    if (!empty($order->email)) {
+        $closed_email_sent = vip_tattoo_plan_send_email($order->email, 'Доступ до курсу закрито', "Оскільки другий платіж (137.50€) так і не пройшов протягом 24 годин, доступ до навчальних груп курсу було закрито.\n\nЩоб відновити доступ, зверніться до підтримки.");
+    }
+
     vip_tattoo_plan_sheets_append_row([
         $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', 'Оплата частинами', $order->provider,
         $order->stripe_subscription_id ?? '', '2/2 — не оплачено', '', number_format((int) $order->total_paid_cents / 100, 2, '.', ''),
-        'Доступ закрито (2-й платіж не оплачено)', $order->paid_at ?? '', '', $order->telegram_chat_id, current_time('mysql'),
+        'Доступ закрито (2-й платіж не оплачено)', $order->paid_at ?? '', '', $order->telegram_chat_id, $now,
+        $order->name ?? '',
+        $order->email ? ($closed_email_sent ? 'Лист про закриття доступу надіслано' : 'Лист про закриття доступу НЕ надіслано (помилка)') : 'Email відсутній',
     ]);
-
-    if (!empty($order->email)) {
-        vip_tattoo_plan_send_email($order->email, 'Доступ до курсу закрито', "Оскільки другий платіж (137.50€) так і не пройшов протягом 24 годин, доступ до навчальних груп курсу було закрито.\n\nЩоб відновити доступ, зверніться до підтримки.");
-    }
 }
 
 /* ------------------------------------------------------------------ */
@@ -682,13 +698,7 @@ function vip_tattoo_plan_paypal_installment_sale_completed($subscription_id, $re
         vip_tattoo_plan_installment_deliver_access($order);
     }
 
-    vip_tattoo_plan_sheets_append_row([
-        $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', 'Оплата частинами', 'PayPal',
-        $subscription_id, $step . '/2', number_format($paid_now_cents / 100, 2, '.', ''), number_format($total_paid / 100, 2, '.', ''),
-        $step >= 2 ? 'Повністю оплачено (2/2)' : 'Частково оплачено (1/2)',
-        $step === 1 ? $now : ($order->paid_at ?? ''), $step >= 2 ? $now : '', $order->telegram_chat_id ?? '', $now,
-    ]);
-
+    $receipt_sent = false;
     if (!empty($order->email)) {
         $step_eur = number_format($paid_now_cents / 100, 2, '.', '');
         $subject = $step === 1
@@ -697,7 +707,7 @@ function vip_tattoo_plan_paypal_installment_sale_completed($subscription_id, $re
         $next_note = $step === 1
             ? 'Второй платёж спишется автоматически через 7 дней.'
             : 'Оплата завершена. Дальнейших списаний не будет.';
-        vip_tattoo_plan_send_receipt_email($order->email, $subject, [
+        $receipt_sent = vip_tattoo_plan_send_receipt_email($order->email, $subject, [
             'order_id'          => $order->id,
             'amount'            => $step_eur,
             'currency'          => 'EUR',
@@ -706,8 +716,19 @@ function vip_tattoo_plan_paypal_installment_sale_completed($subscription_id, $re
             'plan_label'        => 'Оплата частями - часть ' . $step . ' из 2',
             'next_payment_note' => $next_note,
             'buyer_email'       => $order->email,
+            'buyer_phone'       => $order->phone ?? '',
+            'buyer_name'        => $order->name ?? '',
         ]);
     }
+
+    vip_tattoo_plan_sheets_append_row([
+        $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', 'Оплата частинами', 'PayPal',
+        $subscription_id, $step . '/2', number_format($paid_now_cents / 100, 2, '.', ''), number_format($total_paid / 100, 2, '.', ''),
+        $step >= 2 ? 'Повністю оплачено (2/2)' : 'Частково оплачено (1/2)',
+        $step === 1 ? $now : ($order->paid_at ?? ''), $step >= 2 ? $now : '', $order->telegram_chat_id ?? '', $now,
+        $order->name ?? '',
+        $order->email ? ($receipt_sent ? 'Квитанція ' . $step . '/2 надіслана' : 'Квитанція ' . $step . '/2 НЕ надіслана (помилка)') : 'Email відсутній',
+    ]);
 }
 
 function vip_tattoo_plan_paypal_installment_payment_failed($subscription_id) {

@@ -53,6 +53,7 @@ function vip_tattoo_plan_payments_activate() {
         stripe_subscription_id VARCHAR(191) DEFAULT NULL,
         stripe_schedule_id VARCHAR(191) DEFAULT NULL,
         installment_final_at DATETIME DEFAULT NULL,
+        name VARCHAR(191) DEFAULT NULL,
         PRIMARY KEY  (id),
         UNIQUE KEY token (token)
     ) {$charset_collate};";
@@ -65,7 +66,7 @@ function vip_tattoo_plan_payments_activate() {
 }
 register_activation_hook(VIP_TATTOO_PLAN_PLUGIN_DIR . 'vip-tattoo-plan-viewer.php', 'vip_tattoo_plan_payments_activate');
 
-define('VIP_TATTOO_PLAN_PAYMENTS_DB_VERSION', 2);
+define('VIP_TATTOO_PLAN_PAYMENTS_DB_VERSION', 3);
 add_action('admin_init', function () {
     if ((int) get_option('vip_tattoo_plan_payments_db_version', 0) < VIP_TATTOO_PLAN_PAYMENTS_DB_VERSION) {
         vip_tattoo_plan_payments_activate();
@@ -604,9 +605,11 @@ function vip_tattoo_plan_stripe_capture_and_mark_paid($session_id) {
         'paid_at' => $paid_at,
         'email'   => $session['customer_details']['email'] ?? null,
         'phone'   => $session['customer_details']['phone'] ?? null,
+        'name'    => $session['customer_details']['name'] ?? null,
     ], ['id' => $order->id]);
     $order->status = 'paid';
     $order->paid_at = $paid_at;
+    $order->name = $session['customer_details']['name'] ?? '';
 
     // deliver_access() often runs later, from the Telegram /start webhook,
     // against a freshly re-fetched $order row -- so this extra receipt
@@ -709,7 +712,7 @@ function vip_tattoo_plan_deliver_access($order) {
             'method'       => $order->provider === 'paypal' ? 'PayPal' : 'Card (Stripe)',
             'buyer_email'  => $order->email,
             'buyer_phone'  => $order->phone ?? '',
-            'buyer_name'   => $extra['buyer_name'] ?? '',
+            'buyer_name'   => $order->name ?? ($extra['buyer_name'] ?? ''),
             'card_last4'   => $extra['card_last4'] ?? '',
             'card_brand'   => $extra['card_brand'] ?? '',
             'auth_code'    => $extra['auth_code'] ?? '',
@@ -1068,7 +1071,7 @@ function vip_tattoo_plan_rest_stripe_webhook(WP_REST_Request $request) {
         $session = $event['data']['object'] ?? [];
         $session_id = $session['id'] ?? '';
         if (($session['mode'] ?? '') === 'subscription' && !empty($session['subscription'])) {
-            $debug = vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $session['subscription']);
+            $debug = vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $session['subscription'], $session['customer_details']['name'] ?? '');
         } else {
             vip_tattoo_plan_stripe_capture_and_mark_paid($session_id);
             $debug = 'full payment capture ran for session=' . $session_id;
@@ -1186,7 +1189,13 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
     }
 
     $payer_rows = [];
-    if ($a['buyer_name'])  $payer_rows[] = ['ПІБ', esc_html($a['buyer_name'])];
+    if ($a['buyer_name']) {
+        $name_parts = preg_split('/\s+/', trim($a['buyer_name']), 2);
+        $first_name = $name_parts[0] ?? '';
+        $last_name  = $name_parts[1] ?? '';
+        if ($last_name)  $payer_rows[] = ['Прізвище', esc_html($last_name)];
+        if ($first_name) $payer_rows[] = ["Ім'я", esc_html($first_name)];
+    }
     if ($a['buyer_phone']) $payer_rows[] = ['Телефон', esc_html($a['buyer_phone'])];
     if ($a['buyer_email']) $payer_rows[] = ['Email', esc_html($a['buyer_email'])];
 
@@ -1194,8 +1203,8 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
         $html = '';
         foreach ($rows as $row) {
             $html .= '<tr>'
-                . '<td style="padding:6px 0;color:#8a8a8a;font-size:14px;vertical-align:top;">' . $row[0] . ':</td>'
-                . '<td style="padding:6px 0 6px 12px;color:#ffffff;font-size:14px;text-align:right;">' . $row[1] . '</td>'
+                . '<td style="padding:9px 0;color:#a0a0a0;font-size:17px;vertical-align:top;">' . $row[0] . ':</td>'
+                . '<td style="padding:9px 0 9px 12px;color:#ffffff;font-size:17px;text-align:right;">' . $row[1] . '</td>'
                 . '</tr>';
         }
         return $html;
@@ -1203,7 +1212,7 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
 
     $next_payment_html = '';
     if ($a['next_payment_note']) {
-        $next_payment_html = '<div style="margin-top:18px;background:rgba(46,160,35,0.1);border:1px solid rgba(46,160,35,0.35);border-radius:10px;padding:12px 14px;color:#7bd66a;font-size:13px;line-height:1.5;">'
+        $next_payment_html = '<div style="margin-top:18px;background:rgba(46,160,35,0.1);border:1px solid rgba(46,160,35,0.35);border-radius:10px;padding:14px 16px;color:#7bd66a;font-size:15px;line-height:1.6;">'
             . esc_html($a['next_payment_note'])
             . '</div>';
     }
@@ -1215,30 +1224,30 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
 <body style="margin:0;padding:0;background:#000000;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#000000;padding:24px 12px;font-family:Arial,Helvetica,sans-serif;">
   <tr><td align="center">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:460px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;">
       <tr><td style="height:6px;line-height:6px;font-size:0;background:linear-gradient(90deg,#1e8c1a 0%,#4ee23a 50%,#1e8c1a 100%);border-radius:14px 14px 0 0;">&nbsp;</td></tr>
-      <tr><td style="background:#0a0a0a;border-radius:0 0 14px 14px;padding:28px 24px 24px;">
+      <tr><td style="background:#0a0a0a;border-radius:0 0 14px 14px;padding:32px 28px 28px;">
 
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
-          <img src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/images/receipt-logo.jpg'); ?>" alt="<?php echo esc_attr($business_name); ?>" width="140" style="width:140px;max-width:140px;height:auto;border-radius:50%;display:block;margin:0 auto 16px;" />
+          <img src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/images/receipt-logo.jpg'); ?>" alt="<?php echo esc_attr($business_name); ?>" width="200" style="width:200px;max-width:200px;height:auto;border-radius:50%;display:block;margin:0 auto 18px;" />
         </td></tr></table>
 
-        <div style="text-align:center;color:#3ecb2f;font-size:19px;font-weight:800;">✅ УСПЕШНАЯ ОПЛАТА!</div>
-        <div style="text-align:center;color:#8a8a8a;font-size:12px;margin-top:6px;word-break:break-all;">№ <?php echo esc_html($a['order_id']); ?></div>
+        <div style="text-align:center;color:#3ecb2f;font-size:24px;font-weight:800;">✅ УСПЕШНАЯ ОПЛАТА!</div>
+        <div style="text-align:center;color:#9a9a9a;font-size:14px;margin-top:8px;word-break:break-all;">№ <?php echo esc_html($a['order_id']); ?></div>
 
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px;">
-          <tr><td style="color:#8a8a8a;font-size:14px;">Сумма:</td>
-              <td style="text-align:right;"><span style="color:#4a9eff;font-size:26px;font-weight:800;"><?php echo esc_html($a['amount']); ?></span> <span style="color:#4a9eff;font-size:16px;font-weight:700;"><?php echo esc_html($a['currency']); ?></span></td></tr>
+          <tr><td style="color:#a0a0a0;font-size:17px;">Сумма:</td>
+              <td style="text-align:right;"><span style="color:#4a9eff;font-size:34px;font-weight:800;"><?php echo esc_html($a['amount']); ?></span> <span style="color:#4a9eff;font-size:19px;font-weight:700;"><?php echo esc_html($a['currency']); ?></span></td></tr>
           <?php echo $render_rows($top_rows); ?>
         </table>
 
-        <div style="color:#ffffff;font-size:13px;font-weight:800;letter-spacing:0.04em;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);">ДАННЫЕ ПЛАТЕЖА</div>
+        <div style="color:#ffffff;font-size:16px;font-weight:800;letter-spacing:0.04em;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);">ДАННЫЕ ПЛАТЕЖА</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">
           <?php echo $render_rows($payment_rows); ?>
         </table>
 
         <?php if ($payer_rows) : ?>
-        <div style="color:#ffffff;font-size:13px;font-weight:800;letter-spacing:0.04em;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);">ИНФОРМАЦИЯ О ПЛАТЕЛЬЩИКЕ</div>
+        <div style="color:#ffffff;font-size:16px;font-weight:800;letter-spacing:0.04em;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);">ИНФОРМАЦИЯ О ПЛАТЕЛЬЩИКЕ</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">
           <?php echo $render_rows($payer_rows); ?>
         </table>
@@ -1246,7 +1255,7 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
 
         <?php echo $next_payment_html; ?>
 
-        <div style="margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);color:#6b6b6b;font-size:11px;line-height:1.6;text-align:center;">
+        <div style="margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);color:#7a7a7a;font-size:13px;line-height:1.7;text-align:center;">
           Это письмо подтверждает оплату, обработанную <?php echo esc_html($business_name); ?>.
         </div>
       </td></tr>
