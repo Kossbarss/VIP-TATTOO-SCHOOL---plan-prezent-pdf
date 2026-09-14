@@ -352,9 +352,22 @@ function vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $sub
     return 'checkout_completed: order #' . $order->id . ' linked to subscription_id=' . $subscription_id;
 }
 
+/**
+ * Newer Stripe API versions moved an invoice's subscription id off the
+ * top-level `subscription` field (still present on older API versions)
+ * into a nested `parent.subscription_details.subscription` field. Check
+ * both so this keeps working regardless of which API version the account
+ * is pinned to.
+ */
+function vip_tattoo_plan_stripe_invoice_subscription_id($invoice) {
+    return $invoice['subscription']
+        ?? $invoice['parent']['subscription_details']['subscription']
+        ?? '';
+}
+
 function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
     global $wpdb;
-    $subscription_id = $invoice['subscription'] ?? '';
+    $subscription_id = vip_tattoo_plan_stripe_invoice_subscription_id($invoice);
     if (!$subscription_id) return 'invoice_paid: no subscription_id on invoice';
 
     $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
@@ -444,7 +457,7 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
 
 function vip_tattoo_plan_stripe_installment_invoice_failed($invoice) {
     global $wpdb;
-    $subscription_id = $invoice['subscription'] ?? '';
+    $subscription_id = vip_tattoo_plan_stripe_invoice_subscription_id($invoice);
     if (!$subscription_id) return;
 
     $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
