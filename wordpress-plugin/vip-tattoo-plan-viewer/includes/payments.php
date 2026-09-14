@@ -941,12 +941,14 @@ function vip_tattoo_plan_stripe_start_checkout($token, $price_cents, $currency, 
     }
 
     $body = [
-        'mode'                => 'payment',
-        'success_url'         => $return_url,
-        'cancel_url'          => $cancel_url,
-        'client_reference_id' => $token,
-        'metadata'            => ['token' => $token],
-        'line_items'          => [$line_item],
+        'mode'                     => 'payment',
+        'success_url'              => $return_url,
+        'cancel_url'               => $cancel_url,
+        'client_reference_id'      => $token,
+        'metadata'                 => ['token' => $token],
+        'line_items'               => [$line_item],
+        'phone_number_collection'  => ['enabled' => 'true'],
+        'billing_address_collection' => 'required',
     ];
 
     $submit_message = get_option('vip_tattoo_plan_stripe_submit_message', '');
