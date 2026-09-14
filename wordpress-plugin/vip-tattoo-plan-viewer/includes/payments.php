@@ -1167,7 +1167,7 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
     $business_name  = get_option('vip_tattoo_plan_receipt_business_name', 'Vip tattoo school');
     $business_nip   = get_option('vip_tattoo_plan_receipt_business_nip', '');
     $business_regon = get_option('vip_tattoo_plan_receipt_business_regon', '');
-    $site_link      = home_url();
+    $site_link      = 'https://website.vip-tattoo-school.com/';
 
     $top_rows = [];
     $top_rows[] = ['Сайт', esc_html($site_link)];
