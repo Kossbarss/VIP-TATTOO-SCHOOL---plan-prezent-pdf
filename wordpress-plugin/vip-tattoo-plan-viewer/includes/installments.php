@@ -577,6 +577,7 @@ function vip_tattoo_plan_stripe_installment_invoice_failed($invoice) {
     if (!wp_next_scheduled('vip_tattoo_plan_check_installment_access', [$order->id])) {
         wp_schedule_single_event(time() + $delay_hours * HOUR_IN_SECONDS, 'vip_tattoo_plan_check_installment_access', [$order->id]);
     }
+    vip_tattoo_plan_schedule_installment_reminders($order->id, $invoice['hosted_invoice_url'] ?? '', $retry_deadline, $delay_hours);
 }
 
 function vip_tattoo_plan_stripe_installment_subscription_deleted($subscription) {
@@ -634,6 +635,75 @@ function vip_tattoo_plan_check_and_kick_installment_order($order_id) {
         $order->name ?? '',
         $order->email ? ($closed_email_sent ? 'Лист про закриття доступу надіслано' : 'Лист про закриття доступу НЕ надіслано (помилка)') : 'Email відсутній',
     ]);
+}
+
+add_action('vip_tattoo_plan_installment_payment_reminder', 'vip_tattoo_plan_installment_payment_reminder_handler', 10, 4);
+
+/*
+ * Проміжні нагадування між невдалим 2-м платежем і закриттям доступу.
+ * Не чіпає жодних сум/статусів -- лише повторно надсилає той самий
+ * "платіж не пройшов" лист+Telegram, якщо клієнт ще не оплатив і
+ * доступ ще не закрито.
+ */
+function vip_tattoo_plan_installment_payment_reminder_handler($order_id, $retry_url, $retry_deadline, $reminder_no) {
+    global $wpdb;
+    $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
+    $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE id = %d", $order_id));
+    if (!$order) return;
+    if ((int) $order->installment_step >= 2) return; // вже оплатив -- нагадування не потрібне
+    if ($order->status === 'access_revoked') return; // доступ вже закрито -- пізно нагадувати
+
+    $now = current_time('mysql');
+    $step_eur = number_format(VIP_TATTOO_PLAN_INSTALLMENT_STEP_CENTS / 100, 2, '.', '');
+
+    $reminder_args = [
+        'order_id'       => $order->id,
+        'amount'         => $step_eur,
+        'currency'       => 'EUR',
+        'date'           => date_i18n('d.m.Y, H:i', strtotime($now)),
+        'method'         => $order->provider === 'paypal' ? 'PayPal' : 'Card (Stripe)',
+        'plan_label'     => 'Оплата частями - часть 2 из 2',
+        'buyer_email'    => $order->email ?? '',
+        'buyer_phone'    => $order->phone ?? '',
+        'buyer_name'     => $order->name ?? '',
+        'retry_url'      => $retry_url,
+        'retry_deadline' => $retry_deadline,
+    ];
+
+    $subject = 'Напоминание ' . $reminder_no . ' - не удалось списать второй платёж';
+
+    $reminder_sent = false;
+    if (!empty($order->email)) {
+        $reminder_sent = vip_tattoo_plan_send_failed_payment_email($order->email, $subject, $reminder_args);
+    }
+    if ($order->telegram_chat_id) {
+        vip_tattoo_plan_installment_telegram_api('sendMessage', [
+            'chat_id'    => $order->telegram_chat_id,
+            'text'       => vip_tattoo_plan_telegram_receipt_text('failed', $reminder_args),
+            'parse_mode' => 'HTML',
+        ]);
+    }
+
+    vip_tattoo_plan_sheets_append_row([
+        $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', 'Оплата частинами', $order->provider,
+        $order->stripe_subscription_id ?: ($order->provider_order_id ?? ''), '2/2 — нагадування ' . $reminder_no, '',
+        number_format((int) $order->total_paid_cents / 100, 2, '.', ''),
+        'Нагадування ' . $reminder_no . ' про несплату', $order->paid_at ?? '', '', $order->telegram_chat_id ?? '', $now,
+        $order->name ?? '',
+        $order->email ? ($reminder_sent ? 'Нагадування ' . $reminder_no . ' надіслано' : 'Нагадування ' . $reminder_no . ' НЕ надіслано (помилка)') : 'Email відсутній',
+    ]);
+}
+
+function vip_tattoo_plan_schedule_installment_reminders($order_id, $retry_url, $retry_deadline, $delay_hours) {
+    $r1_hours = max(1, (int) round($delay_hours / 3));
+    $r2_hours = max($r1_hours + 1, (int) round($delay_hours * 2 / 3));
+
+    if (!wp_next_scheduled('vip_tattoo_plan_installment_payment_reminder', [$order_id, $retry_url, $retry_deadline, 1])) {
+        wp_schedule_single_event(time() + $r1_hours * HOUR_IN_SECONDS, 'vip_tattoo_plan_installment_payment_reminder', [$order_id, $retry_url, $retry_deadline, 1]);
+    }
+    if (!wp_next_scheduled('vip_tattoo_plan_installment_payment_reminder', [$order_id, $retry_url, $retry_deadline, 2])) {
+        wp_schedule_single_event(time() + $r2_hours * HOUR_IN_SECONDS, 'vip_tattoo_plan_installment_payment_reminder', [$order_id, $retry_url, $retry_deadline, 2]);
+    }
 }
 
 /* ------------------------------------------------------------------ */
@@ -825,6 +895,8 @@ function vip_tattoo_plan_paypal_installment_payment_failed($subscription_id) {
     if (!wp_next_scheduled('vip_tattoo_plan_check_installment_access', [$order->id])) {
         wp_schedule_single_event(time() + $delay_hours * HOUR_IN_SECONDS, 'vip_tattoo_plan_check_installment_access', [$order->id]);
     }
+    $retry_deadline = date_i18n('H:i d.m.Y', strtotime(current_time('mysql') . ' +' . $delay_hours . ' hours'));
+    vip_tattoo_plan_schedule_installment_reminders($order->id, '', $retry_deadline, $delay_hours);
 }
 
 function vip_tattoo_plan_paypal_installment_subscription_cancelled($subscription_id) {
