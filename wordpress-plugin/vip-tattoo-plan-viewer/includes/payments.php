@@ -1203,8 +1203,8 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
         $html = '';
         foreach ($rows as $row) {
             $html .= '<tr>'
-                . '<td style="padding:9px 0;color:#a0a0a0;font-size:17px;vertical-align:top;">' . $row[0] . ':</td>'
-                . '<td style="padding:9px 0 9px 12px;color:#ffffff;font-size:17px;text-align:right;">' . $row[1] . '</td>'
+                . '<td style="padding:12px 0;color:#b5b5b5;font-size:23px;vertical-align:top;">' . $row[0] . ':</td>'
+                . '<td style="padding:12px 0 12px 12px;color:#ffffff;font-size:23px;text-align:right;">' . $row[1] . '</td>'
                 . '</tr>';
         }
         return $html;
@@ -1212,7 +1212,7 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
 
     $next_payment_html = '';
     if ($a['next_payment_note']) {
-        $next_payment_html = '<div style="margin-top:18px;background:rgba(46,160,35,0.1);border:1px solid rgba(46,160,35,0.35);border-radius:10px;padding:14px 16px;color:#7bd66a;font-size:15px;line-height:1.6;">'
+        $next_payment_html = '<div style="margin-top:22px;background:rgba(46,160,35,0.1);border:1px solid rgba(46,160,35,0.35);border-radius:10px;padding:20px;color:#8fe07f;font-size:20px;line-height:1.6;">'
             . esc_html($a['next_payment_note'])
             . '</div>';
     }
@@ -1232,22 +1232,22 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
           <img src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/images/receipt-logo.jpg'); ?>" alt="<?php echo esc_attr($business_name); ?>" width="200" style="width:200px;max-width:200px;height:auto;border-radius:50%;display:block;margin:0 auto 18px;" />
         </td></tr></table>
 
-        <div style="text-align:center;color:#3ecb2f;font-size:24px;font-weight:800;">✅ УСПЕШНАЯ ОПЛАТА!</div>
-        <div style="text-align:center;color:#9a9a9a;font-size:14px;margin-top:8px;word-break:break-all;">№ <?php echo esc_html($a['order_id']); ?></div>
+        <div style="text-align:center;color:#3ecb2f;font-size:32px;font-weight:800;">✅ УСПЕШНАЯ ОПЛАТА!</div>
+        <div style="text-align:center;color:#a8a8a8;font-size:17px;margin-top:10px;word-break:break-all;">№ <?php echo esc_html($a['order_id']); ?></div>
 
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px;">
-          <tr><td style="color:#a0a0a0;font-size:17px;">Сумма:</td>
-              <td style="text-align:right;"><span style="color:#4a9eff;font-size:34px;font-weight:800;"><?php echo esc_html($a['amount']); ?></span> <span style="color:#4a9eff;font-size:19px;font-weight:700;"><?php echo esc_html($a['currency']); ?></span></td></tr>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:26px;">
+          <tr><td style="color:#b5b5b5;font-size:23px;">Сумма:</td>
+              <td style="text-align:right;"><span style="color:#4a9eff;font-size:42px;font-weight:800;"><?php echo esc_html($a['amount']); ?></span> <span style="color:#4a9eff;font-size:24px;font-weight:700;"><?php echo esc_html($a['currency']); ?></span></td></tr>
           <?php echo $render_rows($top_rows); ?>
         </table>
 
-        <div style="color:#ffffff;font-size:16px;font-weight:800;letter-spacing:0.04em;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);">ДАННЫЕ ПЛАТЕЖА</div>
+        <div style="color:#ffffff;font-size:21px;font-weight:800;letter-spacing:0.04em;margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);">ДАННЫЕ ПЛАТЕЖА</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">
           <?php echo $render_rows($payment_rows); ?>
         </table>
 
         <?php if ($payer_rows) : ?>
-        <div style="color:#ffffff;font-size:16px;font-weight:800;letter-spacing:0.04em;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);">ИНФОРМАЦИЯ О ПЛАТЕЛЬЩИКЕ</div>
+        <div style="color:#ffffff;font-size:21px;font-weight:800;letter-spacing:0.04em;margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);">ИНФОРМАЦИЯ О ПЛАТЕЛЬЩИКЕ</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">
           <?php echo $render_rows($payer_rows); ?>
         </table>
@@ -1255,7 +1255,7 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
 
         <?php echo $next_payment_html; ?>
 
-        <div style="margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);color:#7a7a7a;font-size:13px;line-height:1.7;text-align:center;">
+        <div style="margin-top:26px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);color:#8a8a8a;font-size:16px;line-height:1.7;text-align:center;">
           Это письмо подтверждает оплату, обработанную <?php echo esc_html($business_name); ?>.
         </div>
       </td></tr>
