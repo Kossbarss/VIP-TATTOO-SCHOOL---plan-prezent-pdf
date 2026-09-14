@@ -23,6 +23,16 @@ if (!defined('ABSPATH')) exit;
 define('VIP_TATTOO_PLAN_INSTALLMENT_STEP_CENTS', 13750);
 define('VIP_TATTOO_PLAN_INSTALLMENT_TOTAL_CENTS', 27500);
 
+/* Прізвище/Ім'я окремими стовпцями (не повне ПІБ) для рядків Google Sheets */
+function vip_tattoo_plan_split_name_for_sheets($name) {
+    $name = trim((string) $name);
+    if (!$name) return ['', ''];
+    $parts = preg_split('/\s+/', $name, 2);
+    $first_name = $parts[0] ?? '';
+    $last_name  = $parts[1] ?? '';
+    return [$last_name, $first_name];
+}
+
 /* ------------------------------------------------------------------ */
 /* Settings                                                            */
 /* ------------------------------------------------------------------ */
@@ -381,7 +391,7 @@ function vip_tattoo_plan_render_sheets_settings() {
 
     if (isset($_POST['vip_tattoo_plan_test_sheet_row']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
         $result = vip_tattoo_plan_sheets_append_row([
-            '', current_time('mysql'), '', '', '', 'Тест', '', '', '', '', '', 'Тестовий рядок з адмінки', '', '', '', current_time('mysql'),
+            '', current_time('mysql'), '', '', '', '', 'Тест', '', '', '', '', '', 'Тестовий рядок з адмінки', '', '', '', current_time('mysql'),
         ]);
         if (is_wp_error($result)) {
             echo '<div class="notice notice-error"><p>Помилка запису в Google Sheets: ' . esc_html($result->get_error_message()) . '</p></div>';
@@ -647,12 +657,14 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
         }
     }
 
+    [$sheet_last_name, $sheet_first_name] = vip_tattoo_plan_split_name_for_sheets($order->name ?? '');
     vip_tattoo_plan_sheets_append_row([
         $order->id,
         $order->created_at,
         $email,
         $phone,
-        $order->name ?? '',
+        $sheet_last_name,
+        $sheet_first_name,
         'Оплата частинами',
         'Stripe',
         $subscription_id,
@@ -716,8 +728,9 @@ function vip_tattoo_plan_stripe_installment_invoice_failed($invoice) {
         ]);
     }
 
+    [$sheet_last_name, $sheet_first_name] = vip_tattoo_plan_split_name_for_sheets($order->name ?? '');
     vip_tattoo_plan_sheets_append_row([
-        $order->id, $order->created_at, $email, $order->phone ?? '', $order->name ?? '', 'Оплата частинами', 'Stripe',
+        $order->id, $order->created_at, $email, $order->phone ?? '', $sheet_last_name, $sheet_first_name, 'Оплата частинами', 'Stripe',
         $subscription_id, '2/2 — помилка', '', number_format((int) $order->total_paid_cents / 100, 2, '.', ''),
         'Платіж не пройшов', $order->paid_at ?? '', '', $order->telegram_chat_id ?? '', $now,
         $email ? ($warning_sent ? 'Лист про невдалу оплату надіслано' : 'Лист про невдалу оплату НЕ надіслано (помилка)') : 'Email відсутній',
@@ -778,8 +791,9 @@ function vip_tattoo_plan_check_and_kick_installment_order($order_id) {
         'parse_mode' => 'HTML',
     ]);
 
+    [$sheet_last_name, $sheet_first_name] = vip_tattoo_plan_split_name_for_sheets($order->name ?? '');
     vip_tattoo_plan_sheets_append_row([
-        $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', $order->name ?? '', 'Оплата частинами', $order->provider,
+        $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', $sheet_last_name, $sheet_first_name, 'Оплата частинами', $order->provider,
         $order->stripe_subscription_id ?? '', '2/2 — не оплачено', '', number_format((int) $order->total_paid_cents / 100, 2, '.', ''),
         'Доступ закрито (2-й платіж не оплачено)', $order->paid_at ?? '', '', $order->telegram_chat_id, $now,
         $order->email ? ($closed_email_sent ? 'Лист про закриття доступу надіслано' : 'Лист про закриття доступу НЕ надіслано (помилка)') : 'Email відсутній',
@@ -833,8 +847,9 @@ function vip_tattoo_plan_installment_payment_reminder_handler($order_id, $retry_
         ]);
     }
 
+    [$sheet_last_name, $sheet_first_name] = vip_tattoo_plan_split_name_for_sheets($order->name ?? '');
     vip_tattoo_plan_sheets_append_row([
-        $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', $order->name ?? '', 'Оплата частинами', $order->provider,
+        $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', $sheet_last_name, $sheet_first_name, 'Оплата частинами', $order->provider,
         $order->stripe_subscription_id ?: ($order->provider_order_id ?? ''), '2/2 — нагадування ' . $reminder_no, '',
         number_format((int) $order->total_paid_cents / 100, 2, '.', ''),
         'Нагадування ' . $reminder_no . ' про несплату', $order->paid_at ?? '', '', $order->telegram_chat_id ?? '', $now,
@@ -1015,8 +1030,9 @@ function vip_tattoo_plan_paypal_installment_sale_completed($subscription_id, $re
         }
     }
 
+    [$sheet_last_name, $sheet_first_name] = vip_tattoo_plan_split_name_for_sheets($order->name ?? '');
     vip_tattoo_plan_sheets_append_row([
-        $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', $order->name ?? '', 'Оплата частинами', 'PayPal',
+        $order->id, $order->created_at, $order->email ?? '', $order->phone ?? '', $sheet_last_name, $sheet_first_name, 'Оплата частинами', 'PayPal',
         $subscription_id, $step . '/2', number_format($paid_now_cents / 100, 2, '.', ''), number_format($total_paid / 100, 2, '.', ''),
         $step >= 2 ? 'Повністю оплачено (2/2)' : 'Частково оплачено (1/2)',
         $step === 1 ? $now : ($order->paid_at ?? ''), $step >= 2 ? $now : '', $order->telegram_chat_id ?? '', $now,
