@@ -693,6 +693,7 @@ function vip_tattoo_plan_deliver_access($order) {
             'date'         => date_i18n('d.m.Y', strtotime($order->paid_at ?: current_time('mysql'))),
             'method'       => $order->provider === 'paypal' ? 'PayPal' : 'Card (Stripe)',
             'buyer_email'  => $order->email,
+            'buyer_phone'  => $order->phone ?? '',
         ]);
     }
 }
@@ -1126,77 +1127,95 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
         'amount'            => '0.00',
         'currency'          => 'EUR',
         'product_name'      => get_option('vip_tattoo_plan_product_name', 'VIP tattoo school - курс'),
-        'date'              => date_i18n('d.m.Y'),
+        'date'              => date_i18n('d.m.Y, H:i'),
         'method'            => 'Card',
         'card_last4'        => '',
         'plan_label'        => '',
         'next_payment_note' => '',
         'buyer_email'       => '',
+        'buyer_phone'       => '',
     ];
     $a = array_merge($defaults, $args);
 
-    $business_name  = get_option('vip_tattoo_plan_receipt_business_name', '');
+    $business_name  = get_option('vip_tattoo_plan_receipt_business_name', 'Vip tattoo school');
     $business_nip   = get_option('vip_tattoo_plan_receipt_business_nip', '');
     $business_regon = get_option('vip_tattoo_plan_receipt_business_regon', '');
+    $site_link      = home_url();
 
-    $rows = [];
-    $rows[] = ['Курс', esc_html($a['product_name'])];
-    $rows[] = ['Дата', esc_html($a['date'])];
-    $rows[] = ['Способ оплаты', esc_html($a['method']) . ($a['card_last4'] ? ' •••• ' . esc_html($a['card_last4']) : '')];
-    if ($a['plan_label']) {
-        $rows[] = ['Тип оплаты', esc_html($a['plan_label'])];
-    }
-    if ($a['buyer_email']) {
-        $rows[] = ['Email', esc_html($a['buyer_email'])];
-    }
-    $rows[] = ['№ заказа', esc_html($a['order_id'])];
+    $top_rows = [];
+    $top_rows[] = ['Сайт', esc_html($site_link)];
+    if ($business_nip)   $top_rows[] = ['NIP', esc_html($business_nip)];
+    if ($business_regon) $top_rows[] = ['REGON', esc_html($business_regon)];
+    $top_rows[] = ['Опис', esc_html($a['product_name']) . ($a['plan_label'] ? ' (' . esc_html($a['plan_label']) . ')' : '')];
 
-    $rows_html = '';
-    foreach ($rows as $row) {
-        $rows_html .= '<tr>'
-            . '<td style="padding:7px 0;color:#a89a86;font-size:14px;">' . $row[0] . '</td>'
-            . '<td style="padding:7px 0;color:#e9e0d3;font-size:14px;text-align:right;">' . $row[1] . '</td>'
-            . '</tr>';
-    }
+    $payment_rows = [];
+    $payment_rows[] = ['Способ оплаты', esc_html($a['method']) . ($a['card_last4'] ? ' •••• ' . esc_html($a['card_last4']) : '')];
+    $payment_rows[] = ['Дата', esc_html($a['date'])];
+    $payment_rows[] = ['Id платежа', esc_html($a['order_id'])];
+
+    $payer_rows = [];
+    if ($a['buyer_email']) $payer_rows[] = ['Email', esc_html($a['buyer_email'])];
+    if ($a['buyer_phone']) $payer_rows[] = ['Телефон', esc_html($a['buyer_phone'])];
+
+    $render_rows = function ($rows) {
+        $html = '';
+        foreach ($rows as $row) {
+            $html .= '<tr>'
+                . '<td style="padding:6px 0;color:#8a8a8a;font-size:14px;vertical-align:top;">' . $row[0] . ':</td>'
+                . '<td style="padding:6px 0 6px 12px;color:#ffffff;font-size:14px;text-align:right;">' . $row[1] . '</td>'
+                . '</tr>';
+        }
+        return $html;
+    };
 
     $next_payment_html = '';
     if ($a['next_payment_note']) {
-        $next_payment_html = '<tr><td style="padding-top:16px;">'
-            . '<div style="background:rgba(240,200,131,0.1);border:1px solid rgba(201,161,90,0.35);border-radius:10px;padding:12px 14px;color:#f0c883;font-size:13px;line-height:1.5;">'
+        $next_payment_html = '<div style="margin-top:18px;background:rgba(46,160,35,0.1);border:1px solid rgba(46,160,35,0.35);border-radius:10px;padding:12px 14px;color:#7bd66a;font-size:13px;line-height:1.5;">'
             . esc_html($a['next_payment_note'])
-            . '</div></td></tr>';
+            . '</div>';
     }
-
-    $footer_lines = array_filter([$business_name, $business_nip ? 'NIP ' . $business_nip : '', $business_regon ? 'REGON ' . $business_regon : '']);
-    $footer_html = implode(' &middot; ', array_map('esc_html', $footer_lines));
 
     ob_start();
     ?>
 <!DOCTYPE html>
 <html>
-<body style="margin:0;padding:0;background:#0f0d0b;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0f0d0b;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;">
+<body style="margin:0;padding:0;background:#000000;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#000000;padding:24px 12px;font-family:Arial,Helvetica,sans-serif;">
   <tr><td align="center">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#1c1613;border-radius:16px;overflow:hidden;border:1px solid rgba(201,161,90,0.25);">
-      <tr><td style="background:#0f0d0b;padding:20px 24px 4px;text-align:center;">
-        <img src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/images/receipt-logo.jpg'); ?>" alt="Vip tattoo school" width="120" style="width:120px;max-width:120px;height:auto;border-radius:12px;display:inline-block;" />
-      </td></tr>
-      <tr><td style="background:linear-gradient(90deg,#0f150f 0%,#1e8c1a 55%,#2ea023 100%);padding:28px 24px;text-align:center;">
-        <div style="width:48px;height:48px;line-height:48px;border-radius:50%;background:linear-gradient(100deg,#f0c883,#c9a15a);color:#1a120c;font-size:26px;font-weight:800;margin:0 auto 10px;">✓</div>
-        <div style="color:#fff;font-size:20px;font-weight:800;letter-spacing:0.02em;">УСПЕШНАЯ ОПЛАТА!</div>
-        <div style="color:rgba(255,255,255,0.7);font-size:12px;margin-top:6px;">№ <?php echo esc_html($a['order_id']); ?></div>
-      </td></tr>
-      <tr><td style="padding:24px;">
-        <div style="color:#f0c883;font-size:28px;font-weight:800;margin-bottom:16px;"><?php echo esc_html($a['amount']); ?> <?php echo esc_html($a['currency']); ?></div>
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid rgba(242,233,218,0.12);">
-          <?php echo $rows_html; ?>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:460px;">
+      <tr><td style="height:6px;line-height:6px;font-size:0;background:linear-gradient(90deg,#1e8c1a 0%,#4ee23a 50%,#1e8c1a 100%);border-radius:14px 14px 0 0;">&nbsp;</td></tr>
+      <tr><td style="background:#0a0a0a;border-radius:0 0 14px 14px;padding:28px 24px 24px;">
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+          <img src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/images/receipt-logo.jpg'); ?>" alt="<?php echo esc_attr($business_name); ?>" width="140" style="width:140px;max-width:140px;height:auto;border-radius:50%;display:block;margin:0 auto 16px;" />
+        </td></tr></table>
+
+        <div style="text-align:center;color:#3ecb2f;font-size:19px;font-weight:800;">✅ УСПЕШНАЯ ОПЛАТА!</div>
+        <div style="text-align:center;color:#8a8a8a;font-size:12px;margin-top:6px;word-break:break-all;">№ <?php echo esc_html($a['order_id']); ?></div>
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px;">
+          <tr><td style="color:#8a8a8a;font-size:14px;">Сумма:</td>
+              <td style="text-align:right;"><span style="color:#4a9eff;font-size:26px;font-weight:800;"><?php echo esc_html($a['amount']); ?></span> <span style="color:#4a9eff;font-size:16px;font-weight:700;"><?php echo esc_html($a['currency']); ?></span></td></tr>
+          <?php echo $render_rows($top_rows); ?>
         </table>
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><?php echo $next_payment_html; ?></table>
-        <?php if ($footer_html) : ?>
-        <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(242,233,218,0.12);color:#8a7d6e;font-size:11px;line-height:1.6;">
-          <?php echo $footer_html; ?>
-        </div>
+
+        <div style="color:#ffffff;font-size:13px;font-weight:800;letter-spacing:0.04em;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);">ДАННЫЕ ПЛАТЕЖА</div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">
+          <?php echo $render_rows($payment_rows); ?>
+        </table>
+
+        <?php if ($payer_rows) : ?>
+        <div style="color:#ffffff;font-size:13px;font-weight:800;letter-spacing:0.04em;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);">ИНФОРМАЦИЯ О ПЛАТЕЛЬЩИКЕ</div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">
+          <?php echo $render_rows($payer_rows); ?>
+        </table>
         <?php endif; ?>
+
+        <?php echo $next_payment_html; ?>
+
+        <div style="margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);color:#6b6b6b;font-size:11px;line-height:1.6;text-align:center;">
+          Это письмо подтверждает оплату, обработанную <?php echo esc_html($business_name); ?>.
+        </div>
       </td></tr>
     </table>
   </td></tr>

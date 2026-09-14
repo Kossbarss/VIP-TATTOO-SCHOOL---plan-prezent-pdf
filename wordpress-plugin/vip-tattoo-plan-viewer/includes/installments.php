@@ -454,6 +454,7 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
             'plan_label'        => 'Оплата частями - часть ' . $step . ' из 2',
             'next_payment_note' => $next_note,
             'buyer_email'       => $email,
+            'buyer_phone'       => $order->phone ?? '',
         ]);
     }
     if ($order->telegram_chat_id) {
