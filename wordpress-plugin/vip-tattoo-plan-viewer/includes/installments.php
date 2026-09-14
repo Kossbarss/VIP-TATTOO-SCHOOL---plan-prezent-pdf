@@ -365,6 +365,29 @@ function vip_tattoo_plan_stripe_invoice_subscription_id($invoice) {
         ?? '';
 }
 
+/**
+ * Best-effort card brand/last4 + a charge id (shown as "Код авторизації" on
+ * the receipt) for an invoice -- the field that holds the paid charge has
+ * moved across Stripe API versions, so this tries every location seen in
+ * the wild before giving up (the receipt just omits these rows then).
+ */
+function vip_tattoo_plan_stripe_invoice_charge_details($invoice) {
+    $charge_id = $invoice['charge']
+        ?? $invoice['payments']['data'][0]['payment']['charge']
+        ?? $invoice['latest_charge']
+        ?? '';
+    if (!$charge_id || !is_string($charge_id)) return [];
+
+    $charge = vip_tattoo_plan_stripe_request('GET', '/charges/' . $charge_id);
+    if (is_wp_error($charge)) return [];
+
+    return [
+        'card_last4' => $charge['payment_method_details']['card']['last4'] ?? '',
+        'card_brand' => $charge['payment_method_details']['card']['brand'] ?? '',
+        'auth_code'  => $charge['id'] ?? '',
+    ];
+}
+
 function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
     global $wpdb;
     $subscription_id = vip_tattoo_plan_stripe_invoice_subscription_id($invoice);
@@ -445,7 +468,8 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
         $next_note = $step === 1
             ? 'Второй платёж ' . $step_eur . '€ спишется автоматически ' . date_i18n('d.m.Y', strtotime($now . ' +7 days')) . '.'
             : 'Оплата завершена (275€ всего). Дальнейших списаний не будет.';
-        vip_tattoo_plan_send_receipt_email($email, $subject, [
+        $charge_details = vip_tattoo_plan_stripe_invoice_charge_details($invoice);
+        vip_tattoo_plan_send_receipt_email($email, $subject, array_merge([
             'order_id'          => $order->id,
             'amount'            => $step_eur,
             'currency'          => 'EUR',
@@ -455,7 +479,7 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
             'next_payment_note' => $next_note,
             'buyer_email'       => $email,
             'buyer_phone'       => $order->phone ?? '',
-        ]);
+        ], $charge_details));
     }
     if ($order->telegram_chat_id) {
         vip_tattoo_plan_installment_telegram_api('sendMessage', [

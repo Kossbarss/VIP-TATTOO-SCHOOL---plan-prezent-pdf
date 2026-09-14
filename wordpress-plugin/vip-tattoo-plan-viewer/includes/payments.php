@@ -584,7 +584,7 @@ function vip_tattoo_plan_stripe_capture_and_mark_paid($session_id) {
         return;
     }
 
-    $session = vip_tattoo_plan_stripe_request('GET', '/checkout/sessions/' . $session_id);
+    $session = vip_tattoo_plan_stripe_request('GET', '/checkout/sessions/' . $session_id . '?expand[]=payment_intent.latest_charge');
     if (is_wp_error($session)) {
         error_log('[VIP Tattoo Plan] Stripe session lookup failed for ' . $session_id . ': ' . $session->get_error_message());
         return;
@@ -607,6 +607,20 @@ function vip_tattoo_plan_stripe_capture_and_mark_paid($session_id) {
     ], ['id' => $order->id]);
     $order->status = 'paid';
     $order->paid_at = $paid_at;
+
+    // deliver_access() often runs later, from the Telegram /start webhook,
+    // against a freshly re-fetched $order row -- so this extra receipt
+    // detail (unavailable on the orders table) has to survive that gap via
+    // a transient keyed by order id rather than as a property on $order.
+    $charge = $session['payment_intent']['latest_charge'] ?? null;
+    if (is_array($charge)) {
+        set_transient('vip_tattoo_plan_receipt_extra_' . $order->id, [
+            'card_last4' => $charge['payment_method_details']['card']['last4'] ?? '',
+            'card_brand' => $charge['payment_method_details']['card']['brand'] ?? '',
+            'auth_code'  => $charge['id'] ?? '',
+            'buyer_name' => $session['customer_details']['name'] ?? '',
+        ], HOUR_IN_SECONDS);
+    }
 
     vip_tattoo_plan_deliver_access($order);
 }
@@ -686,6 +700,7 @@ function vip_tattoo_plan_deliver_access($order) {
     }
 
     if (!empty($order->email)) {
+        $extra = get_transient('vip_tattoo_plan_receipt_extra_' . $order->id) ?: [];
         vip_tattoo_plan_send_receipt_email($order->email, 'Оплата прошла успешно - VIP tattoo school', [
             'order_id'     => $order->id,
             'amount'       => number_format((int) get_option('vip_tattoo_plan_price_cents', 27500) / 100, 2, '.', ''),
@@ -694,6 +709,10 @@ function vip_tattoo_plan_deliver_access($order) {
             'method'       => $order->provider === 'paypal' ? 'PayPal' : 'Card (Stripe)',
             'buyer_email'  => $order->email,
             'buyer_phone'  => $order->phone ?? '',
+            'buyer_name'   => $extra['buyer_name'] ?? '',
+            'card_last4'   => $extra['card_last4'] ?? '',
+            'card_brand'   => $extra['card_brand'] ?? '',
+            'auth_code'    => $extra['auth_code'] ?? '',
         ]);
     }
 }
@@ -1130,10 +1149,13 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
         'date'              => date_i18n('d.m.Y, H:i'),
         'method'            => 'Card',
         'card_last4'        => '',
+        'card_brand'        => '',
         'plan_label'        => '',
         'next_payment_note' => '',
         'buyer_email'       => '',
         'buyer_phone'       => '',
+        'buyer_name'        => '',
+        'auth_code'         => '',
     ];
     $a = array_merge($defaults, $args);
 
@@ -1144,18 +1166,27 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
 
     $top_rows = [];
     $top_rows[] = ['Сайт', esc_html($site_link)];
-    if ($business_nip)   $top_rows[] = ['NIP', esc_html($business_nip)];
-    if ($business_regon) $top_rows[] = ['REGON', esc_html($business_regon)];
+    if ($business_nip)   $top_rows[] = ['ЄДРПОУ', esc_html($business_nip)];
+    if ($business_regon) $top_rows[] = ['IBAN', esc_html($business_regon)];
     $top_rows[] = ['Опис', esc_html($a['product_name']) . ($a['plan_label'] ? ' (' . esc_html($a['plan_label']) . ')' : '')];
 
     $payment_rows = [];
-    $payment_rows[] = ['Способ оплаты', esc_html($a['method']) . ($a['card_last4'] ? ' •••• ' . esc_html($a['card_last4']) : '')];
+    if ($a['card_last4']) {
+        $card_label = $a['card_brand'] ? esc_html($a['card_brand']) . ' •• ' : '•••• ';
+        $payment_rows[] = ['Номер картки', $card_label . esc_html($a['card_last4'])];
+    } else {
+        $payment_rows[] = ['Способ оплаты', esc_html($a['method'])];
+    }
     $payment_rows[] = ['Дата', esc_html($a['date'])];
-    $payment_rows[] = ['Id платежа', esc_html($a['order_id'])];
+    $payment_rows[] = ['Id платежу', esc_html($a['order_id'])];
+    if ($a['auth_code']) {
+        $payment_rows[] = ['Код авторизації', esc_html($a['auth_code'])];
+    }
 
     $payer_rows = [];
-    if ($a['buyer_email']) $payer_rows[] = ['Email', esc_html($a['buyer_email'])];
+    if ($a['buyer_name'])  $payer_rows[] = ['ПІБ', esc_html($a['buyer_name'])];
     if ($a['buyer_phone']) $payer_rows[] = ['Телефон', esc_html($a['buyer_phone'])];
+    if ($a['buyer_email']) $payer_rows[] = ['Email', esc_html($a['buyer_email'])];
 
     $render_rows = function ($rows) {
         $html = '';
