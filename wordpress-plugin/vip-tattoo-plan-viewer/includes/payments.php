@@ -1224,9 +1224,9 @@ function vip_tattoo_plan_render_receipt_email_html($args) {
 <body style="margin:0;padding:0;background:#000000;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#000000;padding:24px 12px;font-family:Arial,Helvetica,sans-serif;">
   <tr><td align="center">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:720px;">
       <tr><td style="height:6px;line-height:6px;font-size:0;background:linear-gradient(90deg,#1e8c1a 0%,#4ee23a 50%,#1e8c1a 100%);border-radius:14px 14px 0 0;">&nbsp;</td></tr>
-      <tr><td style="background:#0a0a0a;border-radius:0 0 14px 14px;padding:32px 28px 28px;">
+      <tr><td style="background:#0a0a0a;border-radius:0 0 14px 14px;padding:40px 44px 36px;">
 
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
           <img src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/images/receipt-logo.jpg'); ?>" alt="<?php echo esc_attr($business_name); ?>" width="200" style="width:200px;max-width:200px;height:auto;border-radius:50%;display:block;margin:0 auto 18px;" />
@@ -1344,9 +1344,9 @@ function vip_tattoo_plan_render_failed_payment_email_html($args) {
 <body style="margin:0;padding:0;background:#000000;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#000000;padding:24px 12px;font-family:Arial,Helvetica,sans-serif;">
   <tr><td align="center">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:720px;">
       <tr><td style="height:6px;line-height:6px;font-size:0;background:linear-gradient(90deg,#8c1a1a 0%,#e23a3a 50%,#8c1a1a 100%);border-radius:14px 14px 0 0;">&nbsp;</td></tr>
-      <tr><td style="background:#0a0a0a;border-radius:0 0 14px 14px;padding:32px 28px 28px;">
+      <tr><td style="background:#0a0a0a;border-radius:0 0 14px 14px;padding:40px 44px 36px;">
 
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
           <img src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/images/receipt-logo.jpg'); ?>" alt="<?php echo esc_attr($business_name); ?>" width="200" style="width:200px;max-width:200px;height:auto;border-radius:50%;display:block;margin:0 auto 18px;" />
