@@ -1292,25 +1292,25 @@ function vip_tattoo_plan_render_failed_payment_email_html($args) {
 
     $top_rows = [];
     $top_rows[] = ['Сайт', esc_html($site_link)];
-    $top_rows[] = ['Опис', esc_html($a['product_name']) . ($a['plan_label'] ? ' (' . esc_html($a['plan_label']) . ')' : '')];
+    $top_rows[] = ['Описание', esc_html($a['product_name']) . ($a['plan_label'] ? ' (' . esc_html($a['plan_label']) . ')' : '')];
 
     $payment_rows = [];
     if ($a['card_last4']) {
         $card_label = $a['card_brand'] ? esc_html($a['card_brand']) . ' •• ' : '•••• ';
-        $payment_rows[] = ['Номер картки', $card_label . esc_html($a['card_last4'])];
+        $payment_rows[] = ['Номер карты', $card_label . esc_html($a['card_last4'])];
     } else {
         $payment_rows[] = ['Способ оплаты', esc_html($a['method'])];
     }
     $payment_rows[] = ['Дата', esc_html($a['date'])];
-    $payment_rows[] = ['Id платежу', esc_html($a['order_id'])];
+    $payment_rows[] = ['Id платежа', esc_html($a['order_id'])];
 
     $payer_rows = [];
     if ($a['buyer_name']) {
         $name_parts = preg_split('/\s+/', trim($a['buyer_name']), 2);
         $first_name = $name_parts[0] ?? '';
         $last_name  = $name_parts[1] ?? '';
-        if ($last_name)  $payer_rows[] = ['Прізвище', esc_html($last_name)];
-        if ($first_name) $payer_rows[] = ["Ім'я", esc_html($first_name)];
+        if ($last_name)  $payer_rows[] = ['Фамилия', esc_html($last_name)];
+        if ($first_name) $payer_rows[] = ['Имя', esc_html($first_name)];
     }
     if ($a['buyer_phone']) $payer_rows[] = ['Телефон', esc_html($a['buyer_phone'])];
     if ($a['buyer_email']) $payer_rows[] = ['Email', esc_html($a['buyer_email'])];
@@ -1319,8 +1319,8 @@ function vip_tattoo_plan_render_failed_payment_email_html($args) {
         $html = '';
         foreach ($rows as $row) {
             $html .= '<tr>'
-                . '<td style="padding:9px 0;color:#a0a0a0;font-size:17px;vertical-align:top;">' . $row[0] . ':</td>'
-                . '<td style="padding:9px 0 9px 12px;color:#ffffff;font-size:17px;text-align:right;">' . $row[1] . '</td>'
+                . '<td style="padding:10px 0;color:#a0a0a0;font-size:19px;vertical-align:top;">' . $row[0] . ':</td>'
+                . '<td style="padding:10px 0 10px 12px;color:#ffffff;font-size:19px;text-align:right;">' . $row[1] . '</td>'
                 . '</tr>';
         }
         return $html;
@@ -1329,11 +1329,11 @@ function vip_tattoo_plan_render_failed_payment_email_html($args) {
     $retry_html = '';
     if ($a['retry_url']) {
         $deadline_html = $a['retry_deadline']
-            ? 'Ви можете повторити оплату. Посилання буде діяти до ' . esc_html($a['retry_deadline'])
-            : 'Ви можете повторити оплату за посиланням нижче.';
-        $retry_html = '<div style="margin-top:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:16px;text-align:center;">'
-            . '<div style="color:#c9c9c9;font-size:15px;line-height:1.6;margin-bottom:14px;">' . $deadline_html . '</div>'
-            . '<a href="' . esc_url($a['retry_url']) . '" style="display:inline-block;background:#2f6fed;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:12px 28px;border-radius:8px;">Повторити оплату</a>'
+            ? 'Вы можете повторить оплату. Ссылка будет действовать до ' . esc_html($a['retry_deadline'])
+            : 'Вы можете повторить оплату по ссылке ниже.';
+        $retry_html = '<div style="margin-top:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:18px;text-align:center;">'
+            . '<div style="color:#c9c9c9;font-size:17px;line-height:1.6;margin-bottom:16px;">' . $deadline_html . '</div>'
+            . '<a href="' . esc_url($a['retry_url']) . '" style="display:inline-block;background:#2f6fed;color:#ffffff;text-decoration:none;font-size:18px;font-weight:700;padding:14px 30px;border-radius:8px;">Повторить оплату</a>'
             . '</div>';
     }
 
@@ -1352,35 +1352,35 @@ function vip_tattoo_plan_render_failed_payment_email_html($args) {
           <img src="<?php echo esc_url(VIP_TATTOO_PLAN_PLUGIN_URL . 'assets/images/receipt-logo.jpg'); ?>" alt="<?php echo esc_attr($business_name); ?>" width="200" style="width:200px;max-width:200px;height:auto;border-radius:50%;display:block;margin:0 auto 18px;" />
         </td></tr></table>
 
-        <div style="text-align:center;color:#e2483f;font-size:24px;font-weight:800;">❌ ПЛАТІЖ НЕУСПІШНИЙ!</div>
-        <div style="text-align:center;color:#9a9a9a;font-size:14px;margin-top:8px;word-break:break-all;">№ <?php echo esc_html($a['order_id']); ?></div>
+        <div style="text-align:center;color:#e2483f;font-size:27px;font-weight:800;">❌ ПЛАТЁЖ НЕ ПРОШЁЛ!</div>
+        <div style="text-align:center;color:#9a9a9a;font-size:15px;margin-top:8px;word-break:break-all;">№ <?php echo esc_html($a['order_id']); ?></div>
 
-        <div style="color:#d9d9d9;font-size:15px;line-height:1.7;margin-top:18px;">
-          На жаль, не вдалося здійснити оплату з вашої картки. Будь ласка, перевірте, чи вірно було вказано реквізити картки, також перевірте інтернет ліміт і спробуйте оплатити знов. Додатково Ви можете зв'язатися з Вашим банком для з'ясування причин відмови або скористатися іншою карткою.
+        <div style="color:#d9d9d9;font-size:17px;line-height:1.7;margin-top:18px;">
+          К сожалению, не удалось провести оплату с вашей карты. Пожалуйста, проверьте правильность реквизитов карты, а также проверьте интернет-лимит и попробуйте оплатить снова. Дополнительно вы можете связаться с вашим банком для выяснения причины отказа или воспользоваться другой картой.
         </div>
 
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:22px;">
-          <tr><td style="color:#a0a0a0;font-size:17px;">Сума:</td>
-              <td style="text-align:right;"><span style="color:#4a9eff;font-size:34px;font-weight:800;"><?php echo esc_html($a['amount']); ?></span> <span style="color:#4a9eff;font-size:19px;font-weight:700;"><?php echo esc_html($a['currency']); ?></span></td></tr>
+          <tr><td style="color:#a0a0a0;font-size:19px;">Сумма:</td>
+              <td style="text-align:right;"><span style="color:#4a9eff;font-size:36px;font-weight:800;"><?php echo esc_html($a['amount']); ?></span> <span style="color:#4a9eff;font-size:21px;font-weight:700;"><?php echo esc_html($a['currency']); ?></span></td></tr>
           <?php echo $render_rows($top_rows); ?>
         </table>
 
         <?php echo $retry_html; ?>
 
-        <div style="color:#ffffff;font-size:16px;font-weight:800;letter-spacing:0.04em;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);">ДАНІ ПЛАТЕЖУ</div>
+        <div style="color:#ffffff;font-size:18px;font-weight:800;letter-spacing:0.04em;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);">ДАННЫЕ ПЛАТЕЖА</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">
           <?php echo $render_rows($payment_rows); ?>
         </table>
 
         <?php if ($payer_rows) : ?>
-        <div style="color:#ffffff;font-size:16px;font-weight:800;letter-spacing:0.04em;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);">ІНФОРМАЦІЯ ПРО ПЛАТНИКА</div>
+        <div style="color:#ffffff;font-size:18px;font-weight:800;letter-spacing:0.04em;margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,0.1);">ИНФОРМАЦИЯ О ПЛАТЕЛЬЩИКЕ</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">
           <?php echo $render_rows($payer_rows); ?>
         </table>
         <?php endif; ?>
 
-        <div style="margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);color:#7a7a7a;font-size:13px;line-height:1.7;text-align:center;">
-          Це повідомлення про статус платежу, оброблене <?php echo esc_html($business_name); ?>.
+        <div style="margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);color:#7a7a7a;font-size:14px;line-height:1.7;text-align:center;">
+          Это письмо о статусе платежа, обработанного <?php echo esc_html($business_name); ?>.
         </div>
       </td></tr>
     </table>
