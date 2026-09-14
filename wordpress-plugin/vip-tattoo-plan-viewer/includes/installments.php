@@ -55,92 +55,48 @@ function vip_tattoo_plan_installment_fields() {
 }
 
 add_action('admin_menu', function () {
-    add_submenu_page(
-        'vip-tattoo-plan-payments',
-        'Оплата частинами',
-        'Оплата частинами',
-        'manage_options',
-        'vip-tattoo-plan-installments',
-        'vip_tattoo_plan_render_installment_settings'
-    );
-});
+    add_submenu_page('vip-tattoo-plan-payments', 'Розстрочка: Stripe', 'Розстрочка: Stripe', 'manage_options', 'vip-tattoo-plan-installments', 'vip_tattoo_plan_render_installment_stripe_settings');
+    add_submenu_page('vip-tattoo-plan-payments', 'Розстрочка: PayPal', 'Розстрочка: PayPal', 'manage_options', 'vip-tattoo-plan-paypal-installment', 'vip_tattoo_plan_render_installment_paypal_settings');
+    add_submenu_page('vip-tattoo-plan-payments', 'Розстрочка: Telegram', 'Розстрочка: Telegram', 'manage_options', 'vip-tattoo-plan-telegram-installment', 'vip_tattoo_plan_render_installment_telegram_settings');
+    add_submenu_page('vip-tattoo-plan-payments', 'Email / SMTP', 'Email / SMTP', 'manage_options', 'vip-tattoo-plan-smtp', 'vip_tattoo_plan_render_smtp_settings');
+    add_submenu_page('vip-tattoo-plan-payments', 'Google Sheets', 'Google Sheets', 'manage_options', 'vip-tattoo-plan-sheets', 'vip_tattoo_plan_render_sheets_settings');
+}, 21);
 
-function vip_tattoo_plan_render_installment_settings() {
+function vip_tattoo_plan_save_installment_settings_subset($keys, $defaults) {
+    $textarea_keys = ['vip_tattoo_plan_installment_access_message'];
+    foreach ($keys as $key) {
+        $default = $defaults[$key] ?? '';
+        if (in_array($key, $textarea_keys, true)) {
+            update_option($key, isset($_POST[$key]) ? sanitize_textarea_field(wp_unslash($_POST[$key])) : $default);
+        } else {
+            update_option($key, isset($_POST[$key]) ? sanitize_text_field(wp_unslash($_POST[$key])) : $default);
+        }
+    }
+}
+
+function vip_tattoo_plan_render_installment_stripe_settings() {
     if (!current_user_can('manage_options')) return;
-
     $defaults = vip_tattoo_plan_installment_fields();
+    $keys = ['vip_tattoo_plan_stripe_test_installment_price_id', 'vip_tattoo_plan_stripe_live_installment_price_id', 'vip_tattoo_plan_stripe_test_webhook_secret_installment', 'vip_tattoo_plan_stripe_live_webhook_secret_installment'];
 
     if (isset($_POST['vip_tattoo_plan_save_installment_settings']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
-        foreach ($defaults as $key => $default) {
-            if ($key === 'vip_tattoo_plan_installment_access_message') {
-                update_option($key, isset($_POST[$key]) ? sanitize_textarea_field(wp_unslash($_POST[$key])) : $default);
-            } else {
-                update_option($key, isset($_POST[$key]) ? sanitize_text_field(wp_unslash($_POST[$key])) : $default);
-            }
-        }
+        vip_tattoo_plan_save_installment_settings_subset($keys, $defaults);
         echo '<div class="notice notice-success"><p>Збережено.</p></div>';
-    }
-
-    if (isset($_POST['vip_tattoo_plan_create_paypal_plan']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
-        $result = vip_tattoo_plan_paypal_create_installment_plan();
-        if (is_wp_error($result)) {
-            echo '<div class="notice notice-error"><p>Помилка: ' . esc_html($result->get_error_message()) . '</p></div>';
-        } else {
-            echo '<div class="notice notice-success"><p>PayPal Billing Plan створено: <code>' . esc_html($result) . '</code> — вже збережено в поле нижче.</p></div>';
-        }
-    }
-
-    if (isset($_POST['vip_tattoo_plan_set_installment_telegram_webhook']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
-        $result = vip_tattoo_plan_set_installment_telegram_webhook();
-        if ($result === true) {
-            echo '<div class="notice notice-success"><p>Telegram webhook (оплати частинами) встановлено успішно.</p></div>';
-        } else {
-            echo '<div class="notice notice-error"><p>Помилка встановлення webhook: ' . esc_html($result) . '</p></div>';
-        }
-    }
-
-    if (isset($_POST['vip_tattoo_plan_send_test_receipt']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
-        $test_email = sanitize_email(wp_unslash($_POST['vip_tattoo_plan_test_receipt_email'] ?? ''));
-        $test_type  = sanitize_text_field(wp_unslash($_POST['vip_tattoo_plan_send_test_receipt']));
-        if (!$test_email || !is_email($test_email)) {
-            echo '<div class="notice notice-error"><p>Вкажи коректний email для тестової розсилки.</p></div>';
-        } else {
-            $sent = vip_tattoo_plan_send_test_receipt($test_email, $test_type);
-            if ($sent) {
-                echo '<div class="notice notice-success"><p>Тестовий лист (' . esc_html($test_type) . ') надіслано на ' . esc_html($test_email) . '.</p></div>';
-            } else {
-                echo '<div class="notice notice-error"><p>Не вдалося надіслати тестовий лист — перевір SMTP-налаштування.</p></div>';
-            }
-        }
-    }
-
-    if (isset($_POST['vip_tattoo_plan_test_sheet_row']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
-        $result = vip_tattoo_plan_sheets_append_row([
-            '', current_time('mysql'), '', '', 'Тест', '', '', '', '', '', 'Тестовий рядок з адмінки', '', '', '', current_time('mysql'),
-        ]);
-        if (is_wp_error($result)) {
-            echo '<div class="notice notice-error"><p>Помилка запису в Google Sheets: ' . esc_html($result->get_error_message()) . '</p></div>';
-        } else {
-            echo '<div class="notice notice-success"><p>Тестовий рядок додано в таблицю.</p></div>';
-        }
     }
 
     $vals = [];
     foreach ($defaults as $key => $default) {
         $vals[$key] = get_option($key, $default);
     }
-
-    $sa_email = vip_tattoo_plan_google_service_account_email();
-    $installment_telegram_webhook_url = rest_url('vip-tattoo-plan/v1/installment-telegram-webhook');
     ?>
     <div class="wrap">
-        <h1>Оплата частинами — 2 платежі по 137.50€</h1>
-        <p class="description">Той самий товар (курс), другий спосіб оплати поруч із повною оплатою 275€ одразу. Провайдер (Stripe/PayPal) і базова ціна беруться з основної сторінки «VIP Tattoo План: Оплата».</p>
+        <h1>Розстрочка — Stripe (2 × 137.50€)</h1>
+        <?php vip_tattoo_plan_settings_tabs_nav('vip-tattoo-plan-installments'); ?>
+        <p class="description">Secret Key береться той самий, що і для повної оплати (сторінка «Stripe (повна)») — тут лише окрема ціна і окремий вебхук-секрет для подій розстрочки.</p>
 
         <form method="post">
             <?php wp_nonce_field('vip_tattoo_plan_installment_settings', 'vip_tattoo_plan_installment_nonce'); ?>
-
-            <h2>Stripe — тижнева ціна (137.50 EUR, interval: week)</h2>
+            <h2>Тижнева ціна (137.50 EUR, interval: week)</h2>
             <table class="form-table">
                 <tr>
                     <th><label for="vip_tattoo_plan_stripe_test_installment_price_id">Test Price ID (рекурентний)</label></th>
@@ -156,9 +112,13 @@ function vip_tattoo_plan_render_installment_settings() {
                         <p class="description">Те саме, але в Live mode. Плагін сам після 1-го платежу обмежує підписку до 2 циклів і скасовує її — окремо нічого налаштовувати в Stripe не потрібно.</p>
                     </td>
                 </tr>
+            </table>
+
+            <h2>Вебхуки Stripe для розстрочки</h2>
+            <table class="form-table">
                 <tr>
-                    <th><label>Вебхуки Stripe</label></th>
-                    <td><p class="description">Можна або додати ці 3 події до того самого Stripe webhook endpoint, що і для повної оплати (сторінка «Оплата» вище), або створити для них окремий пункт призначення з тим самим URL — обидва варіанти працюють. Потрібні події: <code>invoice.payment_succeeded</code>, <code>invoice.payment_failed</code>, <code>customer.subscription.deleted</code>.</p></td>
+                    <th><label>Пояснення</label></th>
+                    <td><p class="description">Можна або додати ці 3 події до того самого Stripe webhook endpoint, що і для повної оплати (сторінка «Stripe (повна)»), або створити для них окремий пункт призначення з тим самим URL — обидва варіанти працюють. Потрібні події: <code>invoice.payment_succeeded</code>, <code>invoice.payment_failed</code>, <code>customer.subscription.deleted</code>.</p></td>
                 </tr>
                 <tr>
                     <th><label for="vip_tattoo_plan_stripe_test_webhook_secret_installment">Test Signing secret (окремий вебхук)</label></th>
@@ -175,8 +135,45 @@ function vip_tattoo_plan_render_installment_settings() {
                     </td>
                 </tr>
             </table>
+            <p class="submit">
+                <button type="submit" name="vip_tattoo_plan_save_installment_settings" value="1" class="button button-primary">Зберегти налаштування</button>
+            </p>
+        </form>
+    </div>
+    <?php
+}
 
-            <h2>PayPal — Billing Plan (137.50 EUR × 2, тиждень)</h2>
+function vip_tattoo_plan_render_installment_paypal_settings() {
+    if (!current_user_can('manage_options')) return;
+    $defaults = vip_tattoo_plan_installment_fields();
+    $keys = ['vip_tattoo_plan_paypal_sandbox_installment_plan_id', 'vip_tattoo_plan_paypal_live_installment_plan_id'];
+
+    if (isset($_POST['vip_tattoo_plan_save_installment_settings']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
+        vip_tattoo_plan_save_installment_settings_subset($keys, $defaults);
+        echo '<div class="notice notice-success"><p>Збережено.</p></div>';
+    }
+
+    if (isset($_POST['vip_tattoo_plan_create_paypal_plan']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
+        $result = vip_tattoo_plan_paypal_create_installment_plan();
+        if (is_wp_error($result)) {
+            echo '<div class="notice notice-error"><p>Помилка: ' . esc_html($result->get_error_message()) . '</p></div>';
+        } else {
+            echo '<div class="notice notice-success"><p>PayPal Billing Plan створено: <code>' . esc_html($result) . '</code> — вже збережено в поле нижче.</p></div>';
+        }
+    }
+
+    $vals = [];
+    foreach ($defaults as $key => $default) {
+        $vals[$key] = get_option($key, $default);
+    }
+    ?>
+    <div class="wrap">
+        <h1>Розстрочка — PayPal (2 × 137.50€)</h1>
+        <?php vip_tattoo_plan_settings_tabs_nav('vip-tattoo-plan-paypal-installment'); ?>
+        <p class="description">Client ID/Secret беруться ті самі, що і для повної оплати (сторінка «PayPal (повна)») — тут лише окремий Billing Plan для розстрочки.</p>
+
+        <form method="post">
+            <?php wp_nonce_field('vip_tattoo_plan_installment_settings', 'vip_tattoo_plan_installment_nonce'); ?>
             <table class="form-table">
                 <tr>
                     <th><label for="vip_tattoo_plan_paypal_sandbox_installment_plan_id">Sandbox Plan ID</label></th>
@@ -186,62 +183,55 @@ function vip_tattoo_plan_render_installment_settings() {
                     <th><label for="vip_tattoo_plan_paypal_live_installment_plan_id">Live Plan ID</label></th>
                     <td><input type="text" class="regular-text" id="vip_tattoo_plan_paypal_live_installment_plan_id" name="vip_tattoo_plan_paypal_live_installment_plan_id" value="<?php echo esc_attr($vals['vip_tattoo_plan_paypal_live_installment_plan_id']); ?>" placeholder="P-..." /></td>
                 </tr>
-                <tr>
-                    <th><label>Створити план автоматично</label></th>
-                    <td><p class="description">Спочатку заповни й збережи Sandbox/Live Client ID + Secret на сторінці «Оплата», обери потрібний режим (PayPal → Режим), збережи — тоді натисни кнопку нижче, вона створить продукт і план на 2 цикли по 137.50 EUR/тиждень і сама впише Plan ID у відповідне поле вище.</p></td>
-                </tr>
             </table>
+            <p class="submit">
+                <button type="submit" name="vip_tattoo_plan_save_installment_settings" value="1" class="button button-primary">Зберегти налаштування</button>
+            </p>
+        </form>
 
-            <h2>Email-сповіщення (Gmail SMTP)</h2>
-            <table class="form-table">
-                <tr>
-                    <th><label for="vip_tattoo_plan_smtp_host">SMTP Host</label></th>
-                    <td><input type="text" id="vip_tattoo_plan_smtp_host" name="vip_tattoo_plan_smtp_host" value="<?php echo esc_attr($vals['vip_tattoo_plan_smtp_host']); ?>" /></td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_smtp_port">SMTP Port</label></th>
-                    <td><input type="number" id="vip_tattoo_plan_smtp_port" name="vip_tattoo_plan_smtp_port" value="<?php echo esc_attr($vals['vip_tattoo_plan_smtp_port']); ?>" /></td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_smtp_username">SMTP логін (Gmail-адреса)</label></th>
-                    <td><input type="text" class="regular-text" id="vip_tattoo_plan_smtp_username" name="vip_tattoo_plan_smtp_username" value="<?php echo esc_attr($vals['vip_tattoo_plan_smtp_username']); ?>" /></td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_smtp_password">SMTP пароль (App Password)</label></th>
-                    <td><input type="password" class="regular-text" autocomplete="off" id="vip_tattoo_plan_smtp_password" name="vip_tattoo_plan_smtp_password" value="<?php echo esc_attr($vals['vip_tattoo_plan_smtp_password']); ?>" /></td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_smtp_from_email">Email відправника (From)</label></th>
-                    <td><input type="text" class="regular-text" id="vip_tattoo_plan_smtp_from_email" name="vip_tattoo_plan_smtp_from_email" value="<?php echo esc_attr($vals['vip_tattoo_plan_smtp_from_email']); ?>" /></td>
-                </tr>
-                <tr>
-                    <th><label for="vip_tattoo_plan_smtp_from_name">Ім'я відправника (From)</label></th>
-                    <td><input type="text" class="regular-text" id="vip_tattoo_plan_smtp_from_name" name="vip_tattoo_plan_smtp_from_name" value="<?php echo esc_attr($vals['vip_tattoo_plan_smtp_from_name']); ?>" /></td>
-                </tr>
-            </table>
+        <hr />
+        <h2>Створити план автоматично</h2>
+        <p class="description">Спочатку заповни й збережи Sandbox/Live Client ID + Secret на сторінці «PayPal (повна)», обери потрібний режим там (Режим), збережи — тоді натисни кнопку нижче, вона створить продукт і план на 2 цикли по 137.50 EUR/тиждень і сама впише Plan ID у поле вище.</p>
+        <form method="post">
+            <?php wp_nonce_field('vip_tattoo_plan_installment_settings', 'vip_tattoo_plan_installment_nonce'); ?>
+            <button type="submit" name="vip_tattoo_plan_create_paypal_plan" value="1" class="button">Створити PayPal Billing Plan автоматично</button>
+        </form>
+    </div>
+    <?php
+}
 
-            <h2>Google Sheets (журнал платежів оплати частинами)</h2>
-            <table class="form-table">
-                <tr>
-                    <th><label for="vip_tattoo_plan_google_sheet_id">ID таблиці</label></th>
-                    <td>
-                        <input type="text" class="regular-text" id="vip_tattoo_plan_google_sheet_id" name="vip_tattoo_plan_google_sheet_id" value="<?php echo esc_attr($vals['vip_tattoo_plan_google_sheet_id']); ?>" />
-                        <p class="description">Частина URL таблиці між <code>/d/</code> і <code>/edit</code>.</p>
-                    </td>
-                </tr>
-                <tr>
-                    <th><label>Service Account</label></th>
-                    <td>
-                        <?php if ($sa_email): ?>
-                            <p><code><?php echo esc_html($sa_email); ?></code> — переконайся, що цей email доданий як "Редактор" у таблиці (Поділитися).</p>
-                        <?php else: ?>
-                            <p class="description">Файл ключа <code>config/google-service-account.json</code> не знайдено в папці плагіна.</p>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-            </table>
+function vip_tattoo_plan_render_installment_telegram_settings() {
+    if (!current_user_can('manage_options')) return;
+    $defaults = vip_tattoo_plan_installment_fields();
+    $keys = ['vip_tattoo_plan_installment_telegram_bot_token', 'vip_tattoo_plan_installment_telegram_bot_username', 'vip_tattoo_plan_installment_access_message', 'vip_tattoo_plan_installment_kick_group_ids', 'vip_tattoo_plan_installment_kick_delay_hours'];
 
-            <h2>Telegram-доступ до оплати частинами</h2>
+    if (isset($_POST['vip_tattoo_plan_save_installment_settings']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
+        vip_tattoo_plan_save_installment_settings_subset($keys, $defaults);
+        echo '<div class="notice notice-success"><p>Збережено.</p></div>';
+    }
+
+    if (isset($_POST['vip_tattoo_plan_set_installment_telegram_webhook']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
+        $result = vip_tattoo_plan_set_installment_telegram_webhook();
+        if ($result === true) {
+            echo '<div class="notice notice-success"><p>Telegram webhook (оплати частинами) встановлено успішно.</p></div>';
+        } else {
+            echo '<div class="notice notice-error"><p>Помилка встановлення webhook: ' . esc_html($result) . '</p></div>';
+        }
+    }
+
+    $vals = [];
+    foreach ($defaults as $key => $default) {
+        $vals[$key] = get_option($key, $default);
+    }
+    $installment_telegram_webhook_url = rest_url('vip-tattoo-plan/v1/installment-telegram-webhook');
+    ?>
+    <div class="wrap">
+        <h1>Розстрочка — Telegram-доступ</h1>
+        <?php vip_tattoo_plan_settings_tabs_nav('vip-tattoo-plan-telegram-installment'); ?>
+        <p class="description">Це ОКРЕМИЙ бот від бота повної оплати — саме він пише клієнту, який обрав розстрочку.</p>
+
+        <form method="post">
+            <?php wp_nonce_field('vip_tattoo_plan_installment_settings', 'vip_tattoo_plan_installment_nonce'); ?>
             <table class="form-table">
                 <tr>
                     <th><label for="vip_tattoo_plan_installment_telegram_bot_token">Bot Token</label></th>
@@ -274,10 +264,17 @@ function vip_tattoo_plan_render_installment_settings() {
                     <td><code><?php echo esc_html($installment_telegram_webhook_url); ?></code></td>
                 </tr>
             </table>
-
             <p class="submit">
                 <button type="submit" name="vip_tattoo_plan_save_installment_settings" value="1" class="button button-primary">Зберегти налаштування</button>
             </p>
+        </form>
+
+        <hr />
+        <h2>Telegram webhook</h2>
+        <p>Після того як зберіг Bot Token вище — натисни цю кнопку один раз:</p>
+        <form method="post">
+            <?php wp_nonce_field('vip_tattoo_plan_installment_settings', 'vip_tattoo_plan_installment_nonce'); ?>
+            <button type="submit" name="vip_tattoo_plan_set_installment_telegram_webhook" value="1" class="button">Встановити Telegram webhook (оплати частинами)</button>
         </form>
 
         <hr />
@@ -297,22 +294,143 @@ function vip_tattoo_plan_render_installment_settings() {
                 <button type="submit" name="vip_tattoo_plan_send_test_receipt" value="failed" class="button button-primary">❌ Тест: 2-й платіж не пройшов</button>
             </p>
         </form>
+    </div>
+    <?php
+
+    if (isset($_POST['vip_tattoo_plan_send_test_receipt']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
+        $test_email = sanitize_email(wp_unslash($_POST['vip_tattoo_plan_test_receipt_email'] ?? ''));
+        $test_type  = sanitize_text_field(wp_unslash($_POST['vip_tattoo_plan_send_test_receipt']));
+        if (!$test_email || !is_email($test_email)) {
+            echo '<div class="notice notice-error"><p>Вкажи коректний email для тестової розсилки.</p></div>';
+        } else {
+            $sent = vip_tattoo_plan_send_test_receipt($test_email, $test_type);
+            if ($sent) {
+                echo '<div class="notice notice-success"><p>Тестовий лист (' . esc_html($test_type) . ') надіслано на ' . esc_html($test_email) . '.</p></div>';
+            } else {
+                echo '<div class="notice notice-error"><p>Не вдалося надіслати тестовий лист — перевір SMTP-налаштування.</p></div>';
+            }
+        }
+    }
+}
+
+function vip_tattoo_plan_render_smtp_settings() {
+    if (!current_user_can('manage_options')) return;
+    $defaults = vip_tattoo_plan_installment_fields();
+    $keys = ['vip_tattoo_plan_smtp_host', 'vip_tattoo_plan_smtp_port', 'vip_tattoo_plan_smtp_username', 'vip_tattoo_plan_smtp_password', 'vip_tattoo_plan_smtp_from_email', 'vip_tattoo_plan_smtp_from_name'];
+
+    if (isset($_POST['vip_tattoo_plan_save_installment_settings']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
+        vip_tattoo_plan_save_installment_settings_subset($keys, $defaults);
+        echo '<div class="notice notice-success"><p>Збережено.</p></div>';
+    }
+
+    $vals = [];
+    foreach ($defaults as $key => $default) {
+        $vals[$key] = get_option($key, $default);
+    }
+    ?>
+    <div class="wrap">
+        <h1>Email / SMTP</h1>
+        <?php vip_tattoo_plan_settings_tabs_nav('vip-tattoo-plan-smtp'); ?>
+        <p class="description">Спільні SMTP-налаштування для всіх email-квитанцій (повна оплата і розстрочка).</p>
+
+        <form method="post">
+            <?php wp_nonce_field('vip_tattoo_plan_installment_settings', 'vip_tattoo_plan_installment_nonce'); ?>
+            <table class="form-table">
+                <tr>
+                    <th><label for="vip_tattoo_plan_smtp_host">SMTP Host</label></th>
+                    <td><input type="text" id="vip_tattoo_plan_smtp_host" name="vip_tattoo_plan_smtp_host" value="<?php echo esc_attr($vals['vip_tattoo_plan_smtp_host']); ?>" /></td>
+                </tr>
+                <tr>
+                    <th><label for="vip_tattoo_plan_smtp_port">SMTP Port</label></th>
+                    <td><input type="number" id="vip_tattoo_plan_smtp_port" name="vip_tattoo_plan_smtp_port" value="<?php echo esc_attr($vals['vip_tattoo_plan_smtp_port']); ?>" /></td>
+                </tr>
+                <tr>
+                    <th><label for="vip_tattoo_plan_smtp_username">SMTP логін (Gmail-адреса)</label></th>
+                    <td><input type="text" class="regular-text" id="vip_tattoo_plan_smtp_username" name="vip_tattoo_plan_smtp_username" value="<?php echo esc_attr($vals['vip_tattoo_plan_smtp_username']); ?>" /></td>
+                </tr>
+                <tr>
+                    <th><label for="vip_tattoo_plan_smtp_password">SMTP пароль (App Password)</label></th>
+                    <td><input type="password" class="regular-text" autocomplete="off" id="vip_tattoo_plan_smtp_password" name="vip_tattoo_plan_smtp_password" value="<?php echo esc_attr($vals['vip_tattoo_plan_smtp_password']); ?>" /></td>
+                </tr>
+                <tr>
+                    <th><label for="vip_tattoo_plan_smtp_from_email">Email відправника (From)</label></th>
+                    <td><input type="text" class="regular-text" id="vip_tattoo_plan_smtp_from_email" name="vip_tattoo_plan_smtp_from_email" value="<?php echo esc_attr($vals['vip_tattoo_plan_smtp_from_email']); ?>" /></td>
+                </tr>
+                <tr>
+                    <th><label for="vip_tattoo_plan_smtp_from_name">Ім'я відправника (From)</label></th>
+                    <td><input type="text" class="regular-text" id="vip_tattoo_plan_smtp_from_name" name="vip_tattoo_plan_smtp_from_name" value="<?php echo esc_attr($vals['vip_tattoo_plan_smtp_from_name']); ?>" /></td>
+                </tr>
+            </table>
+            <p class="submit">
+                <button type="submit" name="vip_tattoo_plan_save_installment_settings" value="1" class="button button-primary">Зберегти налаштування</button>
+            </p>
+        </form>
+    </div>
+    <?php
+}
+
+function vip_tattoo_plan_render_sheets_settings() {
+    if (!current_user_can('manage_options')) return;
+    $defaults = vip_tattoo_plan_installment_fields();
+    $keys = ['vip_tattoo_plan_google_sheet_id'];
+
+    if (isset($_POST['vip_tattoo_plan_save_installment_settings']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
+        vip_tattoo_plan_save_installment_settings_subset($keys, $defaults);
+        echo '<div class="notice notice-success"><p>Збережено.</p></div>';
+    }
+
+    if (isset($_POST['vip_tattoo_plan_test_sheet_row']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
+        $result = vip_tattoo_plan_sheets_append_row([
+            '', current_time('mysql'), '', '', 'Тест', '', '', '', '', '', 'Тестовий рядок з адмінки', '', '', '', current_time('mysql'),
+        ]);
+        if (is_wp_error($result)) {
+            echo '<div class="notice notice-error"><p>Помилка запису в Google Sheets: ' . esc_html($result->get_error_message()) . '</p></div>';
+        } else {
+            echo '<div class="notice notice-success"><p>Тестовий рядок додано в таблицю.</p></div>';
+        }
+    }
+
+    $vals = [];
+    foreach ($defaults as $key => $default) {
+        $vals[$key] = get_option($key, $default);
+    }
+    $sa_email = vip_tattoo_plan_google_service_account_email();
+    ?>
+    <div class="wrap">
+        <h1>Google Sheets — журнал платежів</h1>
+        <?php vip_tattoo_plan_settings_tabs_nav('vip-tattoo-plan-sheets'); ?>
+
+        <form method="post">
+            <?php wp_nonce_field('vip_tattoo_plan_installment_settings', 'vip_tattoo_plan_installment_nonce'); ?>
+            <table class="form-table">
+                <tr>
+                    <th><label for="vip_tattoo_plan_google_sheet_id">ID таблиці</label></th>
+                    <td>
+                        <input type="text" class="regular-text" id="vip_tattoo_plan_google_sheet_id" name="vip_tattoo_plan_google_sheet_id" value="<?php echo esc_attr($vals['vip_tattoo_plan_google_sheet_id']); ?>" />
+                        <p class="description">Частина URL таблиці між <code>/d/</code> і <code>/edit</code>.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label>Service Account</label></th>
+                    <td>
+                        <?php if ($sa_email): ?>
+                            <p><code><?php echo esc_html($sa_email); ?></code> — переконайся, що цей email доданий як "Редактор" у таблиці (Поділитися).</p>
+                        <?php else: ?>
+                            <p class="description">Файл ключа <code>config/google-service-account.json</code> не знайдено в папці плагіна.</p>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+            </table>
+            <p class="submit">
+                <button type="submit" name="vip_tattoo_plan_save_installment_settings" value="1" class="button button-primary">Зберегти налаштування</button>
+            </p>
+        </form>
 
         <hr />
-        <p>
-            <form method="post" style="display:inline-block; margin-right:10px;">
-                <?php wp_nonce_field('vip_tattoo_plan_installment_settings', 'vip_tattoo_plan_installment_nonce'); ?>
-                <button type="submit" name="vip_tattoo_plan_create_paypal_plan" value="1" class="button">Створити PayPal Billing Plan автоматично</button>
-            </form>
-            <form method="post" style="display:inline-block; margin-right:10px;">
-                <?php wp_nonce_field('vip_tattoo_plan_installment_settings', 'vip_tattoo_plan_installment_nonce'); ?>
-                <button type="submit" name="vip_tattoo_plan_test_sheet_row" value="1" class="button">Тестовий запис у Google Sheets</button>
-            </form>
-            <form method="post" style="display:inline-block;">
-                <?php wp_nonce_field('vip_tattoo_plan_installment_settings', 'vip_tattoo_plan_installment_nonce'); ?>
-                <button type="submit" name="vip_tattoo_plan_set_installment_telegram_webhook" value="1" class="button">Встановити Telegram webhook (оплати частинами)</button>
-            </form>
-        </p>
+        <form method="post">
+            <?php wp_nonce_field('vip_tattoo_plan_installment_settings', 'vip_tattoo_plan_installment_nonce'); ?>
+            <button type="submit" name="vip_tattoo_plan_test_sheet_row" value="1" class="button">Тестовий запис у Google Sheets</button>
+        </form>
     </div>
     <?php
 }
