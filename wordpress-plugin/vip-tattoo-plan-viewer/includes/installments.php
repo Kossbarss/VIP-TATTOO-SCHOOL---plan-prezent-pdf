@@ -754,11 +754,11 @@ function vip_tattoo_plan_installment_deliver_access($order) {
     $next_payment_date = date_i18n('d.m.Y', strtotime($paid_at . ' +7 days'));
     $step_eur = number_format(VIP_TATTOO_PLAN_INSTALLMENT_STEP_CENTS / 100, 2, '.', '');
 
-    $installment_notice = "Оплата получена: {$step_eur}€ (часть 1 из 2), дата: " . date_i18n('d.m.Y', strtotime($paid_at)) . ".\n"
+    $installment_notice = "\n\nОплата получена: {$step_eur}€ (часть 1 из 2), дата: " . date_i18n('d.m.Y', strtotime($paid_at)) . ".\n"
         . "Второй платёж {$step_eur}€ спишется автоматически {$next_payment_date}.\n"
-        . "Доступ к курсу уже открыт ниже:\n\n";
+        . "Доступ к обучению уже открыт ниже: 👇";
 
-    $message = $installment_notice . get_option('vip_tattoo_plan_installment_access_message');
+    $message = get_option('vip_tattoo_plan_installment_access_message') . $installment_notice;
     $result = vip_tattoo_plan_installment_telegram_api('sendMessage', [
         'chat_id' => $order->telegram_chat_id,
         'text'    => $message,
