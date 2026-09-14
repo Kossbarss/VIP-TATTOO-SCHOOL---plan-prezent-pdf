@@ -157,6 +157,21 @@ function vip_tattoo_plan_render_payment_settings() {
         echo '<div class="notice notice-success"><p>Усі замовлення видалено.</p></div>';
     }
 
+    if (isset($_POST['vip_tattoo_plan_send_test_receipt']) && wp_verify_nonce($_POST['vip_tattoo_plan_payment_nonce'] ?? '', 'vip_tattoo_plan_payment_settings')) {
+        $test_email = sanitize_email(wp_unslash($_POST['vip_tattoo_plan_test_receipt_email'] ?? ''));
+        $test_type  = sanitize_text_field(wp_unslash($_POST['vip_tattoo_plan_send_test_receipt']));
+        if (!$test_email || !is_email($test_email)) {
+            echo '<div class="notice notice-error"><p>Вкажи коректний email для тестової розсилки.</p></div>';
+        } else {
+            $sent = vip_tattoo_plan_send_test_receipt($test_email, $test_type);
+            if ($sent) {
+                echo '<div class="notice notice-success"><p>Тестовий лист (' . esc_html($test_type) . ') надіслано на ' . esc_html($test_email) . '.</p></div>';
+            } else {
+                echo '<div class="notice notice-error"><p>Не вдалося надіслати тестовий лист — перевір SMTP-налаштування.</p></div>';
+            }
+        }
+    }
+
     $vals = [];
     foreach ($defaults as $key => $default) {
         $vals[$key] = get_option($key, $default);
@@ -362,6 +377,24 @@ function vip_tattoo_plan_render_payment_settings() {
             <button type="submit" name="vip_tattoo_plan_set_telegram_webhook" value="1" class="button">Встановити Telegram webhook</button>
         </form>
         <p class="description">Ендпоінт: <code><?php echo esc_html($telegram_webhook_url); ?></code></p>
+
+        <hr />
+        <h2>Тестова розсилка квитанцій (рубильник)</h2>
+        <p class="description">Надішли собі будь-яку з 3 квитанцій із тестовими даними — без реального платежу і без потреби чекати на тестову оплату в Stripe/PayPal.</p>
+        <form method="post">
+            <?php wp_nonce_field('vip_tattoo_plan_payment_settings', 'vip_tattoo_plan_payment_nonce'); ?>
+            <table class="form-table">
+                <tr>
+                    <th><label for="vip_tattoo_plan_test_receipt_email">Email для тестових листів</label></th>
+                    <td><input type="email" class="regular-text" id="vip_tattoo_plan_test_receipt_email" name="vip_tattoo_plan_test_receipt_email" value="<?php echo esc_attr(get_option('admin_email')); ?>" /></td>
+                </tr>
+            </table>
+            <p class="submit">
+                <button type="submit" name="vip_tattoo_plan_send_test_receipt" value="success" class="button button-primary">✅ Тест: Успішна оплата</button>
+                <button type="submit" name="vip_tattoo_plan_send_test_receipt" value="final" class="button button-primary">🎓 Тест: Курс оплачено повністю</button>
+                <button type="submit" name="vip_tattoo_plan_send_test_receipt" value="failed" class="button button-primary">❌ Тест: Платіж не пройшов</button>
+            </p>
+        </form>
 
         <hr />
         <h2>Останні замовлення</h2>
@@ -1552,6 +1585,37 @@ function vip_tattoo_plan_send_final_payment_email($to, $subject, $args) {
     remove_action('phpmailer_init', 'vip_tattoo_plan_configure_smtp');
     remove_filter('wp_mail_content_type', 'vip_tattoo_plan_mail_content_type_html');
     return $sent;
+}
+
+function vip_tattoo_plan_send_test_receipt($to, $type) {
+    $dummy = [
+        'order_id'      => 'TEST-' . wp_generate_password(8, false),
+        'amount'        => '137.50',
+        'currency'      => 'EUR',
+        'total_amount'  => '275.00',
+        'date'          => date_i18n('d.m.Y, H:i'),
+        'method'        => 'Card (Stripe)',
+        'card_last4'    => '4242',
+        'card_brand'    => 'Visa',
+        'plan_label'    => 'Оплата частями - часть 1 из 2',
+        'next_payment_note' => 'Второй платёж 137.50€ спишется автоматически ' . date_i18n('d.m.Y', strtotime('+7 days')) . '.',
+        'buyer_email'   => $to,
+        'buyer_phone'   => '+380501234567',
+        'buyer_name'    => 'Иван Петренко',
+        'auth_code'     => 'ch_test_' . wp_generate_password(10, false),
+        'retry_url'     => 'https://checkout.stripe.com/pay/cs_test_example',
+        'retry_deadline'=> date_i18n('H:i d.m.Y', strtotime('+24 hours')),
+    ];
+
+    switch ($type) {
+        case 'final':
+            return vip_tattoo_plan_send_final_payment_email($to, '[ТЕСТ] Оплата 2/2 получена - курс полностью оплачен', $dummy);
+        case 'failed':
+            return vip_tattoo_plan_send_failed_payment_email($to, '[ТЕСТ] Не удалось списать второй платёж', $dummy);
+        case 'success':
+        default:
+            return vip_tattoo_plan_send_receipt_email($to, '[ТЕСТ] Оплата прошла успешно', $dummy);
+    }
 }
 
 /*
