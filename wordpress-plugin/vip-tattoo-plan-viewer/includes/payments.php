@@ -1331,9 +1331,9 @@ function vip_tattoo_plan_render_failed_payment_email_html($args) {
         $deadline_html = $a['retry_deadline']
             ? 'Вы можете повторить оплату. Ссылка будет действовать до ' . esc_html($a['retry_deadline'])
             : 'Вы можете повторить оплату по ссылке ниже.';
-        $retry_html = '<div style="margin-top:22px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:20px;text-align:center;">'
-            . '<div style="color:#d6d6d6;font-size:23px;line-height:1.6;margin-bottom:18px;">' . $deadline_html . '</div>'
-            . '<a href="' . esc_url($a['retry_url']) . '" style="display:inline-block;background:#2f6fed;color:#ffffff;text-decoration:none;font-size:25px;font-weight:700;padding:16px 34px;border-radius:8px;">Повторить оплату</a>'
+        $retry_html = '<div style="margin-top:28px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:28px 24px;text-align:center;">'
+            . '<div style="color:#d6d6d6;font-size:22px;line-height:1.7;margin-bottom:22px;">' . $deadline_html . '</div>'
+            . '<a href="' . esc_url($a['retry_url']) . '" style="display:inline-block;background:#2f6fed;color:#ffffff;text-decoration:none;font-size:25px;font-weight:700;padding:18px 40px;border-radius:8px;">Повторить оплату</a>'
             . '</div>';
     }
 
@@ -1353,13 +1353,13 @@ function vip_tattoo_plan_render_failed_payment_email_html($args) {
         </td></tr></table>
 
         <div style="text-align:center;color:#e2483f;font-size:36px;font-weight:800;">❌ ПЛАТЁЖ НЕ ПРОШЁЛ!</div>
-        <div style="text-align:center;color:#a8a8a8;font-size:19px;margin-top:10px;word-break:break-all;">№ <?php echo esc_html($a['order_id']); ?></div>
+        <div style="text-align:center;color:#a8a8a8;font-size:19px;margin-top:12px;word-break:break-all;">№ <?php echo esc_html($a['order_id']); ?></div>
 
-        <div style="color:#e2e2e2;font-size:23px;line-height:1.7;margin-top:20px;">
-          К сожалению, не удалось провести оплату с вашей карты. Пожалуйста, проверьте правильность реквизитов карты, а также проверьте интернет-лимит и попробуйте оплатить снова. Дополнительно вы можете связаться с вашим банком для выяснения причины отказа или воспользоваться другой картой.
+        <div style="color:#e2e2e2;font-size:22px;line-height:1.9;margin-top:28px;">
+          Не удалось провести оплату с вашей карты.<br>Пожалуйста, проверьте реквизиты карты и интернет-лимит, затем попробуйте снова — либо свяжитесь с банком или используйте другую карту.
         </div>
 
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:26px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:34px;">
           <tr><td style="color:#b5b5b5;font-size:27px;">Сумма:</td>
               <td style="text-align:right;"><span style="color:#4a9eff;font-size:47px;font-weight:800;"><?php echo esc_html($a['amount']); ?></span> <span style="color:#4a9eff;font-size:27px;font-weight:700;"><?php echo esc_html($a['currency']); ?></span></td></tr>
           <?php echo $render_rows($top_rows); ?>
@@ -1367,7 +1367,7 @@ function vip_tattoo_plan_render_failed_payment_email_html($args) {
 
         <?php echo $retry_html; ?>
 
-        <div style="color:#ffffff;font-size:24px;font-weight:800;letter-spacing:0.04em;margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);">ДАННЫЕ ПЛАТЕЖА</div>
+        <div style="color:#ffffff;font-size:24px;font-weight:800;letter-spacing:0.04em;margin-top:34px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);">ДАННЫЕ ПЛАТЕЖА</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">
           <?php echo $render_rows($payment_rows); ?>
         </table>
