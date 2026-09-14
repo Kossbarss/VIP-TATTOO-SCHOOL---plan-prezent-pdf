@@ -48,6 +48,7 @@ function vip_tattoo_plan_installment_fields() {
 
         'vip_tattoo_plan_installment_telegram_bot_token'    => '',
         'vip_tattoo_plan_installment_telegram_bot_username' => '',
+        'vip_tattoo_plan_installment_access_message'        => "Спасибо за покупку обучения! Ваша оплата успешно прошла 🎉\n\nПереходите и присоединяйтесь к учебной программе, где вы сейчас увидите 15 блоков, наполненных материалами и уроками, по этой ссылке (сделайте запрос, и администратор сразу вас добавит):\n\nhttps://t.me/+cUtIkWv6ljo5NmQy\n\nСсылка для доступа к материалам:\n\nhttps://t.me/+F_eC8wV1jqtiMWQy\n\nНа этом доступе находится общий чат, а также в нем есть навигация по всему курсу, чтобы вам было проще найти необходимый материал и загрузить его, ссылка (доступ):\n\nhttps://t.me/+XUvrwztuyXQ2NGZi\n\nМоя рекомендация вам - сначала просмотрите всё наполнение, то есть «пробегитесь» по всем блокам и всему обучению, чтобы понять, где и что находится и как работает «навигатор», и только после этого, в уверенном настроении, начинайте обучение по урокам, и конечно, не забывайте о общении в чате.\n\nУточнение: если что-то не получается загрузить или любая «кнопка» не работает, сразу пишите в чат поддержки.\n\nЕсли возникнут какие-либо вопросы - я всегда на связи 👌",
         'vip_tattoo_plan_installment_kick_group_ids'        => '-1003753289762,-1003954532258',
         'vip_tattoo_plan_installment_kick_delay_hours'      => '24',
     ];
@@ -71,7 +72,11 @@ function vip_tattoo_plan_render_installment_settings() {
 
     if (isset($_POST['vip_tattoo_plan_save_installment_settings']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
         foreach ($defaults as $key => $default) {
-            update_option($key, isset($_POST[$key]) ? sanitize_text_field(wp_unslash($_POST[$key])) : $default);
+            if ($key === 'vip_tattoo_plan_installment_access_message') {
+                update_option($key, isset($_POST[$key]) ? sanitize_textarea_field(wp_unslash($_POST[$key])) : $default);
+            } else {
+                update_option($key, isset($_POST[$key]) ? sanitize_text_field(wp_unslash($_POST[$key])) : $default);
+            }
         }
         echo '<div class="notice notice-success"><p>Збережено.</p></div>';
     }
@@ -230,6 +235,13 @@ function vip_tattoo_plan_render_installment_settings() {
                 <tr>
                     <th><label for="vip_tattoo_plan_installment_telegram_bot_username">Юзернейм бота (без @)</label></th>
                     <td><input type="text" id="vip_tattoo_plan_installment_telegram_bot_username" name="vip_tattoo_plan_installment_telegram_bot_username" value="<?php echo esc_attr($vals['vip_tattoo_plan_installment_telegram_bot_username']); ?>" placeholder="vip_tattoo_payment_bot" /></td>
+                </tr>
+                <tr>
+                    <th><label for="vip_tattoo_plan_installment_access_message">Текст повідомлення з доступом (оплата частинами)</label></th>
+                    <td>
+                        <textarea id="vip_tattoo_plan_installment_access_message" name="vip_tattoo_plan_installment_access_message" rows="6" class="large-text"><?php echo esc_textarea($vals['vip_tattoo_plan_installment_access_message']); ?></textarea>
+                        <p class="description">Надсилається окремо через цього бота (оплата частинами) після 1-го платежу. Перед цим текстом плагін автоматично додає рядки про суму й дату 1-го та 2-го платежу.</p>
+                    </td>
                 </tr>
                 <tr>
                     <th><label for="vip_tattoo_plan_installment_kick_group_ids">Chat ID груп, звідки видаляти при неоплаті (через кому)</label></th>
@@ -740,7 +752,7 @@ function vip_tattoo_plan_installment_deliver_access($order) {
         . "Второй платёж {$step_eur}€ спишется автоматически {$next_payment_date}.\n"
         . "Доступ к курсу уже открыт ниже:\n\n";
 
-    $message = $installment_notice . get_option('vip_tattoo_plan_telegram_access_message');
+    $message = $installment_notice . get_option('vip_tattoo_plan_installment_access_message');
     $result = vip_tattoo_plan_installment_telegram_api('sendMessage', [
         'chat_id' => $order->telegram_chat_id,
         'text'    => $message,
