@@ -99,6 +99,21 @@ function vip_tattoo_plan_render_installment_settings() {
         }
     }
 
+    if (isset($_POST['vip_tattoo_plan_send_test_receipt']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
+        $test_email = sanitize_email(wp_unslash($_POST['vip_tattoo_plan_test_receipt_email'] ?? ''));
+        $test_type  = sanitize_text_field(wp_unslash($_POST['vip_tattoo_plan_send_test_receipt']));
+        if (!$test_email || !is_email($test_email)) {
+            echo '<div class="notice notice-error"><p>Вкажи коректний email для тестової розсилки.</p></div>';
+        } else {
+            $sent = vip_tattoo_plan_send_test_receipt($test_email, $test_type);
+            if ($sent) {
+                echo '<div class="notice notice-success"><p>Тестовий лист (' . esc_html($test_type) . ') надіслано на ' . esc_html($test_email) . '.</p></div>';
+            } else {
+                echo '<div class="notice notice-error"><p>Не вдалося надіслати тестовий лист — перевір SMTP-налаштування.</p></div>';
+            }
+        }
+    }
+
     if (isset($_POST['vip_tattoo_plan_test_sheet_row']) && wp_verify_nonce($_POST['vip_tattoo_plan_installment_nonce'] ?? '', 'vip_tattoo_plan_installment_settings')) {
         $result = vip_tattoo_plan_sheets_append_row([
             '', current_time('mysql'), '', '', 'Тест', '', '', '', '', '', 'Тестовий рядок з адмінки', '', '', '', current_time('mysql'),
@@ -262,6 +277,24 @@ function vip_tattoo_plan_render_installment_settings() {
 
             <p class="submit">
                 <button type="submit" name="vip_tattoo_plan_save_installment_settings" value="1" class="button button-primary">Зберегти налаштування</button>
+            </p>
+        </form>
+
+        <hr />
+        <h2>Тестова розсилка квитанцій (рубильник)</h2>
+        <p class="description">Надішли собі будь-яку з 3 квитанцій із тестовими даними — без реальної оплати частинами і без потреби чекати на тестову підписку в Stripe/PayPal.</p>
+        <form method="post">
+            <?php wp_nonce_field('vip_tattoo_plan_installment_settings', 'vip_tattoo_plan_installment_nonce'); ?>
+            <table class="form-table">
+                <tr>
+                    <th><label for="vip_tattoo_plan_test_receipt_email">Email для тестових листів</label></th>
+                    <td><input type="email" class="regular-text" id="vip_tattoo_plan_test_receipt_email" name="vip_tattoo_plan_test_receipt_email" value="<?php echo esc_attr(get_option('admin_email')); ?>" /></td>
+                </tr>
+            </table>
+            <p class="submit">
+                <button type="submit" name="vip_tattoo_plan_send_test_receipt" value="success" class="button button-primary">✅ Тест: 1-й платіж (1/2)</button>
+                <button type="submit" name="vip_tattoo_plan_send_test_receipt" value="final" class="button button-primary">🎓 Тест: 2-й платіж — курс оплачено повністю</button>
+                <button type="submit" name="vip_tattoo_plan_send_test_receipt" value="failed" class="button button-primary">❌ Тест: 2-й платіж не пройшов</button>
             </p>
         </form>
 
