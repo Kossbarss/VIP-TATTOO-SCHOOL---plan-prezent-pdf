@@ -393,7 +393,7 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
     $order->status = $step === 1 ? 'paid' : $order->status;
 
     if ($step === 1) {
-        vip_tattoo_plan_deliver_access($order);
+        vip_tattoo_plan_installment_deliver_access($order);
     }
 
     $email = $invoice['customer_email'] ?? ($order->email ?? '');
@@ -619,7 +619,7 @@ function vip_tattoo_plan_paypal_installment_sale_completed($subscription_id, $re
     $order->status = $step === 1 ? 'paid' : $order->status;
 
     if ($step === 1) {
-        vip_tattoo_plan_deliver_access($order);
+        vip_tattoo_plan_installment_deliver_access($order);
     }
 
     vip_tattoo_plan_sheets_append_row([
@@ -709,6 +709,32 @@ function vip_tattoo_plan_send_email($to, $subject, $body) {
     $sent = wp_mail($to, $subject, $body);
     remove_action('phpmailer_init', 'vip_tattoo_plan_configure_smtp');
     return $sent;
+}
+
+/**
+ * Installment orders must never be delivered through the shared
+ * vip_tattoo_plan_deliver_access() (payments.php) -- that one always sends
+ * through the full-payment bot's own token, which the installment
+ * customer's telegram_chat_id was never registered with (they only ever
+ * /start'd the installment bot). This is the installment-bot equivalent.
+ */
+function vip_tattoo_plan_installment_deliver_access($order) {
+    global $wpdb;
+    $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
+
+    if ($order->status !== 'paid' || !$order->telegram_chat_id || $order->delivered_at) {
+        return;
+    }
+
+    $message = get_option('vip_tattoo_plan_telegram_access_message');
+    $result = vip_tattoo_plan_installment_telegram_api('sendMessage', [
+        'chat_id' => $order->telegram_chat_id,
+        'text'    => $message,
+    ]);
+
+    if (!is_wp_error($result)) {
+        $wpdb->update($table, ['delivered_at' => current_time('mysql')], ['id' => $order->id]);
+    }
 }
 
 /* ------------------------------------------------------------------ */
@@ -835,7 +861,7 @@ function vip_tattoo_plan_rest_installment_telegram_webhook(WP_REST_Request $requ
             $wpdb->update($table, ['telegram_chat_id' => $chat_id], ['id' => $order->id]);
             $order->telegram_chat_id = $chat_id;
             if ($order->status === 'paid') {
-                vip_tattoo_plan_deliver_access($order);
+                vip_tattoo_plan_installment_deliver_access($order);
             } else {
                 vip_tattoo_plan_installment_telegram_api('sendMessage', [
                     'chat_id' => $chat_id,

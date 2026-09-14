@@ -554,8 +554,17 @@ function vip_tattoo_plan_stripe_capture_and_mark_paid($session_id) {
 
     $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
     $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE provider_order_id = %s", $session_id));
-    if (!$order || $order->status === 'paid') {
-        if ($order) vip_tattoo_plan_deliver_access($order);
+    if (!$order) return;
+
+    // Installment orders are captured and delivered exclusively through
+    // their own Stripe subscription/invoice webhooks (see installments.php)
+    // -- this shared one-time-payment path must never touch them, or it
+    // ends up paging the full-payment Telegram bot for a customer who only
+    // has a chat with the installment bot.
+    if (($order->plan_type ?? 'full') === 'installment') return;
+
+    if ($order->status === 'paid') {
+        vip_tattoo_plan_deliver_access($order);
         return;
     }
 
@@ -667,8 +676,15 @@ function vip_tattoo_plan_paypal_capture_and_mark_paid($paypal_order_id) {
 
     $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
     $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE provider_order_id = %s", $paypal_order_id));
-    if (!$order || $order->status === 'paid') {
-        if ($order) vip_tattoo_plan_deliver_access($order);
+    if (!$order) return;
+
+    // Same reasoning as the Stripe version above: installment orders (PayPal
+    // subscriptions, not one-time "orders") are captured and delivered
+    // exclusively through their own PayPal webhooks in installments.php.
+    if (($order->plan_type ?? 'full') === 'installment') return;
+
+    if ($order->status === 'paid') {
+        vip_tattoo_plan_deliver_access($order);
         return;
     }
 
