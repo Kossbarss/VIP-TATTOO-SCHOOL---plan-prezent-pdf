@@ -1267,7 +1267,7 @@ function vip_tattoo_plan_rest_stripe_webhook(WP_REST_Request $request) {
         $session = $event['data']['object'] ?? [];
         $session_id = $session['id'] ?? '';
         if (($session['mode'] ?? '') === 'subscription' && !empty($session['subscription'])) {
-            $debug = vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $session['subscription'], $session['customer_details']['name'] ?? '');
+            $debug = vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $session['subscription'], $session['customer_details']['name'] ?? '', $session['customer_details']['phone'] ?? '');
         } else {
             vip_tattoo_plan_stripe_capture_and_mark_paid($session_id);
             $debug = 'full payment capture ran for session=' . $session_id;

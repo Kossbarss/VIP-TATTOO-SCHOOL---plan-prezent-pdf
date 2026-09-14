@@ -496,16 +496,20 @@ function vip_tattoo_plan_stripe_start_installment_checkout($token) {
 }
 
 // Викликається з webhook на checkout.session.completed, коли mode=subscription.
-function vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $subscription_id, $buyer_name = '') {
+function vip_tattoo_plan_stripe_installment_checkout_completed($session_id, $subscription_id, $buyer_name = '', $buyer_phone = '') {
     global $wpdb;
     $table = $wpdb->prefix . VIP_TATTOO_PLAN_ORDERS_TABLE;
     $order = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE provider_order_id = %s", $session_id));
     if (!$order) return 'checkout_completed: order NOT FOUND for session_id=' . $session_id;
 
-    $wpdb->update($table, [
+    $update = [
         'stripe_subscription_id' => $subscription_id,
         'name'                   => $buyer_name ?: null,
-    ], ['id' => $order->id]);
+    ];
+    if ($buyer_phone) {
+        $update['phone'] = $buyer_phone;
+    }
+    $wpdb->update($table, $update, ['id' => $order->id]);
 
     // Раніше тут перетворювали підписку на subscription_schedule з
     // phases[iterations]=2, щоб Stripe сам зупинив її після 2-го платежу --
