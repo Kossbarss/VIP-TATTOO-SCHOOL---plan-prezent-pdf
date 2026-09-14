@@ -436,14 +436,25 @@ function vip_tattoo_plan_stripe_installment_invoice_paid($invoice) {
         $now,
     ]);
 
-    $subject = $step === 1
-        ? 'Оплата 1/2 отримана - доступ до курсу відкрито'
-        : 'Оплата 2/2 отримана - курс повністю оплачено';
-    $body = $step === 1
-        ? "Дякуємо! Перший платіж (137.50€) успішно отримано.\n\nДоступ до курсу вже надіслано в Telegram.\n\nДругий платіж (137.50€) спишеться автоматично через 7 днів."
-        : "Дякуємо! Другий платіж (137.50€) успішно отримано - курс повністю оплачено (275€).\n\nПодальших списань не буде.";
     if ($email) {
-        vip_tattoo_plan_send_email($email, $subject, $body);
+        $step_eur = number_format(VIP_TATTOO_PLAN_INSTALLMENT_STEP_CENTS / 100, 2, '.', '');
+        $paid_date = date_i18n('d.m.Y', strtotime($step === 1 ? $now : ($order->paid_at ?? $now)));
+        $subject = $step === 1
+            ? 'Оплата 1/2 получена - доступ к курсу открыт'
+            : 'Оплата 2/2 получена - курс полностью оплачен';
+        $next_note = $step === 1
+            ? 'Второй платёж ' . $step_eur . '€ спишется автоматически ' . date_i18n('d.m.Y', strtotime($now . ' +7 days')) . '.'
+            : 'Оплата завершена (275€ всего). Дальнейших списаний не будет.';
+        vip_tattoo_plan_send_receipt_email($email, $subject, [
+            'order_id'          => $order->id,
+            'amount'            => $step_eur,
+            'currency'          => 'EUR',
+            'date'              => $paid_date,
+            'method'            => 'Card (Stripe)',
+            'plan_label'        => 'Оплата частями - часть ' . $step . ' из 2',
+            'next_payment_note' => $next_note,
+            'buyer_email'       => $email,
+        ]);
     }
     if ($order->telegram_chat_id) {
         vip_tattoo_plan_installment_telegram_api('sendMessage', [
@@ -652,6 +663,26 @@ function vip_tattoo_plan_paypal_installment_sale_completed($subscription_id, $re
         $step >= 2 ? 'Повністю оплачено (2/2)' : 'Частково оплачено (1/2)',
         $step === 1 ? $now : ($order->paid_at ?? ''), $step >= 2 ? $now : '', $order->telegram_chat_id ?? '', $now,
     ]);
+
+    if (!empty($order->email)) {
+        $step_eur = number_format($paid_now_cents / 100, 2, '.', '');
+        $subject = $step === 1
+            ? 'Оплата 1/2 получена - доступ к курсу открыт'
+            : 'Оплата 2/2 получена - курс полностью оплачен';
+        $next_note = $step === 1
+            ? 'Второй платёж спишется автоматически через 7 дней.'
+            : 'Оплата завершена. Дальнейших списаний не будет.';
+        vip_tattoo_plan_send_receipt_email($order->email, $subject, [
+            'order_id'          => $order->id,
+            'amount'            => $step_eur,
+            'currency'          => 'EUR',
+            'date'              => date_i18n('d.m.Y', strtotime($now)),
+            'method'            => 'PayPal',
+            'plan_label'        => 'Оплата частями - часть ' . $step . ' из 2',
+            'next_payment_note' => $next_note,
+            'buyer_email'       => $order->email,
+        ]);
+    }
 }
 
 function vip_tattoo_plan_paypal_installment_payment_failed($subscription_id) {

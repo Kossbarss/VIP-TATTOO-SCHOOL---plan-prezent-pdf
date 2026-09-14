@@ -104,6 +104,10 @@ function vip_tattoo_plan_payment_fields() {
         'vip_tattoo_plan_currency'                   => 'EUR',
         'vip_tattoo_plan_product_name'               => 'VIP tattoo school - курс',
 
+        'vip_tattoo_plan_receipt_business_name'      => 'VIKTORIA PONIKAROVA STUDIO TATUAŻU "SARNA"',
+        'vip_tattoo_plan_receipt_business_nip'       => '6492327660',
+        'vip_tattoo_plan_receipt_business_regon'     => '524031644',
+
         'vip_tattoo_plan_telegram_access_bot_token'    => '',
         'vip_tattoo_plan_telegram_access_bot_username' => 'vip_tattoo_school_viktori_bot',
         'vip_tattoo_plan_telegram_access_message'      => "Спасибо за покупку обучения! Ваша оплата успешно прошла 🎉\n\nПереходите и присоединяйтесь к учебной программе, где вы сейчас увидите 15 блоков, наполненных материалами и уроками, по этой ссылке (сделайте запрос, и администратор сразу вас добавит):\n\nhttps://t.me/+cUtIkWv6ljo5NmQy\n\nСсылка для доступа к материалам:\n\nhttps://t.me/+F_eC8wV1jqtiMWQy\n\nНа этом доступе находится общий чат, а также в нем есть навигация по всему курсу, чтобы вам было проще найти необходимый материал и загрузить его, ссылка (доступ):\n\nhttps://t.me/+XUvrwztuyXQ2NGZi\n\nМоя рекомендация вам - сначала просмотрите всё наполнение, то есть «пробегитесь» по всем блокам и всему обучению, чтобы понять, где и что находится и как работает «навигатор», и только после этого, в уверенном настроении, начинайте обучение по урокам, и конечно, не забывайте о общении в чате.\n\nУточнение: если что-то не получается загрузить или любая «кнопка» не работает, сразу пишите в чат поддержки.\n\nЕсли возникнут какие-либо вопросы - я всегда на связи 👌",
@@ -188,6 +192,18 @@ function vip_tattoo_plan_render_payment_settings() {
                 <tr>
                     <th><label for="vip_tattoo_plan_product_name">Назва товару (показується на сторінці оплати)</label></th>
                     <td><input type="text" class="regular-text" id="vip_tattoo_plan_product_name" name="vip_tattoo_plan_product_name" value="<?php echo esc_attr($vals['vip_tattoo_plan_product_name']); ?>" /></td>
+                </tr>
+                <tr>
+                    <th><label for="vip_tattoo_plan_receipt_business_name">Реквізити для email-квитанції — назва бізнесу</label></th>
+                    <td><input type="text" class="regular-text" id="vip_tattoo_plan_receipt_business_name" name="vip_tattoo_plan_receipt_business_name" value="<?php echo esc_attr($vals['vip_tattoo_plan_receipt_business_name']); ?>" /></td>
+                </tr>
+                <tr>
+                    <th><label for="vip_tattoo_plan_receipt_business_nip">NIP</label></th>
+                    <td><input type="text" id="vip_tattoo_plan_receipt_business_nip" name="vip_tattoo_plan_receipt_business_nip" value="<?php echo esc_attr($vals['vip_tattoo_plan_receipt_business_nip']); ?>" /></td>
+                </tr>
+                <tr>
+                    <th><label for="vip_tattoo_plan_receipt_business_regon">REGON</label></th>
+                    <td><input type="text" id="vip_tattoo_plan_receipt_business_regon" name="vip_tattoo_plan_receipt_business_regon" value="<?php echo esc_attr($vals['vip_tattoo_plan_receipt_business_regon']); ?>" /></td>
                 </tr>
             </table>
 
@@ -668,6 +684,17 @@ function vip_tattoo_plan_deliver_access($order) {
     if (!is_wp_error($result)) {
         $wpdb->update($table, ['delivered_at' => current_time('mysql')], ['id' => $order->id]);
     }
+
+    if (!empty($order->email)) {
+        vip_tattoo_plan_send_receipt_email($order->email, 'Оплата прошла успешно - VIP tattoo school', [
+            'order_id'     => $order->id,
+            'amount'       => number_format((int) get_option('vip_tattoo_plan_price_cents', 27500) / 100, 2, '.', ''),
+            'currency'     => strtoupper(get_option('vip_tattoo_plan_currency', 'EUR')),
+            'date'         => date_i18n('d.m.Y', strtotime($order->paid_at ?: current_time('mysql'))),
+            'method'       => $order->provider === 'paypal' ? 'PayPal' : 'Card (Stripe)',
+            'buyer_email'  => $order->email,
+        ]);
+    }
 }
 
 function vip_tattoo_plan_paypal_capture_and_mark_paid($paypal_order_id) {
@@ -1080,4 +1107,114 @@ function vip_tattoo_plan_rest_telegram_webhook(WP_REST_Request $request) {
     }
 
     return new WP_REST_Response(['ok' => true], 200);
+}
+
+/* ------------------------------------------------------------------ */
+/* Branded HTML email receipt (full payment + installments)            */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A friendly branded payment confirmation, not a fiscal document -- Stripe
+ * itself already offers to email an official receipt (Settings -> Business
+ * -> Customer emails -> "Successful payments"); this is a second, separate
+ * email in the site's own dark/gold visual language, with a plain-language
+ * summary of what was paid and (for installments) what happens next.
+ */
+function vip_tattoo_plan_render_receipt_email_html($args) {
+    $defaults = [
+        'order_id'          => '',
+        'amount'            => '0.00',
+        'currency'          => 'EUR',
+        'product_name'      => get_option('vip_tattoo_plan_product_name', 'VIP tattoo school - курс'),
+        'date'              => date_i18n('d.m.Y'),
+        'method'            => 'Card',
+        'card_last4'        => '',
+        'plan_label'        => '',
+        'next_payment_note' => '',
+        'buyer_email'       => '',
+    ];
+    $a = array_merge($defaults, $args);
+
+    $business_name  = get_option('vip_tattoo_plan_receipt_business_name', '');
+    $business_nip   = get_option('vip_tattoo_plan_receipt_business_nip', '');
+    $business_regon = get_option('vip_tattoo_plan_receipt_business_regon', '');
+
+    $rows = [];
+    $rows[] = ['Курс', esc_html($a['product_name'])];
+    $rows[] = ['Дата', esc_html($a['date'])];
+    $rows[] = ['Способ оплаты', esc_html($a['method']) . ($a['card_last4'] ? ' •••• ' . esc_html($a['card_last4']) : '')];
+    if ($a['plan_label']) {
+        $rows[] = ['Тип оплаты', esc_html($a['plan_label'])];
+    }
+    if ($a['buyer_email']) {
+        $rows[] = ['Email', esc_html($a['buyer_email'])];
+    }
+    $rows[] = ['№ заказа', esc_html($a['order_id'])];
+
+    $rows_html = '';
+    foreach ($rows as $row) {
+        $rows_html .= '<tr>'
+            . '<td style="padding:7px 0;color:#a89a86;font-size:14px;">' . $row[0] . '</td>'
+            . '<td style="padding:7px 0;color:#e9e0d3;font-size:14px;text-align:right;">' . $row[1] . '</td>'
+            . '</tr>';
+    }
+
+    $next_payment_html = '';
+    if ($a['next_payment_note']) {
+        $next_payment_html = '<tr><td style="padding-top:16px;">'
+            . '<div style="background:rgba(240,200,131,0.1);border:1px solid rgba(201,161,90,0.35);border-radius:10px;padding:12px 14px;color:#f0c883;font-size:13px;line-height:1.5;">'
+            . esc_html($a['next_payment_note'])
+            . '</div></td></tr>';
+    }
+
+    $footer_lines = array_filter([$business_name, $business_nip ? 'NIP ' . $business_nip : '', $business_regon ? 'REGON ' . $business_regon : '']);
+    $footer_html = implode(' &middot; ', array_map('esc_html', $footer_lines));
+
+    ob_start();
+    ?>
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#0f0d0b;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0f0d0b;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;">
+  <tr><td align="center">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#1c1613;border-radius:16px;overflow:hidden;border:1px solid rgba(201,161,90,0.25);">
+      <tr><td style="background:linear-gradient(90deg,#15110f 0%,#dd0003 55%,#ff0003 100%);padding:28px 24px;text-align:center;">
+        <div style="width:48px;height:48px;line-height:48px;border-radius:50%;background:linear-gradient(100deg,#f0c883,#c9a15a);color:#1a120c;font-size:26px;font-weight:800;margin:0 auto 10px;">✓</div>
+        <div style="color:#fff;font-size:20px;font-weight:800;letter-spacing:0.02em;">УСПЕШНАЯ ОПЛАТА!</div>
+        <div style="color:rgba(255,255,255,0.7);font-size:12px;margin-top:6px;">№ <?php echo esc_html($a['order_id']); ?></div>
+      </td></tr>
+      <tr><td style="padding:24px;">
+        <div style="color:#f0c883;font-size:28px;font-weight:800;margin-bottom:16px;"><?php echo esc_html($a['amount']); ?> <?php echo esc_html($a['currency']); ?></div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid rgba(242,233,218,0.12);">
+          <?php echo $rows_html; ?>
+        </table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><?php echo $next_payment_html; ?></table>
+        <?php if ($footer_html) : ?>
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(242,233,218,0.12);color:#8a7d6e;font-size:11px;line-height:1.6;">
+          <?php echo $footer_html; ?>
+        </div>
+        <?php endif; ?>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>
+    <?php
+    return ob_get_clean();
+}
+
+function vip_tattoo_plan_mail_content_type_html() {
+    return 'text/html';
+}
+
+function vip_tattoo_plan_send_receipt_email($to, $subject, $args) {
+    if (!$to || !is_email($to)) return false;
+    $html = vip_tattoo_plan_render_receipt_email_html($args);
+    add_action('phpmailer_init', 'vip_tattoo_plan_configure_smtp');
+    add_filter('wp_mail_content_type', 'vip_tattoo_plan_mail_content_type_html');
+    $sent = wp_mail($to, $subject, $html);
+    remove_action('phpmailer_init', 'vip_tattoo_plan_configure_smtp');
+    remove_filter('wp_mail_content_type', 'vip_tattoo_plan_mail_content_type_html');
+    return $sent;
 }
