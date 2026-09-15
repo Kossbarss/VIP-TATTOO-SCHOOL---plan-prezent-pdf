@@ -304,124 +304,19 @@
     display:flex; align-items:center; justify-content:center; text-align:center;
     font-family:'Playfair Display',serif; font-style:italic; font-weight:900; font-size:1.45cqw; line-height:1.4; color:#8a5a1f;
   }
-
-  /* ====================================================================
-     Real HTML/CSS slides ("rslide-*") -- replacing baked JPG slides one
-     at a time with genuine markup, styled the same way vip-tattoo-landing
-     is: fluid clamp() type/spacing instead of position-percentage text
-     glued to a fixed-ratio image. A slide built this way never needs the
-     "shrink the whole image or the text goes illegible" tradeoff --
-     text re-flows and the layout re-stacks at its own breakpoint. Photos
-     stay real photos (no text baked into them), cropped once from the
-     original slide art.
-     ==================================================================== */
-  :root{
-    --rs-bg-1:#3a1712; --rs-bg-2:#1c100c; --rs-bg-3:#120b09;
-    --rs-gold:#e3cfa0; --rs-gold-dim:#c9b483;
-    --rs-cream:#f3ece0; --rs-body:#d9cdbf;
-    --rs-pad-x:clamp(1.5rem, 5vw, 5.5rem);
-    --rs-pad-y:clamp(2.5rem, 5vw, 4.5rem);
-  }
-  .rslide{
-    position:relative; display:grid; grid-template-columns:1.15fr 1fr; align-items:center;
-    gap:clamp(2rem, 4vw, 4rem);
-    padding:var(--rs-pad-y) var(--rs-pad-x);
-    background:linear-gradient(135deg, var(--rs-bg-1) 0%, var(--rs-bg-2) 55%, var(--rs-bg-3) 100%);
-    border-bottom:3px solid #15110e;
-    overflow:hidden;
-  }
-  .rslide-logo{ display:flex; align-items:center; gap:0.75rem; margin-bottom:clamp(1.5rem, 3vw, 2.5rem); }
-  .rslide-logo-mark{
-    display:flex; align-items:center; justify-content:center;
-    width:clamp(2.2rem, 3vw, 2.75rem); height:clamp(2.2rem, 3vw, 2.75rem);
-    border:1.5px solid var(--rs-gold); border-radius:50%;
-    font-family:'Playfair Display',serif; font-weight:700; font-size:clamp(1rem,1.4vw,1.3rem); color:var(--rs-gold);
-    flex-shrink:0;
-  }
-  .rslide-logo-text{
-    font-family:'Nunito',sans-serif; font-weight:700; font-size:clamp(0.8rem, 1vw, 1rem);
-    letter-spacing:0.35em; color:var(--rs-gold);
-  }
-  .rslide-h1{
-    margin:0 0 clamp(1.25rem, 2.5vw, 1.75rem);
-    font-family:'Playfair Display',serif; font-weight:700; color:var(--rs-cream);
-    font-size:clamp(1.9rem, 4.4vw, 3.35rem); line-height:1.14; text-wrap:balance;
-  }
-  .rslide-h1 em{ font-style:normal; color:var(--rs-gold); }
-  .rslide-desc{
-    max-width:38rem; margin:0 0 clamp(2rem, 4vw, 3rem);
-    font-family:'Nunito',sans-serif; font-weight:400; color:var(--rs-body);
-    font-size:clamp(0.95rem, 1.15vw, 1.15rem); line-height:1.65;
-  }
-  .rslide-stats{
-    display:flex; flex-wrap:wrap; gap:clamp(1.5rem, 3vw, 2.75rem);
-    margin-bottom:clamp(2rem, 4vw, 3rem);
-  }
-  .rslide-stat .num{
-    display:block; font-family:'Playfair Display',serif; font-weight:700; color:var(--rs-gold);
-    font-size:clamp(1.6rem, 2.6vw, 2.35rem); line-height:1;
-  }
-  .rslide-stat .label{
-    display:block; margin-top:0.5rem; max-width:9rem;
-    font-family:'Nunito',sans-serif; font-weight:600; color:var(--rs-body);
-    font-size:clamp(0.7rem, 0.85vw, 0.85rem); line-height:1.35;
-  }
-  .rslide-byline{
-    display:flex; align-items:center; gap:1rem;
-    font-family:'Playfair Display',serif; font-style:italic; font-weight:500; color:var(--rs-body);
-    font-size:clamp(0.85rem, 1vw, 1rem);
-  }
-  .rslide-byline .rule{ width:clamp(2rem,3vw,3rem); height:1px; background:var(--rs-gold-dim); flex-shrink:0; }
-  .rslide-photos{
-    display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:clamp(0.6rem, 1.2vw, 1rem);
-    height:clamp(20rem, 34vw, 32rem);
-    overflow:hidden;
-  }
-  .rslide-photos img{
-    width:100%; height:100%; min-height:0; min-width:0; object-fit:cover; border-radius:1rem; display:block;
-    box-shadow:0 1rem 2rem -0.75rem rgba(0,0,0,0.6);
-  }
-  .rslide-photos .rs1-photo-main{ grid-row:1 / span 2; }
-  .rslide-badge{
-    position:absolute; right:clamp(1rem,2vw,1.75rem); bottom:clamp(1rem,2vw,1.75rem);
-    display:flex; align-items:baseline; gap:0.15rem;
-    width:clamp(2.4rem,3vw,2.9rem); height:clamp(2.4rem,3vw,2.9rem); border-radius:50%;
-    background:rgba(255,255,255,0.08); backdrop-filter:blur(4px);
-    font-family:'Nunito',sans-serif; font-weight:800; color:var(--rs-cream);
-    justify-content:center;
-  }
-  .rslide-badge .num{ font-size:clamp(0.85rem,1.1vw,1rem); }
-  .rslide-badge .den{ font-size:clamp(0.55rem,0.7vw,0.65rem); opacity:0.65; }
-
-  @media (max-width:767px){
-    .rslide{ grid-template-columns:1fr; }
-    .rslide-photos{ order:-1; height:clamp(16rem, 62vw, 22rem); }
-    .rslide-stats{ gap:clamp(1.25rem, 6vw, 2rem) clamp(1.5rem, 8vw, 2.5rem); }
-  }
 </style>
 </head>
 <body>
 <div class="slides">
-  <section class="rslide rslide-1">
-    <div class="rslide-content">
-      <div class="rslide-logo"><span class="rslide-logo-mark">V</span><span class="rslide-logo-text">VIP TATTOO SCHOOL</span></div>
-      <h1 class="rslide-h1">Полная программа обучения тату-мастеров с нуля до <em>постоянных клиентов</em></h1>
-      <p class="rslide-desc">Полное содержание и план всех 15 блоков курса - от первого включения машинки до именного диплома. Автор - Виктория Поникарова, основательница студии Sarna Tattoo, ментор 300+ выпускников в 12 студиях-партнёрах по Украине и Европе.</p>
-      <div class="rslide-stats">
-        <div class="rslide-stat"><span class="num">15</span><span class="label">практических блоков</span></div>
-        <div class="rslide-stat"><span class="num">40+</span><span class="label">часов практики и видео</span></div>
-        <div class="rslide-stat"><span class="num">18</span><span class="label">разобранных стилей тату</span></div>
-        <div class="rslide-stat"><span class="num">12</span><span class="label">студий-партнёров</span></div>
-      </div>
-      <div class="rslide-byline"><span class="rule"></span>Виктория Поникарова · ViP tattoo school</div>
-    </div>
-    <div class="rslide-photos">
-      <img class="rs1-photo-main" src="assets/hero/slide1-photo-tattoo.jpg" alt="Виктория делает тату-работу клиенту">
-      <img src="assets/hero/slide1-photo-portrait.jpg" alt="Виктория Поникарова, портрет">
-      <img src="assets/hero/slide1-photo-teaching.jpg" alt="Виктория проводит очное занятие с ученицами">
-    </div>
-    <div class="rslide-badge"><span class="num">1</span><span class="den">/23</span></div>
-  </section>
+  <div class="slide-wrap">
+    <img class="slide-img" src="assets/slides/slide-01.jpg?v=3" alt="Слайд 1 - VIP Tattoo School">
+    <div class="ov ov-s1-desc">Полное содержание и план всех 15 блоков курса - от первого включения машинки до именного диплома. Автор - Виктория Поникарова, основательница студии Sarna Tattoo, ментор 300+ выпускников в 12 студиях-партнёрах по Украине и Европе.</div>
+    <div class="ov ov-s1-stat" style="left:4.375%;width:10.625%;">практических блоков</div>
+    <div class="ov ov-s1-stat" style="left:16.67%;width:11.875%;">часов практики и видео</div>
+    <div class="ov ov-s1-stat" style="left:29.04%;width:10.42%;">разобранных стилей тату</div>
+    <div class="ov ov-s1-stat" style="left:41.375%;width:9.25%;">студий-партнёров</div>
+    <div class="ov ov-badge on-dark"><span class="num">1</span><span class="den">/23</span></div>
+  </div>
   <div class="slide-wrap">
     <img class="slide-img" src="assets/slides/slide-02.jpg?v=10" alt="Слайд 2 - структура курса">
     <div class="ov sq-icon" style="left:4.458%;top:26.42%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
