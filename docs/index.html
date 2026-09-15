@@ -381,8 +381,12 @@
   .s3-wrap{ background:#faf6ef; padding:2.4cqw 4.458cqw 3.6cqw; }
   .s3-head{ display:flex; align-items:center; gap:1.6cqw; margin-bottom:1.6cqw; padding-bottom:1.6cqw; border-bottom:1px solid #e5ddcc; }
   .s3-badge-black{ width:4.75cqw; height:4.75cqw; flex-shrink:0; display:block; }
-  .s3-heading{ margin:0; font-family:'Playfair Display',serif; font-weight:700; font-size:2.35cqw; color:#17120d; }
-  .s3-subtitle{ margin:0.3cqw 0 0; font-family:'Nunito',sans-serif; font-weight:800; font-size:1.7cqw; color:#3a2c1c; }
+  .s3-heading{
+    margin:0; font-family:var(--font-rise); font-weight:700; font-size:2.3cqw;
+    letter-spacing:-0.045em; font-variation-settings:"wdth" 116, "opsz" 36;
+    text-transform:uppercase; color:#17120d;
+  }
+  .s3-subtitle{ margin:0.5cqw 0 0; font-family:var(--font-body-2); font-weight:500; font-size:1.35cqw; color:#3a2c1c; }
   .s3-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:1.4cqw; margin-bottom:2cqw; }
   .s3-card{
     background:#fff; border:1px solid #e5ddcc; border-radius:1.1cqw;
