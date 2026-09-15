@@ -132,8 +132,28 @@
      Same card visual (gradient/ring/shine/V-watermark/number/label) as
      .sq-icon + .ov-card-num/.ov-card-label above -- only the layout
      mechanism changed, from position:absolute percentages to grid. */
-  .s2-wrap{ background:#1a110d; }
-  .s2-title{ display:block; width:100%; height:auto; }
+  .s2-wrap{ background:linear-gradient(105deg,#3a1712 0%,#1a110d 55%); }
+  /* Title/subtitle rebuilt as real HTML using the exact same font
+     treatment as slide 1's hero h1 (Roboto Flex, uppercase, same
+     weight/letter-spacing/variation-settings), per request -- was
+     previously a cropped image with a decorative blackletter face. */
+  .s2-head{ padding:2.6cqw 4.458cqw 1.2cqw; }
+  .s2-kicker{
+    display:block; margin-bottom:0.9cqw;
+    font-family:var(--font-rise); font-weight:700; font-size:1.05cqw;
+    letter-spacing:0.18em; text-transform:uppercase; color:#e8d5a8;
+  }
+  .s2-heading{
+    margin:0; font-family:var(--font-rise); font-weight:700;
+    font-size:2.6cqw; line-height:1.05; letter-spacing:-0.045em;
+    font-variation-settings:"wdth" 116, "opsz" 36;
+    text-transform:uppercase; color:#fffdfa;
+  }
+  @media (max-width:600px){
+    .s2-head{ padding:5vw 5vw 2vw; }
+    .s2-kicker{ font-size:3vw; margin-bottom:2vw; }
+    .s2-heading{ font-size:6.5vw; }
+  }
   .s2-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:1.2cqw; padding:2.4cqw 4.458cqw 3.6cqw; }
   .s2-card{
     position:relative; aspect-ratio:1.95/1; border-radius:14%/26%; overflow:hidden;
@@ -444,7 +464,10 @@
     <div class="ov ov-badge on-dark"><span class="num">1</span><span class="den">/23</span></div>
   </section>
   <div class="slide-wrap s2-wrap">
-    <img class="s2-title" src="assets/slides/slide-02-title.jpg" alt="Слайд 2 - структура курса: 15 блоков, из которых состоит курс">
+    <div class="s2-head">
+      <span class="s2-kicker">Структура курса</span>
+      <h2 class="s2-heading">15 блоков, из которых состоит курс</h2>
+    </div>
     <div class="s2-grid">
       <div class="s2-card"><span class="ring"></span><span class="s2-num">01</span><span class="s2-label">VIP tattoo school</span></div>
       <div class="s2-card"><span class="ring"></span><span class="s2-num">02</span><span class="s2-label">AI-assistant</span></div>
