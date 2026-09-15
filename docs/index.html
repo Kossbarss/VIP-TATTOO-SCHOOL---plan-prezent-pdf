@@ -372,6 +372,41 @@
     font-family:'Playfair Display',serif; font-style:italic; font-weight:900; font-size:1.45cqw; line-height:1.4; color:#8a5a1f;
   }
 
+  /* ---- Slide 3, rebuilt as real responsive HTML ----------------------
+     Same reason as slides 1-2: the 4 support-format cards and the
+     quote box were baked into slide-03.jpg at fixed positions (image
+     already has its text erased, per the comment above), so they
+     couldn't reflow on narrow screens. Colors/borders sampled directly
+     off the original image pixels; layout is now a real grid. */
+  .s3-wrap{ background:#faf6ef; padding:2.4cqw 4.458cqw 3.6cqw; }
+  .s3-head{ display:flex; align-items:center; gap:1cqw; margin-bottom:1.6cqw; padding-bottom:1.6cqw; border-bottom:1px solid #e5ddcc; }
+  .s3-heading{ margin:0; font-family:'Playfair Display',serif; font-weight:700; font-size:2.35cqw; color:#17120d; }
+  .s3-subtitle{ margin:0.3cqw 0 0; font-family:'Nunito',sans-serif; font-weight:800; font-size:1.7cqw; color:#3a2c1c; }
+  .s3-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:1.4cqw; margin-bottom:2cqw; }
+  .s3-card{
+    background:#fff; border:1px solid #e5ddcc; border-radius:1.1cqw;
+    padding:1.6cqw 1.2cqw 1.4cqw; text-align:center;
+    display:flex; flex-direction:column; align-items:center; gap:0.9cqw;
+  }
+  .s3-card img{ width:3.6cqw; height:3.6cqw; display:block; }
+  .s3-card h3{ margin:0; font-family:'Playfair Display',serif; font-weight:700; font-size:1.3cqw; color:#241a10; }
+  .s3-card p{ margin:0; font-family:'Nunito',sans-serif; font-weight:800; font-size:1.05cqw; line-height:1.5; color:#241a10; }
+  .s3-quote{
+    box-sizing:border-box; padding:1.4cqw 2.4cqw; background:#faf3e1; border:1px solid #c9a15a; border-radius:0.9cqw;
+    text-align:center; font-family:'Playfair Display',serif; font-style:italic; font-weight:900; font-size:1.45cqw; line-height:1.4; color:#8a5a1f;
+  }
+  @media (max-width:768px){
+    .s3-grid{ grid-template-columns:repeat(2,1fr); gap:3vw; }
+    .s3-card{ padding:4vw 3vw; border-radius:3vw; gap:2.5vw; }
+    .s3-card img{ width:9vw; height:9vw; }
+    .s3-card h3{ font-size:4vw; }
+    .s3-card p{ font-size:3.2vw; }
+    .s3-heading{ font-size:6vw; }
+    .s3-subtitle{ font-size:4vw; }
+    .s3-quote{ font-size:4vw; padding:4vw 5vw; }
+    .s3-wrap{ padding:5vw; }
+  }
+
   /* ---- Compact quote box on slide 19 ("Результат обучения") ---------
      Same treatment as slide 3's quote: the original box (baked in
      slide-19.jpg) was full-width and its baked italic text looked soft
@@ -498,20 +533,21 @@
     </div>
     <div class="ov ov-badge on-dark" style="top:90.65%;"><span class="num">2</span><span class="den">/23</span></div>
   </div>
-  <div class="slide-wrap">
-    <img class="slide-img" src="assets/slides/slide-03.jpg?v=17" alt="Слайд 3 - формат поддержки">
-    <div class="ov sq-icon-hdr" style="left:4.333%;top:7.708%;width:5.042%;height:13.02%;"><img src="assets/icons/handshake.png?v=3" alt=""></div>
-    <div class="ov ov-s3-heading">Формат поддержки</div>
-    <div class="ov ov-s3-subtitle">Как я поддерживаю тебя на протяжении всего курса:</div>
-    <div class="ov ov-s3-title" style="left:4.708%;width:21.083%;">Личная обратная связь</div>
-    <div class="ov ov-s3-desc" style="left:4.708%;width:21.083%;">Виктория лично отвечает и разбирает домашние задания</div>
-    <div class="ov ov-s3-title" style="left:28%;width:20.79%;">Чат сообщества</div>
-    <div class="ov ov-s3-desc" style="left:28%;width:20.79%;">Общение и поддержка с другими тату-мастерами</div>
-    <div class="ov ov-s3-title" style="left:51.08%;width:21.08%;">AI-ассистент 24/7</div>
-    <div class="ov ov-s3-desc" style="left:51.08%;width:21.08%;">Персональный помощник на данных курса и студии Sarna</div>
-    <div class="ov ov-s3-title" style="left:74.5%;width:20.75%;">Живые Zoom-созвоны</div>
-    <div class="ov ov-s3-desc" style="left:74.5%;width:20.75%;">Разбор твоего кабинета, цен и клиентов вживую (блоки 13-14)</div>
-    <div class="ov ov-s3-quote">«Ты никогда не остаёшься один на один с вопросами - я на связи весь путь»</div>
+  <div class="slide-wrap s3-wrap">
+    <div class="s3-head">
+      <div class="sq-icon-hdr" style="position:relative;width:3.6cqw;height:3.6cqw;flex-shrink:0;"><img src="assets/icons/handshake.png?v=3" alt=""></div>
+      <div>
+        <h2 class="s3-heading">Формат поддержки</h2>
+        <p class="s3-subtitle">Как я поддерживаю тебя на протяжении всего курса:</p>
+      </div>
+    </div>
+    <div class="s3-grid">
+      <div class="s3-card"><img src="assets/icons/s3-chat.png" alt=""><h3>Личная обратная связь</h3><p>Виктория лично отвечает и разбирает домашние задания</p></div>
+      <div class="s3-card"><img src="assets/icons/s3-community.png" alt=""><h3>Чат сообщества</h3><p>Общение и поддержка с другими тату-мастерами</p></div>
+      <div class="s3-card"><img src="assets/icons/s3-ai.png" alt=""><h3>AI-ассистент 24/7</h3><p>Персональный помощник на данных курса и студии Sarna</p></div>
+      <div class="s3-card"><img src="assets/icons/s3-zoom.png" alt=""><h3>Живые Zoom-созвоны</h3><p>Разбор твоего кабинета, цен и клиентов вживую (блоки 13-14)</p></div>
+    </div>
+    <div class="s3-quote">«Ты никогда не остаёшься один на один с вопросами - я на связи весь путь»</div>
     <div class="ov ov-badge" style="top:90.75%;"><span class="num">3</span><span class="den">/23</span></div>
   </div>
   <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-04.jpg?v=9" alt="Слайд 4 - блок 1: вступление"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">01</span></div><div class="ov ov-hdr-subtitle" style="left:14.83%;top:11.26%;width:68%;">Точка старта: от выбора пути до первого фото в портфолио.</div><div class="ov ov-badge on-light"><span class="num">4</span><span class="den">/23</span></div></div>
