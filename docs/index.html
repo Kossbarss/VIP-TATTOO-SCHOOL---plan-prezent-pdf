@@ -378,7 +378,7 @@
      already has its text erased, per the comment above), so they
      couldn't reflow on narrow screens. Colors/borders sampled directly
      off the original image pixels; layout is now a real grid. */
-  .s3-wrap{ background:#faf6ef; padding:2.4cqw 4.458cqw 3.6cqw; }
+  .s3-wrap{ background:#faf6ef; padding:2.4cqw 4.458cqw 1.6cqw; border-bottom:3px solid #15110e; }
   .s3-head{ display:flex; align-items:center; gap:1.6cqw; margin-bottom:1.6cqw; padding-bottom:1.6cqw; border-bottom:1px solid #e5ddcc; }
   .s3-badge-black{ width:4.75cqw; height:4.75cqw; flex-shrink:0; display:block; }
   .s3-heading{
@@ -400,6 +400,14 @@
     box-sizing:border-box; padding:1.4cqw 2.4cqw; background:#faf3e1; border:1px solid #c9a15a; border-radius:0.9cqw;
     text-align:center; font-family:'Playfair Display',serif; font-style:italic; font-weight:900; font-size:1.45cqw; line-height:1.4; color:#8a5a1f;
   }
+  .s3-badge{ display:flex; align-items:center; justify-content:flex-end; gap:0.5cqw; margin-top:2cqw; font-family:'Nunito',sans-serif; }
+  .s3-badge .num{
+    width:2.9cqw; height:2.9cqw; min-width:2.9cqw; border-radius:50%;
+    background:linear-gradient(100deg,#f0c883,#c9a15a); color:#1a120c;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:1.15cqw;
+  }
+  .s3-badge .den{ font-weight:700; font-size:1.15cqw; color:#8a7a63; }
   @media (max-width:768px){
     .s3-grid{ grid-template-columns:repeat(2,1fr); gap:3vw; }
     .s3-card{ padding:4vw 3vw; border-radius:3vw; gap:2.5vw; }
@@ -409,9 +417,12 @@
     .s3-heading{ font-size:4.6vw; }
     .s3-subtitle{ font-size:4vw; }
     .s3-quote{ font-size:4vw; padding:4vw 5vw; }
-    .s3-wrap{ padding:5vw; }
+    .s3-wrap{ padding:5vw 5vw 2.5vw; }
     .s3-badge-black{ width:11vw; height:11vw; }
     .sq-icon-hdr{ width:11vw !important; height:11vw !important; }
+    .s3-badge{ gap:1.2vw; margin-top:4vw; }
+    .s3-badge .num{ width:6.8vw; height:6.8vw; min-width:6.8vw; font-size:2.7vw; }
+    .s3-badge .den{ font-size:2.7vw; }
   }
 
   /* ---- Module slides (4-18): mobile-only rebuild ----------------------
@@ -637,7 +648,7 @@
       <div class="s3-card"><img src="assets/icons/s3-zoom.png" alt=""><h3>Живые Zoom-созвоны</h3><p>Разбор твоего кабинета, цен и клиентов вживую (блоки 13-14)</p></div>
     </div>
     <div class="s3-quote">«Ты никогда не остаёшься один на один с вопросами - я на связи весь путь»</div>
-    <div class="ov ov-badge" style="top:90.75%;"><span class="num">3</span><span class="den">/23</span></div>
+    <div class="s3-badge"><span class="num">3</span><span class="den">/23</span></div>
   </div>
   <div class="slide-wrap mod-wrap">
     <img class="slide-img" src="assets/slides/slide-04.jpg?v=9" alt="Слайд 4 - блок 1: вступление">
