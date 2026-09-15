@@ -425,6 +425,42 @@
     .s3-badge .den{ font-size:2.7vw; }
   }
 
+  /* ---- Slide 20 ("Почему именно это обучение"), rebuilt as real HTML
+     Comparison layout: VIP tattoo school vs typical training, each in
+     its own bordered card. Reuses slide 3/19's heading treatment;
+     grid reflows to a single column on mobile. */
+  .s20-wrap{ background:#faf6ef; padding:2.4cqw 4.458cqw 1.6cqw; border-bottom:3px solid #15110e; }
+  .s20-head{ display:flex; align-items:center; gap:1.6cqw; margin-bottom:1.6cqw; padding-bottom:1.6cqw; border-bottom:1px solid #e5ddcc; }
+  .s20-head .sq-icon-hdr img{ width:72%; height:72%; }
+  .s20-heading{
+    margin:0; font-family:var(--font-rise); font-weight:700; font-size:2.3cqw;
+    letter-spacing:-0.045em; font-variation-settings:"wdth" 116, "opsz" 36;
+    text-transform:uppercase; color:#17120d;
+  }
+  .s20-subtitle{ margin:0.5cqw 0 0; font-family:var(--font-body-2); font-weight:500; font-size:1.35cqw; line-height:1.4; color:#3a2c1c; }
+  .s20-cols{ display:grid; grid-template-columns:1fr 1fr; gap:1.4cqw; }
+  .s20-col{ background:#fff; border:1px solid #e5ddcc; border-radius:1.1cqw; padding:1.6cqw 1.8cqw; }
+  .s20-col.dim{ background:transparent; border-style:dashed; }
+  .s20-col h3{ margin:0 0 1cqw; font-family:var(--font-rise); font-weight:700; font-size:1.4cqw; color:#17120d; }
+  .s20-col ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.9cqw; }
+  .s20-col li{ display:flex; align-items:flex-start; gap:0.7cqw; }
+  .s20-col .mark{ width:1.5cqw; height:1.5cqw; min-width:1.5cqw; flex-shrink:0; margin-top:0.15cqw; }
+  .s20-col span{ font-family:var(--font-body-2); font-weight:500; font-size:1.05cqw; line-height:1.45; color:#241a10; }
+  .s20-col.dim span{ color:#8a7a63; }
+  @media (max-width:768px){
+    .s20-wrap{ padding:5vw 5vw 2.5vw; }
+    .s20-head{ gap:4vw; }
+    .s20-head .sq-icon-hdr{ width:11vw !important; height:11vw !important; }
+    .s20-heading{ font-size:4.6vw; }
+    .s20-subtitle{ font-size:4vw; }
+    .s20-cols{ grid-template-columns:1fr; gap:4vw; }
+    .s20-col{ padding:4vw; border-radius:3vw; }
+    .s20-col h3{ font-size:4.2vw; margin-bottom:3vw; }
+    .s20-col ul{ gap:3vw; }
+    .s20-col .mark{ width:5vw; height:5vw; min-width:5vw; }
+    .s20-col span{ font-size:3.6vw; }
+  }
+
   /* ---- Module slides (4-18): mobile-only rebuild ----------------------
      Desktop keeps the original baked-image slide untouched (per
      request). On narrow screens the image shrinks the whole 2-column
@@ -1070,7 +1106,39 @@
     <div class="s19-quote">«Не просто диплом - реальная профессия, которая кормит и приносит уверенность»</div>
     <div class="s19-badge"><span class="num">19</span><span class="den">/23</span></div>
   </div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-20.jpg?v=9" alt="Слайд 20 - почему именно это обучение"><div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/scales.png?v=3" alt=""></div><div class="ov ov-hdr-subtitle" style="left:17.96%;top:12.59%;width:60%;">Чем VIP tattoo school отличается от типичного обучения тату.</div><div class="ov ov-badge on-light" style="left:91.29%;"><span class="num">20</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap s20-wrap">
+    <div class="s20-head">
+      <div class="sq-icon-hdr" style="position:relative;width:5.6cqw;height:5.6cqw;flex-shrink:0;"><img src="assets/icons/scales.png?v=3" alt=""></div>
+      <img class="mod-badge-black" style="width:4.75cqw;height:4.75cqw;" src="assets/icons/mod-badge-black-20.png" alt="">
+      <div>
+        <h2 class="s20-heading">Почему именно это обучение</h2>
+        <p class="s20-subtitle">Чем VIP tattoo school отличается от типичного обучения тату.</p>
+      </div>
+    </div>
+    <div class="s20-cols">
+      <div class="s20-col">
+        <h3>VIP tattoo school</h3>
+        <ul>
+          <li><img class="mark" src="assets/icons/mod-check.png" alt=""><span>Практика на моделях под личным наблюдением ментора</span></li>
+          <li><img class="mark" src="assets/icons/mod-check.png" alt=""><span>Индивидуальный разбор каждой выполненной работы</span></li>
+          <li><img class="mark" src="assets/icons/mod-check.png" alt=""><span>Сертификат, признанный студиями-партнёрами</span></li>
+          <li><img class="mark" src="assets/icons/mod-check.png" alt=""><span>Пожизненный доступ к записям и обновлениям программы</span></li>
+          <li><img class="mark" src="assets/icons/mod-check.png" alt=""><span>Онлайн-связь с куратором и техподдержкой без выходных</span></li>
+        </ul>
+      </div>
+      <div class="s20-col dim">
+        <h3>Типичное обучение тату</h3>
+        <ul>
+          <li><span class="mark" style="display:flex;align-items:center;justify-content:center;font-weight:800;color:#c2b6a0;">–</span><span>Только теория без практики на моделях</span></li>
+          <li><span class="mark" style="display:flex;align-items:center;justify-content:center;font-weight:800;color:#c2b6a0;">–</span><span>Группы по 30+ человек без обратной связи</span></li>
+          <li><span class="mark" style="display:flex;align-items:center;justify-content:center;font-weight:800;color:#c2b6a0;">–</span><span>Сертификат без признания в индустрии</span></li>
+          <li><span class="mark" style="display:flex;align-items:center;justify-content:center;font-weight:800;color:#c2b6a0;">–</span><span>Доступ к материалам только на время курса</span></li>
+          <li><span class="mark" style="display:flex;align-items:center;justify-content:center;font-weight:800;color:#c2b6a0;">–</span><span>Отсутствие поддержки после завершения</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="s3-badge"><span class="num">20</span><span class="den">/23</span></div>
+  </div>
   <div class="slide-wrap">
     <img class="slide-img" src="assets/slides/slide-21.jpg?v=21" alt="Слайд 21 - честный старт">
     <div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/shield.png?v=3" alt=""></div>
