@@ -343,6 +343,50 @@
     line-height:1.32; color:#666664; margin:0;
   }
 
+  /* Slide 21 ("Честный старт"): mobile-only rebuild. Desktop keeps the
+     original baked-image slide + .ov-s21-honest overlay untouched. Below
+     768px the image/overlays are hidden and replaced with a real, flowing
+     HTML version using the same cropped assets and copy. */
+  .s21-mobile{ display:none; }
+  @media (max-width:768px){
+    .s21-wrap > .slide-img,
+    .s21-wrap > .ov{ display:none; }
+    .s21-mobile{
+      display:block; background:#faf6ef; padding:6vw 6vw 8vw; text-align:left;
+    }
+    .s21-mob-head{ display:flex; align-items:center; gap:2.5vw; padding-bottom:5vw; margin-bottom:5vw; border-bottom:1px solid #e5ddcc; }
+    .s21-mob-shield-wrap{ position:relative; width:11vw; height:11vw; flex-shrink:0; }
+    .s21-mob-shield-wrap .num{ font-size:4.4vw; }
+    .s21-mob-badge-black{ width:11vw; height:11vw; display:block; flex-shrink:0; }
+    .s21-mob-head h2{
+      font-family:var(--font-rise); font-weight:700; text-transform:uppercase;
+      letter-spacing:-0.045em; font-variation-settings:"wdth" 116,"opsz" 36;
+      font-size:6vw; color:#15110e; margin:0 0 1vw;
+    }
+    .s21-mob-head p{ font-family:var(--font-body-2); font-weight:500; font-size:3.8vw; line-height:1.4; color:#3a2c1c; margin:0; }
+    .s21-mob-honest{
+      background:#fff; border:1px solid #c9a15a; border-radius:4vw;
+      padding:5vw 5.5vw; margin-bottom:6vw;
+    }
+    .s21-mob-honest .eyebrow{
+      display:flex; align-items:center; gap:2vw;
+      font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
+      font-size:3.6vw; color:#a9662f; margin-bottom:2.5vw; line-height:1;
+    }
+    .s21-mob-honest .eyebrow::before{ content:""; width:0.8vw; align-self:stretch; min-height:3.6vw; background:#c9a15a; border-radius:999px; }
+    .s21-mob-honest h3{ font-family:'Playfair Display',serif; font-weight:800; font-size:5.2vw; line-height:1.2; color:#21180f; margin:0 0 2.5vw; }
+    .s21-mob-honest p{ font-family:'Nunito',sans-serif; font-weight:400; font-size:3.7vw; line-height:1.45; color:#666664; margin:0; }
+    .s21-mob-photo{ display:block; width:92%; height:auto; margin-inline:auto; border-radius:6vw; margin-bottom:6vw; }
+    .s21-mob-guarantee{ margin-bottom:6vw; }
+    .s21-mob-guarantee-top{ display:flex; align-items:center; gap:2.5vw; margin-bottom:2.5vw; }
+    .s21-mob-guarantee-top img{ width:11vw; height:11vw; flex-shrink:0; display:block; border-radius:50%; }
+    .s21-mob-guarantee h3{ font-family:var(--font-rise); font-weight:700; font-size:5.6vw; color:#15110e; margin:0; text-align:left; }
+    .s21-mob-guarantee p{ font-family:var(--font-body-2); font-weight:500; font-size:3.6vw; line-height:1.45; color:#3a2c1c; margin:0; text-align:left; }
+    .s21-mob-stats{ display:flex; flex-direction:column; gap:5vw; }
+    .s21-mob-stat .num{ display:block; font-family:'Playfair Display',serif; font-weight:800; font-size:7vw; color:#a9662f; line-height:1; margin-bottom:1.5vw; }
+    .s21-mob-stat .label{ display:block; font-family:var(--font-body-2); font-weight:500; font-size:3.6vw; line-height:1.4; color:#3a2c1c; }
+  }
+
   /* ---- New slide 3: "Формат поддержки" ------------------------------
      Split out of the old slide 2 into its own slide, rebuilt with the
      same header-badge + 4-card + quote-box structure the other module
@@ -1140,7 +1184,7 @@
     </div>
     <div class="s3-badge"><span class="num">20</span><span class="den">/23</span></div>
   </div>
-  <div class="slide-wrap">
+  <div class="slide-wrap s21-wrap">
     <img class="slide-img" src="assets/slides/slide-21.jpg?v=21" alt="Слайд 21 - честный старт">
     <div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/shield.png?v=3" alt=""></div>
     <div class="ov ov-hdr-subtitle" style="left:17.96%;top:12.59%;width:60%;">Без риска и лишних вопросов.</div>
@@ -1150,6 +1194,35 @@
       <p>Я знаю, что не каждый готов сразу платить за очное обучение в студии от 1200€ и присутствовать лично в студии на обучении. Поэтому сделала онлайн обучение по доступной цене 275€ - чтобы вы могли начать путь в профессии без риска, а дальше уже сами решали, куда расти: в свою мини-студию или в открытие своего дела.</p>
     </div>
     <div class="ov ov-badge on-light" style="left:91.29%;"><span class="num">21</span><span class="den">/23</span></div>
+    <div class="s21-mobile">
+      <div class="s21-mob-head">
+        <div class="sq-icon-hdr s21-mob-shield-wrap"><img src="assets/icons/shield.png?v=3" alt=""></div>
+        <img class="mod-badge-black s21-mob-badge-black" src="assets/icons/mod-badge-black-21.png" alt="">
+        <div>
+          <h2>Честный старт</h2>
+          <p>Без риска и лишних вопросов.</p>
+        </div>
+      </div>
+      <div class="s21-mob-honest">
+        <div class="eyebrow">Честный ответ</div>
+        <h3>Почему такая низкая цена?</h3>
+        <p>Я знаю, что не каждый готов сразу платить за очное обучение в студии от 1200€ и присутствовать лично в студии на обучении. Поэтому сделала онлайн обучение по доступной цене 275€ - чтобы вы могли начать путь в профессии без риска, а дальше уже сами решали, куда расти: в свою мини-студию или в открытие своего дела.</p>
+      </div>
+      <img class="s21-mob-photo" src="assets/module-photos/slide-21-photo.jpg" alt="Виктория Поникарова вручает сертификат выпускнице">
+      <div class="s21-mob-guarantee">
+        <div class="s21-mob-guarantee-top">
+          <img src="assets/icons/s21-shield.png" alt="">
+          <h3>Гарантия честного старта</h3>
+        </div>
+        <p>Если, пройдя все модули-блоки, ты поймёшь, что курс не твой - вернём оплату в течение 3 дней с момента старта обучения. Без лишних вопросов.</p>
+      </div>
+      <div class="s21-mob-stats">
+        <div class="s21-mob-stat"><span class="num">3 дня</span><span class="label">на честное решение с момента старта</span></div>
+        <div class="s21-mob-stat"><span class="num">100%</span><span class="label">возврат средств без объяснений</span></div>
+        <div class="s21-mob-stat"><span class="num">0€</span><span class="label">риска попробовать себя в профессии</span></div>
+      </div>
+      <div class="s3-badge"><span class="num">21</span><span class="den">/23</span></div>
+    </div>
   </div>
   <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-22.jpg?v=10" alt="Слайд 22 - популярные вопросы"><div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/question.png?v=3" alt=""></div><div class="ov ov-hdr-subtitle" style="left:17.96%;top:12.59%;width:60%;">Часто задаваемые вопросы.</div><div class="ov ov-badge on-dark" style="left:91.29%;"><span class="num">22</span><span class="den">/23</span></div></div>
   <div class="slide-wrap">
