@@ -126,6 +126,46 @@
     animation:icon-shine-sweep 3.6s ease-in-out infinite;
   }
 
+  /* ---- Slide 2 grid, converted from fixed 5-column %-position -------
+     overlay to a real responsive CSS grid, so the 15 cards reflow to
+     fewer columns on narrow screens instead of shrinking in place.
+     Same card visual (gradient/ring/shine/V-watermark/number/label) as
+     .sq-icon + .ov-card-num/.ov-card-label above -- only the layout
+     mechanism changed, from position:absolute percentages to grid. */
+  .s2-wrap{ background:#1a110d; }
+  .s2-title{ display:block; width:100%; height:auto; }
+  .s2-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:1.2cqw; padding:2.4cqw 4.458cqw 3.6cqw; }
+  .s2-card{
+    position:relative; aspect-ratio:1.95/1; border-radius:14%/26%; overflow:hidden;
+    background:linear-gradient(105deg,#f98658 0%,#f25832 24%,#e62115 52%,#f25832 78%,#f98658 100%);
+    box-shadow:0 10px 20px -10px rgba(221,0,3,0.6);
+  }
+  .s2-card::before{
+    content:"V"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Playfair Display',serif; font-weight:700; font-size:5.5cqw; line-height:1;
+    color:rgba(255,255,255,0.22);
+  }
+  .s2-card .ring{
+    position:absolute; left:50%; top:50%; width:34%; height:65%;
+    transform:translate(-50%,-50%); border:2px solid rgba(255,255,255,0.16); border-radius:50%;
+  }
+  .s2-card::after{
+    content:"";
+    position:absolute; top:-40%; left:-90%; width:110%; height:180%;
+    background:linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
+    animation:icon-shine-sweep 3.6s ease-in-out infinite;
+  }
+  .s2-card .s2-num{
+    position:absolute; left:8%; top:16%;
+    font-family:'Playfair Display',serif; font-weight:700; font-size:1.85cqw; color:#fff; line-height:1;
+  }
+  .s2-card .s2-label{
+    position:absolute; left:8%; bottom:12%; width:84%;
+    font-family:'Nunito',sans-serif; font-weight:800; font-size:1.3cqw; line-height:1.25; color:#fff;
+  }
+  @media (max-width:900px){ .s2-grid{ grid-template-columns:repeat(3,1fr); } }
+  @media (max-width:600px){ .s2-grid{ grid-template-columns:repeat(2,1fr); gap:2.2cqw; padding:3cqw 5cqw 4.5cqw; } }
+
   /* ---- Same rebuild applied to every module-slide header square ------
      Slides 3-22's header badge (a number 01-15, or a small glyph on the
      "bonus" slides) was likewise flat pixels, erased from each
@@ -394,53 +434,25 @@
     </div></div>
     <div class="ov ov-badge on-dark"><span class="num">1</span><span class="den">/23</span></div>
   </section>
-  <div class="slide-wrap">
-    <img class="slide-img" src="assets/slides/slide-02.jpg?v=10" alt="Слайд 2 - структура курса">
-    <div class="ov sq-icon" style="left:4.458%;top:26.42%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov sq-icon" style="left:22.125%;top:26.42%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov sq-icon" style="left:39.833%;top:26.42%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov sq-icon" style="left:57.542%;top:26.42%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov sq-icon" style="left:75.208%;top:26.42%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov sq-icon" style="left:4.458%;top:49.68%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov sq-icon" style="left:22.125%;top:49.68%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov sq-icon" style="left:39.833%;top:49.68%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov sq-icon" style="left:57.542%;top:49.68%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov sq-icon" style="left:75.208%;top:49.68%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov sq-icon" style="left:4.458%;top:73.05%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov sq-icon" style="left:22.125%;top:73.05%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov sq-icon" style="left:39.833%;top:73.05%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov sq-icon" style="left:57.542%;top:73.05%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov sq-icon" style="left:75.208%;top:73.05%;width:16.833%;height:21.68%;"><span class="ring"></span></div>
-    <div class="ov ov-card-num" style="left:4.958%;top:28.947%;">01</div>
-    <div class="ov ov-card-label" style="left:4.958%;top:39.263%;width:15.875%;">VIP tattoo school</div>
-    <div class="ov ov-card-num" style="left:22.625%;top:28.947%;">02</div>
-    <div class="ov ov-card-label" style="left:22.625%;top:39.263%;width:15.875%;">AI-assistant</div>
-    <div class="ov ov-card-num" style="left:40.333%;top:28.947%;">03</div>
-    <div class="ov ov-card-label" style="left:40.333%;top:39.263%;width:15.875%;">Безопасность</div>
-    <div class="ov ov-card-num" style="left:58.000%;top:28.947%;">04</div>
-    <div class="ov ov-card-label" style="left:58.000%;top:39.263%;width:15.875%;">Материалы</div>
-    <div class="ov ov-card-num" style="left:75.667%;top:28.947%;">05</div>
-    <div class="ov ov-card-label" style="left:75.667%;top:39.263%;width:15.875%;">Организация + место</div>
-    <div class="ov ov-card-num" style="left:4.958%;top:52.316%;">06</div>
-    <div class="ov ov-card-label" style="left:4.958%;top:62.632%;width:15.875%;">Практика</div>
-    <div class="ov ov-card-num" style="left:22.625%;top:52.316%;">07</div>
-    <div class="ov ov-card-label" style="left:22.625%;top:62.632%;width:15.875%;">Работа с кожей</div>
-    <div class="ov ov-card-num" style="left:40.333%;top:52.316%;">08</div>
-    <div class="ov ov-card-label" style="left:40.333%;top:62.632%;width:15.875%;">Трафареты</div>
-    <div class="ov ov-card-num" style="left:58.000%;top:52.316%;">09</div>
-    <div class="ov ov-card-label" style="left:58.000%;top:62.632%;width:15.875%;">Pro Stories®</div>
-    <div class="ov ov-card-num" style="left:75.667%;top:52.316%;">10</div>
-    <div class="ov ov-card-label" style="left:75.667%;top:62.632%;width:15.875%;">30-дн. практикум</div>
-    <div class="ov ov-card-num" style="left:4.958%;top:75.684%;">11</div>
-    <div class="ov ov-card-label" style="left:4.958%;top:86.0%;width:15.875%;">Стили</div>
-    <div class="ov ov-card-num" style="left:22.625%;top:75.684%;">12</div>
-    <div class="ov ov-card-label" style="left:22.625%;top:86.0%;width:15.875%;">Работа с клиентом</div>
-    <div class="ov ov-card-num" style="left:40.333%;top:75.684%;">13</div>
-    <div class="ov ov-card-label" style="left:40.333%;top:86.0%;width:15.875%;">Реклама</div>
-    <div class="ov ov-card-num" style="left:58.000%;top:75.684%;">14</div>
-    <div class="ov ov-card-label" style="left:58.000%;top:86.0%;width:15.875%;">Zoom - Tattoo</div>
-    <div class="ov ov-card-num" style="left:75.667%;top:75.684%;">15</div>
-    <div class="ov ov-card-label" style="left:75.667%;top:86.0%;width:15.875%;">Именной диплом</div>
+  <div class="slide-wrap s2-wrap">
+    <img class="s2-title" src="assets/slides/slide-02-title.jpg" alt="Слайд 2 - структура курса: 15 блоков, из которых состоит курс">
+    <div class="s2-grid">
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">01</span><span class="s2-label">VIP tattoo school</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">02</span><span class="s2-label">AI-assistant</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">03</span><span class="s2-label">Безопасность</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">04</span><span class="s2-label">Материалы</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">05</span><span class="s2-label">Организация + место</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">06</span><span class="s2-label">Практика</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">07</span><span class="s2-label">Работа с кожей</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">08</span><span class="s2-label">Трафареты</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">09</span><span class="s2-label">Pro Stories®</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">10</span><span class="s2-label">30-дн. практикум</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">11</span><span class="s2-label">Стили</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">12</span><span class="s2-label">Работа с клиентом</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">13</span><span class="s2-label">Реклама</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">14</span><span class="s2-label">Zoom - Tattoo</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">15</span><span class="s2-label">Именной диплом</span></div>
+    </div>
     <div class="ov ov-badge on-dark" style="top:90.65%;"><span class="num">2</span><span class="den">/23</span></div>
   </div>
   <div class="slide-wrap">
