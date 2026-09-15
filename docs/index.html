@@ -28,6 +28,20 @@
      into a query container so "cqw" units (used everywhere below)
      stay relative to the slide's own rendered width instead. */
   .slides{max-width:1400px;margin:0 auto;container-type:inline-size;}
+  /* On narrow phones, shrinking each slide down to the device width
+     makes the text baked into the JPGs (headings, captions, quotes --
+     real pixels in the image, not something CSS can resize) far too
+     small to read. Instead of squeezing every slide to fit, give
+     slides a comfortable fixed minimum width below this breakpoint and
+     let the page pan horizontally (pinch-zoom already works too) --
+     the same "view a big image, don't shrink it to fit" pattern used
+     for infographics. Vertical scrolling through the deck is unaffected. */
+  @media (max-width:700px){
+    html{overflow-x:auto;}
+    body{overflow-x:auto;}
+    .slides{width:640px;max-width:none;}
+    .cta-bar{width:640px;}
+  }
   /* A thin dark line between every slide so consecutive slides sharing
      the same background color (e.g. two cream module slides) still
      read as separate pages instead of blending into one image. */
