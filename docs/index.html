@@ -81,6 +81,13 @@
     flex:1 1 200px;
     color:#fff; border:1.5px solid rgba(255,255,255,0.5);
   }
+  .cta-bar .btn-outline{
+    flex:1 1 220px;
+    color:#fff; font-weight:800; position:relative; overflow:hidden;
+    background:linear-gradient(105deg,#8fb4fb 0%,#7ba6fa 50%,#8fb4fb 100%);
+    border:1.5px solid #7ba6fa;
+    box-shadow:0 10px 20px -10px rgba(123,166,250,0.6);
+  }
 
   /* ---- Shine sweep on every orange/red square icon -------------------
      Reuses the CTA button's shine animation (cta-btn-shine) on a thin
@@ -411,6 +418,58 @@
     .s22-mob-item h3{ font-family:var(--font-rise); font-weight:700; font-size:4.6vw; color:#15110e; margin:0; line-height:1.25; }
     .s22-mob-item p{ font-family:var(--font-body-2); font-weight:500; font-size:3.7vw; line-height:1.45; color:#3a2c1c; margin:0; }
     .s22-mob-photo{ display:block; width:92%; height:auto; margin-inline:auto; border-radius:6vw; }
+  }
+
+  /* Slide 23 (final CTA): mobile-only rebuild. Desktop keeps the
+     original baked-image slide + .ov-s22-included/.ov-s22-right
+     overlays untouched. Below 768px the image is replaced with a real
+     flowing version: logo, eyebrow, heading, checklist, discount
+     banner + installment image, certificate photo, CTA heading/text. */
+  .s23-mobile{ display:none; }
+  @media (max-width:768px){
+    .s23-wrap > .slide-img,
+    .s23-wrap > .ov{ display:none; }
+    .s23-mobile{
+      display:block; background:#15110e; padding:8vw 6vw 10vw; text-align:left;
+    }
+    .s23-mob-logo{
+      display:inline-flex; align-items:center; gap:2.5vw; margin-bottom:6vw;
+      color:#fff; font-family:var(--font-rise); font-weight:700; font-size:4.2vw;
+      letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap;
+    }
+    .s23-mob-logo img{ width:11vw; height:11vw; border-radius:999px; flex-shrink:0; display:block; }
+    .s23-mob-eyebrow{
+      font-family:var(--font-body-2); font-weight:700; font-size:3.3vw;
+      letter-spacing:0.08em; text-transform:uppercase; color:#c9a15a; margin-bottom:2.5vw;
+    }
+    .s23-mobile h2{
+      font-family:var(--font-rise); font-weight:700; text-transform:uppercase;
+      letter-spacing:-0.045em; font-variation-settings:"wdth" 116,"opsz" 36;
+      font-size:6.4vw; line-height:1.05; color:#fff; margin:0 0 6vw;
+    }
+    .s23-mob-list{ list-style:none; margin:0 0 6vw; padding:0; display:flex; flex-direction:column; gap:4.5vw; }
+    .s23-mob-list li{ display:flex; align-items:flex-start; gap:3vw; }
+    .s23-mob-list img{ width:7vw; height:7vw; flex-shrink:0; display:block; margin-top:0.3vw; }
+    .s23-mob-list span{ font-family:var(--font-body-2); font-weight:500; font-size:3.9vw; line-height:1.4; color:#e9e0d3; }
+    .s23-mob-discount{
+      display:flex; align-items:baseline; justify-content:center; gap:1.5vw;
+      background:linear-gradient(90deg,#15110f 0%,#dd0003 55%,#ff0003 100%);
+      border:1px solid rgba(201,162,74,0.45); border-radius:4vw;
+      padding:3.5vw 4vw; margin-bottom:5vw;
+      font-family:'Nunito',sans-serif; font-weight:600; font-size:3.9vw; color:#fffdfa;
+      text-align:center;
+    }
+    .s23-mob-discount .old{ text-decoration:line-through; color:rgba(250,246,239,0.55); font-size:0.9em; }
+    .s23-mob-discount .new{ font-size:1.25em; font-weight:800; color:#e8d5a8; }
+    .s23-mob-installment{ display:block; width:100%; height:auto; border-radius:3vw; margin-bottom:8vw; }
+    .s23-mob-cert{ display:block; width:100%; height:auto; border-radius:3vw; margin-bottom:8vw; }
+    .s23-mob-cta-h{
+      font-family:var(--font-rise); font-weight:700; text-transform:uppercase;
+      letter-spacing:-0.045em; font-variation-settings:"wdth" 116,"opsz" 36;
+      font-size:5.8vw; line-height:1.05; color:#fff; margin:0 0 3.5vw;
+    }
+    .s23-mob-cta-p{ font-family:var(--font-body-2); font-weight:500; font-size:3.9vw; line-height:1.5; color:#cabfae; margin:0 0 5vw; }
+    .s23-mob-byline{ padding-top:4vw; border-top:1px solid rgba(242,233,218,0.2); font-style:italic; font-size:3.7vw; color:#a89a86; }
   }
 
   /* ---- New slide 3: "Формат поддержки" ------------------------------
@@ -1272,7 +1331,7 @@
       <div class="s3-badge"><span class="num">22</span><span class="den">/23</span></div>
     </div>
   </div>
-  <div class="slide-wrap">
+  <div class="slide-wrap s23-wrap">
     <img class="slide-img" src="assets/slides/slide-23.jpg?v=3" alt="Слайд 23 - готов начать путь в тату-индустрии">
     <div class="ov ov-s22-included">
       <div class="discount-banner">Забрать курс со скидкой за <span class="old">600€</span> <span class="new">275€</span></div>
@@ -1283,10 +1342,28 @@
       <p>Доступ остаётся с тобой навсегда - можешь возвращаться к любому блоку в любой момент. Напиши мне лично, и я расскажу, как начать обучение уже сегодня.</p>
       <div class="byline">ViP tattoo school · Виктория Поникарова</div>
     </div>
+    <div class="s23-mobile">
+      <div class="s23-mob-logo"><img src="assets/hero/logo-mark.png" alt="">VIP tattoo school</div>
+      <div class="s23-mob-eyebrow">Почему именно это обучение</div>
+      <h2>Чем VIP tattoo school отличается от типичного обучения</h2>
+      <ul class="s23-mob-list">
+        <li><img src="assets/icons/mod-check.png" alt=""><span>Практика на моделях под личным наблюдением ментора</span></li>
+        <li><img src="assets/icons/mod-check.png" alt=""><span>Индивидуальный разбор каждой выполненной работы</span></li>
+        <li><img src="assets/icons/mod-check.png" alt=""><span>Сертификат, признанный 12 студиями-партнёрами</span></li>
+        <li><img src="assets/icons/mod-check.png" alt=""><span>Пожизненный доступ к записям и обновлениям</span></li>
+        <li><img src="assets/icons/mod-check.png" alt=""><span>Онлайн-связь с куратором без выходных</span></li>
+      </ul>
+      <div class="s23-mob-discount">Забрать курс со скидкой за <span class="old">600€</span> <span class="new">275€</span></div>
+      <img class="s23-mob-installment" src="assets/images/payment-installment-banner.jpg?v=2" alt="Оплата частями: 0% - сначала учись, потом оплачивай">
+      <img class="s23-mob-cert" src="assets/module-photos/slide-23-cert.jpg" alt="Сертификат об окончании курса ViP tattoo school">
+      <h3 class="s23-mob-cta-h">Готов начать путь в тату-индустрии?</h3>
+      <p class="s23-mob-cta-p">Доступ остаётся с тобой навсегда - можешь возвращаться к любому блоку в любой момент. Напиши мне лично, и я расскажу, как начать обучение уже сегодня.</p>
+      <div class="s23-mob-byline">ViP tattoo school · Виктория Поникарова</div>
+    </div>
   </div>
   <div class="cta-bar">
     <a class="btn btn-primary" href="https://buy.stripe.com/fZucN57RO3TEgXu23C9AA00" target="_blank" rel="noopener"><span>Открыть доступ к обучению</span></a>
-    <a class="btn btn-secondary" href="https://website.vip-tattoo-school.com/#vtpCheckoutCtaInstallment" target="_blank" rel="noopener">Оплата частями - 2×137.50€</a>
+    <a class="btn btn-outline" href="https://website.vip-tattoo-school.com/#vtpCheckoutCtaInstallment" target="_blank" rel="noopener">Оплата частями - 2×137.50€</a>
     <a class="btn btn-secondary" href="https://t.me/+48733341364" target="_blank" rel="noopener">Написать Виктории</a>
   </div>
 </div>
