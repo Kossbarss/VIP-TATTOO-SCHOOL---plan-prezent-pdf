@@ -457,6 +457,30 @@
     .mod-mobile .mod-badge .den{ font-weight:700; font-size:3.6vw; color:#8a7a63; }
   }
 
+  /* ---- Slide 19 ("Результат обучения"), rebuilt as real responsive HTML
+     Same reason as slide 3: the 4 result cards and title were baked
+     into slide-19.jpg at fixed positions (subtitle + quote already
+     real), so they couldn't reflow. Reuses slide 3's exact card
+     visual/grid (.s3-grid/.s3-card) and heading treatment. */
+  .s19-wrap{ background:#faf6ef; padding:2.4cqw 4.458cqw 3.6cqw; }
+  .s19-head{ display:flex; align-items:center; gap:0.8cqw; margin-bottom:1.6cqw; padding-bottom:1.6cqw; border-bottom:1px solid #e5ddcc; }
+  .s19-heading{
+    margin:0; font-family:var(--font-rise); font-weight:700; font-size:2.3cqw;
+    letter-spacing:-0.045em; font-variation-settings:"wdth" 116, "opsz" 36;
+    text-transform:uppercase; color:#17120d;
+  }
+  .s19-subtitle{ margin:0.5cqw 0 0; font-family:var(--font-body-2); font-weight:500; font-size:1.35cqw; line-height:1.4; color:#3a2c1c; }
+  .s19-quote{
+    margin-top:2cqw; box-sizing:border-box; padding:1.4cqw 2.4cqw; background:#faf3e1; border:1px solid #c9a15a; border-radius:0.9cqw;
+    text-align:center; font-family:'Playfair Display',serif; font-style:italic; font-weight:900; font-size:1.45cqw; line-height:1.4; color:#8a5a1f;
+  }
+  @media (max-width:768px){
+    .s19-wrap{ padding:5vw; }
+    .s19-heading{ font-size:4.6vw; }
+    .s19-subtitle{ font-size:4vw; }
+    .s19-quote{ font-size:4vw; padding:4vw 5vw; margin-top:4vw; }
+  }
+
   /* ---- Compact quote box on slide 19 ("Результат обучения") ---------
      Same treatment as slide 3's quote: the original box (baked in
      slide-19.jpg) was full-width and its baked italic text looked soft
@@ -1004,11 +1028,21 @@
       <div class="mod-badge"><span class="num">18</span><span class="den">/23</span></div>
     </div>
   </div>
-  <div class="slide-wrap">
-    <img class="slide-img" src="assets/slides/slide-19.jpg?v=15" alt="Слайд 19 - результат обучения">
-    <div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/star.png?v=3" alt=""></div>
-    <div class="ov ov-hdr-subtitle" style="left:17.96%;top:12.59%;width:60%;">После прохождения курса ты получишь:</div>
-    <div class="ov ov-s19-quote">«Не просто диплом - реальная профессия, которая кормит и приносит уверенность»</div>
+  <div class="slide-wrap s19-wrap">
+    <div class="s19-head">
+      <div class="sq-icon-hdr" style="position:relative;width:5.6cqw;height:5.6cqw;flex-shrink:0;"><img src="assets/icons/star.png?v=3" alt=""></div>
+      <div>
+        <h2 class="s19-heading">Результат обучения</h2>
+        <p class="s19-subtitle">После прохождения курса ты получишь:</p>
+      </div>
+    </div>
+    <div class="s3-grid">
+      <div class="s3-card"><img src="assets/icons/s19-money.png" alt=""><h3>Контроль над своим доходом</h3><p>Перестанешь зависеть от работодателя и сможешь сам назначать цену своей работе.</p></div>
+      <div class="s3-card"><img src="assets/icons/s19-technique.png" alt=""><h3>Уверенную технику без дрожи</h3><p>Разберёшься в машинке, линии и цвете - больше никакого страха испортить рисунок.</p></div>
+      <div class="s3-card"><img src="assets/icons/s19-growth.png" alt=""><h3>Стабильный поток клиентов</h3><p>Портфолио и шаблоны для Instagram, которые уже приносят заявки ученикам курса.</p></div>
+      <div class="s3-card"><img src="assets/icons/s19-recognition.png" alt=""><h3>Признание в индустрии</h3><p>Сертификат на 8+ языках, признанный в 12 студиях-партнёрах по Украине и Европе.</p></div>
+    </div>
+    <div class="s19-quote">«Не просто диплом - реальная профессия, которая кормит и приносит уверенность»</div>
     <div class="ov ov-badge on-light" style="left:91.29%;"><span class="num">19</span><span class="den">/23</span></div>
   </div>
   <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-20.jpg?v=9" alt="Слайд 20 - почему именно это обучение"><div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/scales.png?v=3" alt=""></div><div class="ov ov-hdr-subtitle" style="left:17.96%;top:12.59%;width:60%;">Чем VIP tattoo school отличается от типичного обучения тату.</div><div class="ov ov-badge on-light" style="left:91.29%;"><span class="num">20</span><span class="den">/23</span></div></div>
