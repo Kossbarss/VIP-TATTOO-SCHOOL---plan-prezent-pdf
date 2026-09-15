@@ -387,6 +387,32 @@
     .s21-mob-stat .label{ display:block; font-family:var(--font-body-2); font-weight:500; font-size:3.6vw; line-height:1.4; color:#3a2c1c; }
   }
 
+  /* Slide 22 ("Популярные вопросы"): mobile-only rebuild, same pattern
+     as slide 21. Desktop keeps the original baked-image slide untouched. */
+  .s22-mobile{ display:none; }
+  @media (max-width:768px){
+    .s22-wrap > .slide-img,
+    .s22-wrap > .ov{ display:none; }
+    .s22-mobile{
+      display:block; background:#faf6ef; padding:6vw 6vw 8vw; text-align:left;
+    }
+    .s22-mob-head{ display:flex; align-items:center; gap:2.5vw; padding-bottom:5vw; margin-bottom:6vw; border-bottom:1px solid #e5ddcc; }
+    .s22-mob-icon-wrap{ position:relative; width:11vw; height:11vw; flex-shrink:0; }
+    .s22-mob-badge-black{ width:11vw; height:11vw; display:block; flex-shrink:0; }
+    .s22-mob-head h2{
+      font-family:var(--font-rise); font-weight:700; text-transform:uppercase;
+      letter-spacing:-0.045em; font-variation-settings:"wdth" 116,"opsz" 36;
+      font-size:6vw; color:#15110e; margin:0 0 1vw;
+    }
+    .s22-mob-head p{ font-family:var(--font-body-2); font-weight:500; font-size:3.8vw; line-height:1.4; color:#3a2c1c; margin:0; }
+    .s22-mob-list{ display:flex; flex-direction:column; gap:6vw; margin-bottom:6vw; }
+    .s22-mob-item{ display:flex; flex-direction:column; gap:1.2vw; }
+    .s22-mob-num{ font-family:'Playfair Display',serif; font-style:italic; font-weight:700; font-size:4.2vw; color:#a9662f; line-height:1; margin-bottom:0.5vw; }
+    .s22-mob-item h3{ font-family:var(--font-rise); font-weight:700; font-size:4.6vw; color:#15110e; margin:0; line-height:1.25; }
+    .s22-mob-item p{ font-family:var(--font-body-2); font-weight:500; font-size:3.7vw; line-height:1.45; color:#3a2c1c; margin:0; }
+    .s22-mob-photo{ display:block; width:92%; height:auto; margin-inline:auto; border-radius:6vw; }
+  }
+
   /* ---- New slide 3: "Формат поддержки" ------------------------------
      Split out of the old slide 2 into its own slide, rebuilt with the
      same header-badge + 4-card + quote-box structure the other module
@@ -1224,7 +1250,28 @@
       <div class="s3-badge"><span class="num">21</span><span class="den">/23</span></div>
     </div>
   </div>
-  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-22.jpg?v=10" alt="Слайд 22 - популярные вопросы"><div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/question.png?v=3" alt=""></div><div class="ov ov-hdr-subtitle" style="left:17.96%;top:12.59%;width:60%;">Часто задаваемые вопросы.</div><div class="ov ov-badge on-dark" style="left:91.29%;"><span class="num">22</span><span class="den">/23</span></div></div>
+  <div class="slide-wrap s22-wrap"><img class="slide-img" src="assets/slides/slide-22.jpg?v=10" alt="Слайд 22 - популярные вопросы"><div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/question.png?v=3" alt=""></div><div class="ov ov-hdr-subtitle" style="left:17.96%;top:12.59%;width:60%;">Часто задаваемые вопросы.</div><div class="ov ov-badge on-dark" style="left:91.29%;"><span class="num">22</span><span class="den">/23</span></div>
+    <div class="s22-mobile">
+      <div class="s22-mob-head">
+        <div class="sq-icon-hdr s22-mob-icon-wrap"><img src="assets/icons/question.png?v=3" alt=""></div>
+        <img class="mod-badge-black s22-mob-badge-black" src="assets/icons/mod-badge-black-22.png" alt="">
+        <div>
+          <h2>Популярные вопросы</h2>
+          <p>Часто задаваемые вопросы.</p>
+        </div>
+      </div>
+      <div class="s22-mob-list">
+        <div class="s22-mob-item"><span class="s22-mob-num">01</span><h3>Нужен ли художественный опыт?</h3><p>Не обязателен, но приветствуется. В программе есть модуль по отработке линии и композиции с нуля.</p></div>
+        <div class="s22-mob-item"><span class="s22-mob-num">02</span><h3>Сколько стоит оборудование?</h3><p>Базовый набор для практики на искусственной коже - от 60-80€. Список моделей есть в бонусном уроке.</p></div>
+        <div class="s22-mob-item"><span class="s22-mob-num">03</span><h3>Гарантированы ли первые клиенты?</h3><p>Даём систему и шаблоны, которые уже сработали у учеников, но результат зависит от твоей практики.</p></div>
+        <div class="s22-mob-item"><span class="s22-mob-num">04</span><h3>Сколько времени уделять обучению?</h3><p>В среднем 5-7 часов в неделю на протяжении 8 недель, включая уроки и практику.</p></div>
+        <div class="s22-mob-item"><span class="s22-mob-num">05</span><h3>Есть ли возрастные ограничения?</h3><p>Обучение доступно с 18 лет - стандартное требование для работы в тату-индустрии.</p></div>
+        <div class="s22-mob-item"><span class="s22-mob-num">06</span><h3>Нужен ли ноутбук для обучения?</h3><p>Достаточно смартфона - всё проходит через Telegram, удобно смотреть уроки и сдавать задания.</p></div>
+      </div>
+      <img class="s22-mob-photo" src="assets/module-photos/slide-22-photo.jpg" alt="Виктория Поникарова проводит занятие в студии">
+      <div class="s3-badge"><span class="num">22</span><span class="den">/23</span></div>
+    </div>
+  </div>
   <div class="slide-wrap">
     <img class="slide-img" src="assets/slides/slide-23.jpg?v=3" alt="Слайд 23 - готов начать путь в тату-индустрии">
     <div class="ov ov-s22-included">
