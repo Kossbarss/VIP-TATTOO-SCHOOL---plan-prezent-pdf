@@ -463,7 +463,8 @@
      real), so they couldn't reflow. Reuses slide 3's exact card
      visual/grid (.s3-grid/.s3-card) and heading treatment. */
   .s19-wrap{ background:#faf6ef; padding:2.4cqw 4.458cqw 3.6cqw; }
-  .s19-head{ display:flex; align-items:center; gap:0.8cqw; margin-bottom:1.6cqw; padding-bottom:1.6cqw; border-bottom:1px solid #e5ddcc; }
+  .s19-head{ display:flex; align-items:center; gap:1.6cqw; margin-bottom:1.6cqw; padding-bottom:1.6cqw; border-bottom:1px solid #e5ddcc; }
+  .s19-head .sq-icon-hdr img{ width:72%; height:72%; }
   .s19-heading{
     margin:0; font-family:var(--font-rise); font-weight:700; font-size:2.3cqw;
     letter-spacing:-0.045em; font-variation-settings:"wdth" 116, "opsz" 36;
@@ -476,6 +477,7 @@
   }
   @media (max-width:768px){
     .s19-wrap{ padding:5vw; }
+    .s19-head{ gap:4vw; }
     .s19-heading{ font-size:4.6vw; }
     .s19-subtitle{ font-size:4vw; }
     .s19-quote{ font-size:4vw; padding:4vw 5vw; margin-top:4vw; }
