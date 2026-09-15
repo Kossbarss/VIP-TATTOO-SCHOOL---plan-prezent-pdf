@@ -163,8 +163,17 @@
     position:absolute; left:8%; bottom:12%; width:84%;
     font-family:'Nunito',sans-serif; font-weight:800; font-size:1.3cqw; line-height:1.25; color:#fff;
   }
-  @media (max-width:900px){ .s2-grid{ grid-template-columns:repeat(3,1fr); } }
-  @media (max-width:600px){ .s2-grid{ grid-template-columns:repeat(2,1fr); gap:2.2cqw; padding:3cqw 5cqw 4.5cqw; } }
+  @media (max-width:900px){
+    .s2-grid{ grid-template-columns:repeat(3,1fr); gap:2.4cqw; padding:3.4cqw 4cqw 5cqw; }
+    .s2-card .s2-num{ font-size:4.4cqw; }
+    .s2-card .s2-label{ font-size:3.1cqw; line-height:1.2; }
+  }
+  @media (max-width:600px){
+    .s2-grid{ gap:3vw; padding:5vw 4vw 7vw; }
+    .s2-card{ aspect-ratio:1.55/1; }
+    .s2-card .s2-num{ font-size:5.6vw; }
+    .s2-card .s2-label{ font-size:3.7vw; line-height:1.2; }
+  }
 
   /* ---- Same rebuild applied to every module-slide header square ------
      Slides 3-22's header badge (a number 01-15, or a small glyph on the
