@@ -379,7 +379,8 @@
      couldn't reflow on narrow screens. Colors/borders sampled directly
      off the original image pixels; layout is now a real grid. */
   .s3-wrap{ background:#faf6ef; padding:2.4cqw 4.458cqw 3.6cqw; }
-  .s3-head{ display:flex; align-items:center; gap:1cqw; margin-bottom:1.6cqw; padding-bottom:1.6cqw; border-bottom:1px solid #e5ddcc; }
+  .s3-head{ display:flex; align-items:center; gap:1.6cqw; margin-bottom:1.6cqw; padding-bottom:1.6cqw; border-bottom:1px solid #e5ddcc; }
+  .s3-badge-black{ width:4.75cqw; height:4.75cqw; flex-shrink:0; display:block; }
   .s3-heading{ margin:0; font-family:'Playfair Display',serif; font-weight:700; font-size:2.35cqw; color:#17120d; }
   .s3-subtitle{ margin:0.3cqw 0 0; font-family:'Nunito',sans-serif; font-weight:800; font-size:1.7cqw; color:#3a2c1c; }
   .s3-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:1.4cqw; margin-bottom:2cqw; }
@@ -405,6 +406,8 @@
     .s3-subtitle{ font-size:4vw; }
     .s3-quote{ font-size:4vw; padding:4vw 5vw; }
     .s3-wrap{ padding:5vw; }
+    .s3-badge-black{ width:11vw; height:11vw; }
+    .sq-icon-hdr{ width:11vw !important; height:11vw !important; }
   }
 
   /* ---- Compact quote box on slide 19 ("Результат обучения") ---------
@@ -535,7 +538,8 @@
   </div>
   <div class="slide-wrap s3-wrap">
     <div class="s3-head">
-      <div class="sq-icon-hdr" style="position:relative;width:3.6cqw;height:3.6cqw;flex-shrink:0;"><img src="assets/icons/handshake.png?v=3" alt=""></div>
+      <div class="sq-icon-hdr" style="position:relative;width:5.6cqw;height:5.6cqw;flex-shrink:0;"><img src="assets/icons/handshake.png?v=3" alt=""></div>
+      <img class="s3-badge-black" src="assets/icons/s3-badge-black.png" alt="">
       <div>
         <h2 class="s3-heading">Формат поддержки</h2>
         <p class="s3-subtitle">Как я поддерживаю тебя на протяжении всего курса:</p>
