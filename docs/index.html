@@ -414,41 +414,6 @@
     .sq-icon-hdr{ width:11vw !important; height:11vw !important; }
   }
 
-  /* ---- Module slides (4-18), rebuilt as real responsive HTML ---------
-     Same reason as slides 1-3: the checklist + photo were baked into
-     each slide-NN.jpg at fixed positions (2 columns, always), so they
-     couldn't reflow on narrow screens. Template shared across all 15
-     module slides; only the title/subtitle/list items/photo differ
-     per slide. Checkmark icon and companion black badge icon are
-     cropped from the original pixels, colors sampled from the image. */
-  .mod-wrap{ background:#faf6ef; padding:2.4cqw 4.458cqw 3.6cqw; }
-  .mod-head{ display:flex; align-items:center; gap:0.8cqw; margin-bottom:1.6cqw; padding-bottom:1.6cqw; border-bottom:1px solid #e5ddcc; }
-  .mod-badge-black{ width:4.75cqw; height:4.75cqw; flex-shrink:0; display:block; }
-  .mod-title{
-    margin:0; font-family:var(--font-rise); font-weight:700; font-size:2.3cqw;
-    letter-spacing:-0.045em; font-variation-settings:"wdth" 116, "opsz" 36;
-    text-transform:uppercase; color:#17120d;
-  }
-  .mod-subtitle{ margin:0.5cqw 0 0; font-family:var(--font-body-2); font-weight:500; font-size:1.35cqw; line-height:1.4; color:#3a2c1c; }
-  .mod-body{ display:grid; grid-template-columns:1.3fr 1fr; gap:2.4cqw; align-items:start; }
-  .mod-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1.6cqw; }
-  .mod-list li{ display:flex; align-items:flex-start; gap:1cqw; }
-  .mod-list .check{ width:1.9cqw; height:1.9cqw; min-width:1.9cqw; border-radius:50%; margin-top:0.1cqw; flex-shrink:0; }
-  .mod-list span{ font-family:var(--font-body-2); font-weight:500; font-size:1.15cqw; line-height:1.45; color:#241a10; }
-  .mod-photo{ display:block; width:100%; height:auto; border-radius:1cqw; }
-  @media (max-width:768px){
-    .mod-wrap{ padding:5vw; }
-    .mod-head{ gap:2.5vw; }
-    .mod-badge-black{ width:11vw; height:11vw; }
-    .mod-title{ font-size:5.4vw; }
-    .mod-subtitle{ font-size:4vw; }
-    .mod-body{ grid-template-columns:1fr; gap:5vw; }
-    .mod-photo{ order:-1; border-radius:3vw; }
-    .mod-list{ gap:4vw; }
-    .mod-list .check{ width:6vw; height:6vw; min-width:6vw; }
-    .mod-list span{ font-size:3.8vw; }
-  }
-
   /* ---- Compact quote box on slide 19 ("Результат обучения") ---------
      Same treatment as slide 3's quote: the original box (baked in
      slide-19.jpg) was full-width and its baked italic text looked soft
@@ -593,29 +558,7 @@
     <div class="s3-quote">«Ты никогда не остаёшься один на один с вопросами - я на связи весь путь»</div>
     <div class="ov ov-badge" style="top:90.75%;"><span class="num">3</span><span class="den">/23</span></div>
   </div>
-  <div class="slide-wrap mod-wrap">
-    <div class="mod-head">
-      <div class="sq-icon-hdr" style="position:relative;width:5.6cqw;height:5.6cqw;flex-shrink:0;"><span class="num">01</span></div>
-      <img class="mod-badge-black" src="assets/icons/mod-badge-black.png" alt="">
-      <div>
-        <h2 class="mod-title">VIP tattoo school - Вступление</h2>
-        <p class="mod-subtitle">Точка старта: от выбора пути до первого фото в портфолио.</p>
-      </div>
-    </div>
-    <div class="mod-body">
-      <ul class="mod-list">
-        <li><img class="check" src="assets/icons/mod-check.png" alt=""><span>Приветственное видео-кружочек от Виктории - личное неформальное знакомство</span></li>
-        <li><img class="check" src="assets/icons/mod-check.png" alt=""><span>Видео-урок 1: как войти в тату-индустрию, независимый мастер vs студия</span></li>
-        <li><img class="check" src="assets/icons/mod-check.png" alt=""><span>Видео-урок 2: честная картина профессии - доходы, расходы, путь от Procreate и искусственной кожи до настоящей</span></li>
-        <li><img class="check" src="assets/icons/mod-check.png" alt=""><span>Видео-урок 3: портфолио и продвижение - свет, фильтры, монтаж в CapCut</span></li>
-        <li><img class="check" src="assets/icons/mod-check.png" alt=""><span>Чек-лист инструментов для съёмки (кольцевая лампа, фильтры, Lightroom/Snapseed)</span></li>
-        <li><img class="check" src="assets/icons/mod-check.png" alt=""><span>Базовое ценообразование, безопасность и этика на старте</span></li>
-        <li><img class="check" src="assets/icons/mod-check.png" alt=""><span>Домашнее задание с личным разбором первого фото от Виктории</span></li>
-      </ul>
-      <img class="mod-photo" src="assets/module-photos/slide-04-photo.jpg" alt="Виктория Поникарова проводит обучение">
-    </div>
-    <div class="ov ov-badge on-light"><span class="num">4</span><span class="den">/23</span></div>
-  </div>
+  <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-04.jpg?v=9" alt="Слайд 4 - блок 1: вступление"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">01</span></div><div class="ov ov-hdr-subtitle" style="left:14.83%;top:11.26%;width:68%;">Точка старта: от выбора пути до первого фото в портфолио.</div><div class="ov ov-badge on-light"><span class="num">4</span><span class="den">/23</span></div></div>
   <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-05.jpg?v=8" alt="Слайд 5 - блок 2: AI-assistant"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">02</span></div><div class="ov ov-hdr-subtitle" style="left:14.83%;top:11.26%;width:68%;">Персональный AI-ассистент - бонус, включённый в обучение бесплатно и бессрочно.</div><div class="ov ov-badge on-light"><span class="num">5</span><span class="den">/23</span></div></div>
   <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-06.jpg?v=8" alt="Слайд 6 - блок 3: безопасность"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">03</span></div><div class="ov ov-hdr-subtitle" style="left:14.83%;top:11.26%;width:68%;">Один из ключевых блоков - фундамент профессионализма мастера.</div><div class="ov ov-badge on-light"><span class="num">6</span><span class="den">/23</span></div></div>
   <div class="slide-wrap"><img class="slide-img" src="assets/slides/slide-07.jpg?v=8" alt="Слайд 7 - блок 4: материалы"><div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">04</span></div><div class="ov ov-hdr-subtitle" style="left:14.83%;top:11.26%;width:68%;">Полная техническая база оборудования и расходников.</div><div class="ov ov-badge on-light"><span class="num">7</span><span class="den">/23</span></div></div>
