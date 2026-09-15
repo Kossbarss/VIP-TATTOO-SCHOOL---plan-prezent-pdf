@@ -427,24 +427,24 @@
     .mod-wrap > .slide-img,
     .mod-wrap > .ov{ display:none; }
     .mod-mobile{
-      display:block; background:#faf6ef; padding:6vw 6vw 8vw; text-align:center;
+      display:block; background:#faf6ef; padding:6vw 6vw 8vw; text-align:left;
     }
-    .mod-mobile .mod-head{ display:flex; flex-direction:column; align-items:center; gap:2.5vw; margin-bottom:5vw; padding-bottom:5vw; border-bottom:1px solid #e5ddcc; }
+    .mod-mobile .mod-head{ display:flex; flex-direction:column; align-items:flex-start; gap:2.5vw; margin-bottom:5vw; padding-bottom:5vw; border-bottom:1px solid #e5ddcc; }
     .mod-mobile .mod-head-icons{ display:flex; align-items:center; gap:2.5vw; }
     .mod-mobile .sq-icon-hdr{ position:relative; width:11vw; height:11vw; flex-shrink:0; }
     .mod-mobile .mod-badge-black{ width:11vw; height:11vw; display:block; }
     .mod-mobile .mod-title{
-      margin:0; font-family:var(--font-rise); font-weight:700; font-size:5.6vw;
+      margin:0; text-align:left; font-family:var(--font-rise); font-weight:700; font-size:5.6vw;
       letter-spacing:-0.045em; font-variation-settings:"wdth" 116, "opsz" 36;
       text-transform:uppercase; color:#17120d;
     }
-    .mod-mobile .mod-subtitle{ margin:2vw 0 0; font-family:var(--font-body-2); font-weight:500; font-size:4vw; line-height:1.4; color:#3a2c1c; }
+    .mod-mobile .mod-subtitle{ margin:2vw 0 0; text-align:left; font-family:var(--font-body-2); font-weight:500; font-size:4vw; line-height:1.4; color:#3a2c1c; }
     .mod-mobile .mod-photo{ display:block; width:100%; height:auto; border-radius:3vw; margin-bottom:6vw; }
-    .mod-mobile .mod-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; align-items:center; gap:5vw; }
-    .mod-mobile .mod-list li{ display:flex; flex-direction:column; align-items:center; gap:2vw; }
-    .mod-mobile .mod-list .check{ width:8vw; height:8vw; display:block; }
-    .mod-mobile .mod-list span{ font-family:var(--font-body-2); font-weight:500; font-size:4vw; line-height:1.45; color:#241a10; text-align:center; }
-    .mod-mobile .mod-badge{ display:flex; align-items:center; justify-content:center; gap:1.5vw; margin-top:6vw; font-family:'Nunito',sans-serif; }
+    .mod-mobile .mod-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; align-items:flex-start; gap:5vw; }
+    .mod-mobile .mod-list li{ display:flex; flex-direction:row; align-items:flex-start; gap:3vw; }
+    .mod-mobile .mod-list .check{ width:8vw; height:8vw; flex-shrink:0; display:block; margin-top:0.5vw; }
+    .mod-mobile .mod-list span{ font-family:var(--font-body-2); font-weight:500; font-size:4vw; line-height:1.45; color:#241a10; text-align:left; }
+    .mod-mobile .mod-badge{ display:flex; align-items:center; justify-content:flex-start; gap:1.5vw; margin-top:6vw; font-family:'Nunito',sans-serif; }
     .mod-mobile .mod-badge .num{
       width:9vw; height:9vw; min-width:9vw; border-radius:50%;
       background:linear-gradient(100deg,#f0c883,#c9a15a); color:#1a120c;
