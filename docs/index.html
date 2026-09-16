@@ -234,10 +234,11 @@ src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
     .s2-card .s2-label{ font-size:3.1cqw; line-height:1.2; }
   }
   @media (max-width:600px){
-    .s2-grid{ gap:3vw; padding:5vw 4vw 7vw; }
-    .s2-card{ aspect-ratio:1.55/1; }
-    .s2-card .s2-num{ font-size:5.6vw; }
-    .s2-card .s2-label{ font-size:3.7vw; line-height:1.2; }
+    .s2-grid{ gap:3vw; padding:5vw 4vw 15vw; }
+    .s2-card{ aspect-ratio:1.42/1; }
+    .s2-card .s2-num{ font-size:5.6vw; top:11%; left:0; width:100%; text-align:center; }
+    .s2-card .s2-label{ font-size:3.7vw; line-height:1.25; bottom:9%; text-align:center; }
+    .s2-card .s2-label.one-word{ bottom:auto; top:50%; transform:translateY(-50%); }
   }
 
   /* ---- Same rebuild applied to every module-slide header square ------
@@ -452,12 +453,18 @@ src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
   .ov-badge{ position:absolute; left:92.22%; top:93.42%; display:flex; align-items:center; gap:0.4cqw; font-family:'Nunito',sans-serif; }
   .ov-badge .num{
     width:2.75cqw; height:2.75cqw; min-width:2.75cqw; border-radius:50%;
-    background:linear-gradient(100deg,#f0c883,#c9a15a); color:#1a120c;
+    background:radial-gradient(circle at 32% 28%, #fff6d8 0%, #f8dd8b 20%, #e0ad4a 48%, #b9822a 74%, #8a5f1c 100%);
+    border:1px solid rgba(255,240,190,0.55);
+    box-shadow:inset 0 1px 1px rgba(255,255,255,0.85), inset 0 -2px 3px rgba(80,50,10,0.55), 0 2px 5px rgba(0,0,0,0.35);
+    color:#3a2408; text-shadow:0 1px 1px rgba(255,255,255,0.4), 0 -1px 1px rgba(60,35,5,0.5);
     display:flex; align-items:center; justify-content:center;
-    font-weight:800; font-size:1.05cqw;
+    font-weight:800; font-size:1.05cqw; box-sizing:border-box;
   }
   .ov-badge .den{
-    font-weight:700; font-size:1.05cqw; color:#d8cdb8;
+    font-weight:700; font-size:1.05cqw;
+    background:linear-gradient(180deg, #fff6d8 0%, #f8dd8b 30%, #e0ad4a 60%, #b9822a 85%, #8a5f1c 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,0.35));
   }
   /* Slides 1-2 only: bigger, more legible page-number badge (the
      shared 1.05cqw/2.75cqw sizing above stays for slides 3-23, which
@@ -766,6 +773,7 @@ src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
     display:flex; flex-direction:column; align-items:center; gap:0.9cqw;
   }
   .s3-card img{ width:3.6cqw; height:3.6cqw; display:block; }
+  .s3-card img.s3-icon-lg{ width:6.6cqw; height:6.6cqw; }
   .s3-card h3{ margin:0; min-height:2.6em; display:flex; align-items:center; font-family:var(--font-rise); font-weight:700; font-size:1.3cqw; line-height:1.3; color:#241a10; }
   .s3-card p{ margin:0; font-family:var(--font-body-2); font-weight:500; font-size:1.05cqw; line-height:1.4; color:#241a10; }
   .s3-quote{
@@ -775,15 +783,24 @@ src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
   .s3-badge{ display:flex; align-items:center; justify-content:flex-end; gap:0.5cqw; margin-top:2cqw; font-family:'Nunito',sans-serif; }
   .s3-badge .num{
     width:2.9cqw; height:2.9cqw; min-width:2.9cqw; border-radius:50%;
-    background:linear-gradient(100deg,#f0c883,#c9a15a); color:#1a120c;
+    background:radial-gradient(circle at 32% 28%, #fff6d8 0%, #f8dd8b 20%, #e0ad4a 48%, #b9822a 74%, #8a5f1c 100%);
+    border:1px solid rgba(255,240,190,0.55);
+    box-shadow:inset 0 1px 1px rgba(255,255,255,0.85), inset 0 -2px 3px rgba(80,50,10,0.55), 0 2px 5px rgba(0,0,0,0.35);
+    color:#3a2408; text-shadow:0 1px 1px rgba(255,255,255,0.4), 0 -1px 1px rgba(60,35,5,0.5);
     display:flex; align-items:center; justify-content:center;
-    font-weight:800; font-size:1.15cqw;
+    font-weight:800; font-size:1.15cqw; box-sizing:border-box;
   }
-  .s3-badge .den{ font-weight:700; font-size:1.15cqw; color:#8a7a63; }
+  .s3-badge .den{
+    font-weight:700; font-size:1.15cqw;
+    background:linear-gradient(180deg, #fff6d8 0%, #f8dd8b 30%, #e0ad4a 60%, #b9822a 85%, #8a5f1c 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,0.35));
+  }
   @media (max-width:768px), (hover:none) and (pointer:coarse){
     .s3-grid{ grid-template-columns:repeat(2,1fr); gap:3vw; }
     .s3-card{ padding:4vw 3vw; border-radius:3vw; gap:2.5vw; }
     .s3-card img{ width:9vw; height:9vw; }
+    .s3-card img.s3-icon-lg{ width:16.5vw; height:16.5vw; }
     .s3-card h3{ font-size:4vw; }
     .s3-card p{ font-size:3.2vw; }
     .s3-heading{ font-size:4.6vw; }
@@ -900,11 +917,19 @@ src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
     .mod-mobile .mod-badge{ display:flex; align-items:center; justify-content:flex-end; gap:1.5vw; margin-top:6vw; font-family:'Nunito',sans-serif; }
     .mod-mobile .mod-badge .num{
       width:9vw; height:9vw; min-width:9vw; border-radius:50%;
-      background:linear-gradient(100deg,#f0c883,#c9a15a); color:#1a120c;
+      background:radial-gradient(circle at 32% 28%, #fff6d8 0%, #f8dd8b 20%, #e0ad4a 48%, #b9822a 74%, #8a5f1c 100%);
+      border:1px solid rgba(255,240,190,0.55);
+      box-shadow:inset 0 1px 1px rgba(255,255,255,0.85), inset 0 -2px 3px rgba(80,50,10,0.55), 0 2px 5px rgba(0,0,0,0.35);
+      color:#3a2408; text-shadow:0 1px 1px rgba(255,255,255,0.4), 0 -1px 1px rgba(60,35,5,0.5);
       display:flex; align-items:center; justify-content:center;
-      font-weight:800; font-size:3.6vw;
+      font-weight:800; font-size:3.6vw; box-sizing:border-box;
     }
-    .mod-mobile .mod-badge .den{ font-weight:700; font-size:3.6vw; color:#8a7a63; }
+    .mod-mobile .mod-badge .den{
+      font-weight:700; font-size:3.6vw;
+      background:linear-gradient(180deg, #fff6d8 0%, #f8dd8b 30%, #e0ad4a 60%, #b9822a 85%, #8a5f1c 100%);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+      filter:drop-shadow(0 1px 1px rgba(0,0,0,0.35));
+    }
   }
 
   /* ---- Slide 19 ("Результат обучения"), rebuilt as real responsive HTML
@@ -929,11 +954,19 @@ src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
   .s19-badge{ display:flex; align-items:center; justify-content:flex-end; gap:0.5cqw; margin-top:2cqw; font-family:'Nunito',sans-serif; }
   .s19-badge .num{
     width:2.9cqw; height:2.9cqw; min-width:2.9cqw; border-radius:50%;
-    background:linear-gradient(100deg,#f0c883,#c9a15a); color:#1a120c;
+    background:radial-gradient(circle at 32% 28%, #fff6d8 0%, #f8dd8b 20%, #e0ad4a 48%, #b9822a 74%, #8a5f1c 100%);
+    border:1px solid rgba(255,240,190,0.55);
+    box-shadow:inset 0 1px 1px rgba(255,255,255,0.85), inset 0 -2px 3px rgba(80,50,10,0.55), 0 2px 5px rgba(0,0,0,0.35);
+    color:#3a2408; text-shadow:0 1px 1px rgba(255,255,255,0.4), 0 -1px 1px rgba(60,35,5,0.5);
     display:flex; align-items:center; justify-content:center;
-    font-weight:800; font-size:1.15cqw;
+    font-weight:800; font-size:1.15cqw; box-sizing:border-box;
   }
-  .s19-badge .den{ font-weight:700; font-size:1.15cqw; color:#8a7a63; }
+  .s19-badge .den{
+    font-weight:700; font-size:1.15cqw;
+    background:linear-gradient(180deg, #fff6d8 0%, #f8dd8b 30%, #e0ad4a 60%, #b9822a 85%, #8a5f1c 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,0.35));
+  }
   @media (max-width:768px), (hover:none) and (pointer:coarse){
     .s19-wrap{ padding:5vw 5vw 2.5vw; }
     .s19-head{ gap:4vw; }
@@ -1064,18 +1097,18 @@ src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
     </div>
     <div class="s2-grid">
       <div class="s2-card"><span class="ring"></span><span class="s2-num">01</span><span class="s2-label">VIP tattoo school</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">02</span><span class="s2-label">AI-assistant</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">03</span><span class="s2-label">Безопасность</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">04</span><span class="s2-label">Материалы</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">02</span><span class="s2-label one-word">AI-assistant</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">03</span><span class="s2-label one-word">Безопасность</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">04</span><span class="s2-label one-word">Материалы</span></div>
       <div class="s2-card"><span class="ring"></span><span class="s2-num">05</span><span class="s2-label">Организация + место</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">06</span><span class="s2-label">Практика</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">06</span><span class="s2-label one-word">Практика</span></div>
       <div class="s2-card"><span class="ring"></span><span class="s2-num">07</span><span class="s2-label">Работа с кожей</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">08</span><span class="s2-label">Трафареты</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">09</span><span class="s2-label">Pro Stories®</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">08</span><span class="s2-label one-word">Трафареты</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">09</span><span class="s2-label one-word">Pro Stories®</span></div>
       <div class="s2-card"><span class="ring"></span><span class="s2-num">10</span><span class="s2-label">30-дн. практикум</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">11</span><span class="s2-label">Стили</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">11</span><span class="s2-label one-word">Стили</span></div>
       <div class="s2-card"><span class="ring"></span><span class="s2-num">12</span><span class="s2-label">Работа с клиентом</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">13</span><span class="s2-label">Реклама</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">13</span><span class="s2-label one-word">Реклама</span></div>
       <div class="s2-card"><span class="ring"></span><span class="s2-num">14</span><span class="s2-label">Zoom - Tattoo</span></div>
       <div class="s2-card"><span class="ring"></span><span class="s2-num">15</span><span class="s2-label">Именной диплом</span></div>
     </div>
@@ -1091,10 +1124,10 @@ src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
       </div>
     </div>
     <div class="s3-grid">
-      <div class="s3-card"><img src="assets/icons/s3-chat.png" alt=""><h3>Личная обратная связь</h3><p>Виктория лично отвечает и разбирает домашние задания</p></div>
-      <div class="s3-card"><img src="assets/icons/s3-community.png" alt=""><h3>Чат сообщества</h3><p>Общение и поддержка с другими тату-мастерами</p></div>
-      <div class="s3-card"><img src="assets/icons/s3-ai.png" alt=""><h3>AI-ассистент 24/7</h3><p>Персональный помощник на данных курса и студии Sarna</p></div>
-      <div class="s3-card"><img src="assets/icons/s3-zoom.png" alt=""><h3>Живые Zoom-созвоны</h3><p>Разбор твоего кабинета, цен и клиентов вживую (блоки 13-14)</p></div>
+      <div class="s3-card"><img class="s3-icon-lg" src="assets/icons/s3-personal-badge.png" alt=""><h3>Личная обратная связь</h3><p>Виктория лично отвечает и разбирает домашние задания</p></div>
+      <div class="s3-card"><img class="s3-icon-lg" src="assets/icons/s3-chat-badge.png" alt=""><h3>Чат сообщества</h3><p>Общение и поддержка с другими тату-мастерами</p></div>
+      <div class="s3-card"><img class="s3-icon-lg" src="assets/icons/s3-ai-chip.png" alt=""><h3>AI-ассистент 24/7</h3><p>Персональный помощник на данных курса и студии Sarna</p></div>
+      <div class="s3-card"><img class="s3-icon-lg" src="assets/icons/s3-zoom-badge.png" alt=""><h3>Живые Zoom-созвоны</h3><p>Разбор твоего кабинета, цен и клиентов вживую (блоки 13-14)</p></div>
     </div>
     <div class="s3-quote">«Ты никогда не остаёшься один на один с вопросами - я на связи весь путь»</div>
     <div class="s3-badge"><span class="num">3</span><span class="den">/23</span></div>
