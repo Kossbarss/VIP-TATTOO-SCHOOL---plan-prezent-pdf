@@ -231,6 +231,13 @@
      replaced here with real, larger HTML text at the same spot -- the
      certificate photo, first bullet list and CTA buttons are untouched. */
   .slide-wrap{ position:relative; }
+  /* Slide 23's .ov overlays are positioned as %-of-container, which must
+     stay scoped to the baked image's own height -- .s23-slide-visual is
+     the positioned ancestor they actually attach to, so appending the
+     CTA bar as a further sibling inside .s23-wrap (to make the slide and
+     its buttons one single element) doesn't stretch that container and
+     throw every overlay's math off. */
+  .s23-slide-visual{ position:relative; }
   .ov{ position:absolute; font-family:'Nunito',sans-serif; }
   .ov-s22-included{ left:3.7%; top:53.56%; height:46.44%; width:46%; color:#e9e0d3; display:flex; flex-direction:column; justify-content:flex-start; }
   /* ---- Non-clickable discount banner, styled after the landing page's
@@ -259,6 +266,81 @@
     padding:0.5cqw 1.1cqw; border-radius:999px; margin-bottom:1.35cqw; line-height:1;
   }
   .ov-s22-included .s22-installment-banner{ width:100%; height:auto; border-radius:0.8cqw; display:block; }
+  /* Slide 23 + the CTA button bar below it read as one continuous final
+     block, so both carry the same warm dark-brown radial/linear gradient
+     and centered semi-transparent watermark logo used on the landing
+     page's .certificate-section / .section-watermark -- painted as an
+     overlay ON TOP of the slide's own (opaque) baked image on the slide,
+     and directly as the CSS background on the CTA bar (which has no
+     opaque image, so a plain background works and still sits behind its
+     buttons), so there's no flat-black seam between the two. */
+  .s23-bg-gradient{
+    background:
+      radial-gradient(circle at top right, rgba(253,144,77,0.38) 0%, rgba(201,162,74,0.2) 18%, transparent 38%),
+      linear-gradient(160deg, rgba(90,62,38,0.9) 0%, rgba(24,19,16,1) 78%, rgba(24,19,16,1) 100%);
+  }
+  .ov-s23-bg-tint{
+    position:absolute; inset:0; z-index:0; pointer-events:none;
+  }
+  .ov-s23-watermark{
+    position:absolute; top:38%; left:50%; transform:translate(-50%,-50%);
+    z-index:0; width:min(55%,640px); max-height:55%; object-fit:contain;
+    opacity:0.08; pointer-events:none;
+  }
+  /* Continues, not restarts, the slide's own gradient: its bottom edge has
+     already faded to near-flat ink (the radial glow is anchored at the
+     slide's top right and the linear gradient ends dark), so the CTA bar
+     picks up at that same dark tone instead of a fresh bright top-left
+     corner -- which is what caused the visible seam here before. */
+  .s23-wrap .cta-bar{
+    position:relative; z-index:1;
+    background:rgb(24,19,16);
+  }
+  /* Slide 23 certificate: cropped out of slide-23.jpg into its own image
+     (slide-23-certificate.jpg) so it can carry the same interactive 3D
+     tilt-on-hover + "tap to shatter" badge mechanism cloned from the
+     landing page's certificate-tilt.js (React + framer-motion there;
+     reimplemented here in plain CSS/JS since this deck has no build step). */
+  .ov-s23-cert-wrap{ perspective:1000px; }
+  .ov-s23-cert-tilt{
+    position:relative; width:100%; height:100%; border-radius:1.1cqw;
+    overflow:hidden; transform-style:preserve-3d; will-change:transform;
+    transition:transform 0.1s ease-out; box-shadow:0 1.2cqw 3cqw rgba(0,0,0,0.45);
+  }
+  .ov-s23-cert-tilt img{ display:block; width:100%; height:100%; object-fit:cover; pointer-events:none; }
+  .ov-s23-cert-glare{
+    position:absolute; inset:0; pointer-events:none; opacity:0;
+    background:radial-gradient(circle at 50% 50%, rgba(255,255,255,0.9), transparent 50%);
+    transition:opacity 0.2s ease-out; mix-blend-mode:overlay;
+  }
+  .ov-s23-cert-tilt:hover .ov-s23-cert-glare{ opacity:0.15; }
+  .ov-s23-cert-badge{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    z-index:5; transition:transform 0.15s ease, opacity 0.15s ease;
+  }
+  .ov-s23-cert-badge.is-hidden{ opacity:0; transform:translate(-50%,-50%) scale(0); pointer-events:none; }
+  .ov-s23-cert-badge button{
+    position:relative; display:block; cursor:pointer; overflow:hidden;
+    padding:0.9cqw 1.6cqw; border-radius:0.9cqw; border:1px solid rgba(230,33,21,0.66);
+    background:linear-gradient(135deg, rgba(230,33,21,0.13) 0%, rgba(230,33,21,0.27) 100%);
+    color:#e62115; box-shadow:0 0 1.6cqw rgba(230,33,21,0.2), inset 0 0 1.6cqw rgba(230,33,21,0.07);
+    font-family:var(--font-body-2); font-weight:700; text-transform:uppercase;
+    font-size:1.05cqw; letter-spacing:0.03em;
+  }
+  .ov-s23-cert-badge button:hover{ transform:scale(1.05); }
+  .ov-s23-cert-badge button:active{ transform:scale(0.95); }
+  .ov-s23-cert-shard{
+    position:absolute; left:50%; top:50%; pointer-events:none;
+    background:#e62115; box-shadow:0 0 0.7cqw #e62115, 0 0 1.4cqw #e62115;
+    transition:transform 0.8s cubic-bezier(.25,.46,.45,.94), opacity 0.8s cubic-bezier(.25,.46,.45,.94);
+    transform:translate(-50%,-50%); opacity:1;
+  }
+  .ov-s23-cert-ring{
+    position:absolute; left:50%; top:50%; pointer-events:none; border-radius:50%;
+    border:1px solid rgba(230,33,21,0.6); transform:translate(-50%,-50%);
+    width:0; height:0; opacity:1; transition:width 0.5s ease-out,height 0.5s ease-out,opacity 0.5s ease-out;
+  }
+
   .ov-s22-right{ left:51.5%; top:70.4%; height:29.6%; width:44%; color:#cabfae; display:flex; flex-direction:column; justify-content:center; }
   .ov-s22-right h3{
     font-family:var(--font-rise); font-weight:700; text-transform:uppercase;
@@ -508,11 +590,14 @@
      banner + installment image, certificate photo, CTA heading/text. */
   .s23-mobile{ display:none; }
   @media (max-width:768px){
-    .s23-wrap > .slide-img,
-    .s23-wrap > .ov{ display:none; }
+    .s23-slide-visual > .slide-img,
+    .s23-slide-visual > .ov{ display:none; }
     .s23-mobile{
-      display:block; background:#15110e; padding:8vw 6vw 10vw; text-align:left;
+      position:relative; z-index:1;
+      display:block; background:transparent; padding:8vw 6vw 10vw; text-align:left;
     }
+    .s23-mobile > .ov-s23-bg-tint,
+    .s23-mobile > .ov-s23-watermark{ z-index:-1; }
     .s23-mob-logo{
       display:inline-flex; align-items:center; gap:2.5vw; margin-bottom:6vw;
       color:#fff; font-family:var(--font-rise); font-weight:700; font-size:4.2vw;
@@ -543,7 +628,32 @@
     .s23-mob-discount .old{ text-decoration:line-through; color:rgba(250,246,239,0.55); font-size:0.9em; }
     .s23-mob-discount .new{ font-size:1.25em; font-weight:800; color:#e8d5a8; }
     .s23-mob-installment{ display:block; width:100%; height:auto; border-radius:3vw; margin-bottom:8vw; }
-    .s23-mob-cert{ display:block; width:100%; height:auto; border-radius:3vw; margin-bottom:8vw; }
+    .s23-mob-cert-wrap{ position:relative; margin-bottom:8vw; perspective:1000px; }
+    .s23-mob-cert-tilt{
+      position:relative; width:100%; border-radius:3vw; overflow:hidden;
+      transform-style:preserve-3d; will-change:transform; transition:transform 0.1s ease-out;
+      box-shadow:0 3vw 6vw rgba(0,0,0,0.45);
+    }
+    .s23-mob-cert-tilt img{ display:block; width:100%; height:auto; pointer-events:none; }
+    .s23-mob-cert-badge{
+      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      z-index:5; transition:transform 0.15s ease, opacity 0.15s ease;
+    }
+    .s23-mob-cert-badge.is-hidden{ opacity:0; transform:translate(-50%,-50%) scale(0); pointer-events:none; }
+    .s23-mob-cert-badge button{
+      position:relative; display:block; overflow:hidden;
+      padding:3vw 5vw; border-radius:2.5vw; border:1px solid rgba(230,33,21,0.66);
+      background:linear-gradient(135deg, rgba(230,33,21,0.13) 0%, rgba(230,33,21,0.27) 100%);
+      color:#e62115; box-shadow:0 0 5vw rgba(230,33,21,0.2), inset 0 0 5vw rgba(230,33,21,0.07);
+      font-family:var(--font-body-2); font-weight:700; text-transform:uppercase;
+      font-size:3.4vw; letter-spacing:0.03em;
+    }
+    .s23-mob-cert-shard{
+      position:absolute; left:50%; top:50%; pointer-events:none;
+      background:#e62115; box-shadow:0 0 2vw #e62115, 0 0 4vw #e62115;
+      transition:transform 0.8s cubic-bezier(.25,.46,.45,.94), opacity 0.8s cubic-bezier(.25,.46,.45,.94);
+      transform:translate(-50%,-50%); opacity:1;
+    }
     .s23-mob-cta-h{
       font-family:var(--font-rise); font-weight:700; text-transform:uppercase;
       letter-spacing:-0.045em; font-variation-settings:"wdth" 116,"opsz" 36;
@@ -1604,7 +1714,17 @@
     </div>
   </div>
   <div class="slide-wrap s23-wrap">
+   <div class="s23-slide-visual">
     <img class="slide-img" src="assets/module-photos/slide-23-textless-desktop.jpg" alt="Слайд 23 - готов начать путь в тату-индустрии">
+    <div class="ov-s23-bg-tint s23-bg-gradient" aria-hidden="true"></div>
+    <img class="ov-s23-watermark" src="assets/hero/logo-watermark.png" alt="" aria-hidden="true">
+    <div class="ov ov-s23-cert-wrap" style="left:51.25%;top:12.59%;width:45.42%;height:58.22%;">
+      <div class="ov-s23-cert-tilt" id="s23CertTilt">
+        <img src="assets/module-photos/slide-23-certificate.jpg" alt="Сертификат об окончании курса VIP tattoo school">
+        <div class="ov-s23-cert-glare" id="s23CertGlare"></div>
+      </div>
+      <div class="ov-s23-cert-badge" id="s23CertBadge"><button type="button" id="s23CertBtn">Нажми</button></div>
+    </div>
     <div class="ov ov-s23-brand" style="left:0%;top:5.7%;width:100%;"><img src="assets/hero/logo-mark.png" alt="">VIP tattoo school</div>
     <p class="ov ov-s23-eyebrow" style="left:6.25%;top:13.6%;">Почему именно это обучение</p>
     <h2 class="ov ov-s23-heading" style="left:6.25%;top:16.6%;width:48%;">Чем VIP tattoo school отличается от типичного обучения</h2>
@@ -1625,6 +1745,8 @@
       <div class="byline">ViP tattoo school · Виктория Поникарова</div>
     </div>
     <div class="s23-mobile">
+      <div class="ov-s23-bg-tint s23-bg-gradient" aria-hidden="true"></div>
+      <img class="ov-s23-watermark" src="assets/hero/logo-watermark.png" alt="" aria-hidden="true">
       <div class="s23-mob-logo"><img src="assets/hero/logo-mark.png" alt="">VIP tattoo school</div>
       <div class="s23-mob-eyebrow">Почему именно это обучение</div>
       <h2>Чем VIP tattoo school отличается от типичного обучения</h2>
@@ -1637,17 +1759,102 @@
       </ul>
       <div class="s23-mob-discount">Забрать курс со скидкой за <span class="old">600€</span> <span class="new">275€</span></div>
       <img class="s23-mob-installment" src="assets/images/payment-installment-banner.jpg?v=2" alt="Оплата частями: 0% - сначала учись, потом оплачивай">
-      <img class="s23-mob-cert" src="assets/module-photos/slide-23-cert.jpg" alt="Сертификат об окончании курса ViP tattoo school">
+      <div class="s23-mob-cert-wrap">
+        <div class="s23-mob-cert-tilt" id="s23MobCertTilt">
+          <img src="assets/module-photos/slide-23-cert.jpg" alt="Сертификат об окончании курса ViP tattoo school">
+        </div>
+        <div class="s23-mob-cert-badge" id="s23MobCertBadge"><button type="button" id="s23MobCertBtn">Нажми</button></div>
+      </div>
       <h3 class="s23-mob-cta-h">Готов начать путь в тату-индустрии?</h3>
       <p class="s23-mob-cta-p">Доступ остаётся с тобой навсегда - можешь возвращаться к любому блоку в любой момент. Напиши мне лично, и я расскажу, как начать обучение уже сегодня.</p>
       <div class="s23-mob-byline">ViP tattoo school · Виктория Поникарова</div>
     </div>
-  </div>
-  <div class="cta-bar">
-    <a class="btn btn-primary" href="https://buy.stripe.com/fZucN57RO3TEgXu23C9AA00" target="_blank" rel="noopener"><span>Открыть доступ к обучению</span></a>
-    <a class="btn btn-outline" href="https://website.vip-tattoo-school.com/#vtpCheckoutCtaInstallment" target="_blank" rel="noopener">Оплата частями - 2×137.50€</a>
-    <a class="btn btn-secondary" href="https://t.me/+48733341364" target="_blank" rel="noopener">Написать Виктории</a>
+   </div>
+    <div class="cta-bar">
+      <a class="btn btn-primary" href="https://buy.stripe.com/fZucN57RO3TEgXu23C9AA00" target="_blank" rel="noopener"><span>Открыть доступ к обучению</span></a>
+      <a class="btn btn-outline" href="https://website.vip-tattoo-school.com/#vtpCheckoutCtaInstallment" target="_blank" rel="noopener">Оплата частями - 2×137.50€</a>
+      <a class="btn btn-secondary" href="https://t.me/+48733341364" target="_blank" rel="noopener">Написать Виктории</a>
+    </div>
   </div>
 </div>
+<script>
+(function(){
+  var MAX_TILT = 12;
+
+  function initCertTilt(opts){
+    var tilt = document.getElementById(opts.tiltId);
+    var badge = document.getElementById(opts.badgeId);
+    var btn = document.getElementById(opts.btnId);
+    var glare = opts.glareId ? document.getElementById(opts.glareId) : null;
+    if(!tilt || !badge || !btn) return;
+
+    function setTilt(rx, ry){
+      tilt.style.transform = 'perspective(1000px) rotateX('+rx+'deg) rotateY('+ry+'deg)';
+    }
+
+    function tiltFromPoint(clientX, clientY, strength){
+      var r = tilt.getBoundingClientRect();
+      var px = (clientX - r.left) / r.width;
+      var py = (clientY - r.top) / r.height;
+      setTilt((0.5 - py) * MAX_TILT * strength, (px - 0.5) * MAX_TILT * strength);
+      if(glare) glare.style.background = 'radial-gradient(circle at '+(px*100)+'% '+(py*100)+'%, rgba(255,255,255,0.9), transparent 50%)';
+    }
+
+    if(opts.touch){
+      tilt.addEventListener('touchstart', function(e){
+        var t = e.touches[0];
+        if(t) tiltFromPoint(t.clientX, t.clientY, 2.2);
+      }, {passive:true});
+      tilt.addEventListener('touchmove', function(e){
+        var t = e.touches[0];
+        if(t) tiltFromPoint(t.clientX, t.clientY, 2.2);
+      }, {passive:true});
+      tilt.addEventListener('touchend', function(){ setTilt(0,0); });
+    } else {
+      tilt.addEventListener('mousemove', function(e){ tiltFromPoint(e.clientX, e.clientY, 1); });
+      tilt.addEventListener('mouseleave', function(){ setTilt(0,0); });
+    }
+
+    function demoWobble(){
+      var steps = [[MAX_TILT*0.7,-MAX_TILT*0.7],[-MAX_TILT*0.7,MAX_TILT*0.7],[MAX_TILT*0.5,MAX_TILT*0.5],[0,0]];
+      steps.forEach(function(s, i){ setTimeout(function(){ setTilt(s[0], s[1]); }, 220*(i+1)); });
+    }
+
+    function shatter(){
+      var count = 16;
+      for(var i=0;i<count;i++){
+        var angle = Math.PI*2*i/count + Math.random()*0.5;
+        var dist = 100 + Math.random()*200;
+        var size = 4 + Math.random()*12;
+        var shard = document.createElement('div');
+        shard.className = opts.shardClass;
+        shard.style.width = size+'px';
+        shard.style.height = size+'px';
+        shard.style.clipPath = 'polygon('+(Math.random()*50)+'% 0%, 100% '+(Math.random()*50)+'%, '+(50+Math.random()*50)+'% 100%, 0% '+(50+Math.random()*50)+'%)';
+        badge.appendChild(shard);
+        requestAnimationFrame(function(sh, dx, dy, rot){
+          return function(){
+            sh.style.transform = 'translate(-50%,-50%) translate('+dx+'px,'+dy+'px) rotate('+rot+'deg)';
+            sh.style.opacity = '0';
+          };
+        }(shard, Math.cos(angle)*dist, Math.sin(angle)*dist, Math.random()*720-360));
+        setTimeout(function(sh){ return function(){ sh.remove(); }; }(shard), 900);
+      }
+    }
+
+    btn.addEventListener('click', function(){
+      shatter();
+      demoWobble();
+      badge.classList.add('is-hidden');
+      setTimeout(function(){
+        badge.classList.remove('is-hidden');
+      }, 10000);
+    });
+  }
+
+  initCertTilt({ tiltId:'s23CertTilt', badgeId:'s23CertBadge', btnId:'s23CertBtn', glareId:'s23CertGlare', shardClass:'ov-s23-cert-shard', touch:false });
+  initCertTilt({ tiltId:'s23MobCertTilt', badgeId:'s23MobCertBadge', btnId:'s23MobCertBtn', shardClass:'s23-mob-cert-shard', touch:true });
+})();
+</script>
 </body>
 </html>
