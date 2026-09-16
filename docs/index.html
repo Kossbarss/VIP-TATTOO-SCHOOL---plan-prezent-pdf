@@ -8,6 +8,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>План курса - VIP Tattoo School</title>
 <link rel="icon" type="image/x-icon" href="favicon/favicon.ico">
+<!-- Meta (Facebook) Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '2292163738269124');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
 <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="48x48" href="favicon/favicon-48x48.png">
@@ -255,8 +272,10 @@
     border:1px solid rgba(201,162,74,0.45);
     border-radius:1.35cqw; padding:1.125cqw 1.8cqw; margin-bottom:2.41cqw;
     font-weight:600; font-size:1.575cqw; color:#fffdfa; line-height:1.3;
-    text-align:center; cursor:default; user-select:none;
+    text-align:center; text-decoration:none; cursor:pointer;
+    transition:transform .15s ease, box-shadow .2s ease;
   }
+  .ov-s22-included .discount-banner:hover{ transform:translateY(-2px); box-shadow:0 10px 20px -10px rgba(255,0,3,0.5); }
   .ov-s22-included .discount-banner .old{
     text-decoration:line-through; color:rgba(250,246,239,0.55); font-size:0.9em;
   }
@@ -522,7 +541,7 @@
      768px the image/overlays are hidden and replaced with a real, flowing
      HTML version using the same cropped assets and copy. */
   .s21-mobile{ display:none; }
-  @media (max-width:768px){
+  @media (max-width:768px), (hover:none) and (pointer:coarse){
     .s21-wrap > .slide-img,
     .s21-wrap > .ov{ display:none; }
     .s21-mobile{
@@ -564,7 +583,7 @@
   /* Slide 22 ("Популярные вопросы"): mobile-only rebuild, same pattern
      as slide 21. Desktop keeps the original baked-image slide untouched. */
   .s22-mobile{ display:none; }
-  @media (max-width:768px){
+  @media (max-width:768px), (hover:none) and (pointer:coarse){
     .s22-wrap > .slide-img,
     .s22-wrap > .ov{ display:none; }
     .s22-mobile{
@@ -593,7 +612,7 @@
      flowing version: logo, eyebrow, heading, checklist, discount
      banner + installment image, certificate photo, CTA heading/text. */
   .s23-mobile{ display:none; }
-  @media (max-width:768px){
+  @media (max-width:768px), (hover:none) and (pointer:coarse){
     .s23-slide-visual > .slide-img,
     .s23-slide-visual > .ov{ display:none; }
     .s23-mobile{
@@ -627,7 +646,7 @@
       border:1px solid rgba(201,162,74,0.45); border-radius:4vw;
       padding:3.5vw 4vw; margin-bottom:5vw;
       font-family:'Nunito',sans-serif; font-weight:600; font-size:3.9vw; color:#fffdfa;
-      text-align:center;
+      text-align:center; text-decoration:none; cursor:pointer;
     }
     .s23-mob-discount .old{ text-decoration:line-through; color:rgba(250,246,239,0.55); font-size:0.9em; }
     .s23-mob-discount .new{ font-size:1.25em; font-weight:800; color:#e8d5a8; }
@@ -732,7 +751,7 @@
     font-weight:800; font-size:1.15cqw;
   }
   .s3-badge .den{ font-weight:700; font-size:1.15cqw; color:#8a7a63; }
-  @media (max-width:768px){
+  @media (max-width:768px), (hover:none) and (pointer:coarse){
     .s3-grid{ grid-template-columns:repeat(2,1fr); gap:3vw; }
     .s3-card{ padding:4vw 3vw; border-radius:3vw; gap:2.5vw; }
     .s3-card img{ width:9vw; height:9vw; }
@@ -771,7 +790,7 @@
   .s20-col .mark{ width:1.5cqw; height:1.5cqw; min-width:1.5cqw; flex-shrink:0; margin-top:0.15cqw; }
   .s20-col span{ font-family:var(--font-body-2); font-weight:500; font-size:1.05cqw; line-height:1.45; color:#241a10; }
   .s20-col.dim span{ color:#8a7a63; }
-  @media (max-width:768px){
+  @media (max-width:768px), (hover:none) and (pointer:coarse){
     .s20-wrap{ padding:5vw 5vw 2.5vw; }
     .s20-head{ gap:4vw; }
     .s20-head .sq-icon-hdr{ width:11vw !important; height:11vw !important; }
@@ -824,7 +843,7 @@
      legible single-column flow. Above 768px .mod-mobile stays hidden
      and the desktop overlay above renders instead. */
   .mod-mobile{ display:none; }
-  @media (max-width:768px){
+  @media (max-width:768px), (hover:none) and (pointer:coarse){
     .mod-wrap > .slide-img,
     .mod-wrap > .ov{ display:none; }
     .mod-mobile{
@@ -885,7 +904,7 @@
     font-weight:800; font-size:1.15cqw;
   }
   .s19-badge .den{ font-weight:700; font-size:1.15cqw; color:#8a7a63; }
-  @media (max-width:768px){
+  @media (max-width:768px), (hover:none) and (pointer:coarse){
     .s19-wrap{ padding:5vw 5vw 2.5vw; }
     .s19-head{ gap:4vw; }
     .s19-heading{ font-size:4.6vw; }
@@ -965,7 +984,7 @@
   .hero-photos{ position:relative; z-index:1; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:clamp(0.6rem, 1.2vw, 1rem); height:clamp(20rem, 34vw, 32rem); overflow:hidden; }
   .hero-photos img{ width:100%; height:100%; min-height:0; min-width:0; object-fit:cover; border-radius:clamp(16px, 1.2vw, 24px); display:block; box-shadow:0 24px 54px -26px rgba(0,0,0,0.95); }
   .hero-photos .main{ grid-row:1 / span 2; }
-  @media (max-width:767px){
+  @media (max-width:768px), (hover:none) and (pointer:coarse){
     .hero-grid{ grid-template-columns:1fr; }
     .hero-photos{ order:-1; height:clamp(16rem, 62vw, 22rem); }
   }
@@ -1740,7 +1759,7 @@
       <li><img src="assets/icons/mod-check.png" alt=""><span>Онлайн-связь с куратором без выходных</span></li>
     </ul>
     <div class="ov ov-s22-included">
-      <div class="discount-banner">Забрать курс со скидкой за <span class="old">600€</span> <span class="new">275€</span></div>
+      <a class="discount-banner" href="https://buy.stripe.com/fZucN57RO3TEgXu23C9AA00" target="_blank" rel="noopener">Забрать курс со скидкой за <span class="old">600€</span> <span class="new">275€</span></a>
       <img class="s22-installment-banner" src="assets/images/payment-installment-banner.jpg?v=2" alt="Оплата частями: 0% - сначала учись, потом оплачивай">
     </div>
     <div class="ov ov-s22-right">
@@ -1761,7 +1780,7 @@
         <li><img src="assets/icons/mod-check.png" alt=""><span>Пожизненный доступ к записям и обновлениям</span></li>
         <li><img src="assets/icons/mod-check.png" alt=""><span>Онлайн-связь с куратором без выходных</span></li>
       </ul>
-      <div class="s23-mob-discount">Забрать курс со скидкой за <span class="old">600€</span> <span class="new">275€</span></div>
+      <a class="s23-mob-discount" href="https://buy.stripe.com/fZucN57RO3TEgXu23C9AA00" target="_blank" rel="noopener">Забрать курс со скидкой за <span class="old">600€</span> <span class="new">275€</span></a>
       <img class="s23-mob-installment" src="assets/images/payment-installment-banner.jpg?v=2" alt="Оплата частями: 0% - сначала учись, потом оплачивай">
       <div class="s23-mob-cert-wrap">
         <div class="s23-mob-cert-tilt" id="s23MobCertTilt">
@@ -1858,6 +1877,18 @@
 
   initCertTilt({ tiltId:'s23CertTilt', badgeId:'s23CertBadge', btnId:'s23CertBtn', glareId:'s23CertGlare', shardClass:'ov-s23-cert-shard', touch:false });
   initCertTilt({ tiltId:'s23MobCertTilt', badgeId:'s23MobCertBadge', btnId:'s23MobCertBtn', shardClass:'s23-mob-cert-shard', touch:true });
+
+  // Fire a Meta Pixel "Lead" event whenever a visitor interacts with any of
+  // the 3 checkout-intent buttons: the discount banner and "Открыть доступ"
+  // (both go to the full-payment Stripe link) and "Оплата частями" (the
+  // installment link) -- each of these represents someone signalling
+  // purchase intent, regardless of which payment route they pick.
+  var leadTriggers = document.querySelectorAll('.discount-banner, .s23-mob-discount, .btn-primary, .btn-outline');
+  leadTriggers.forEach(function(el){
+    el.addEventListener('click', function(){
+      if (typeof fbq === 'function') fbq('track', 'Lead');
+    });
+  });
 })();
 </script>
 </body>
