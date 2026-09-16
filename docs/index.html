@@ -260,9 +260,38 @@
   }
   .ov-s22-included .s22-installment-banner{ width:100%; height:auto; border-radius:0.8cqw; display:block; }
   .ov-s22-right{ left:51.5%; top:70.4%; height:29.6%; width:44%; color:#cabfae; display:flex; flex-direction:column; justify-content:center; }
-  .ov-s22-right h3{ font-family:'Playfair Display',serif; font-weight:700; font-size:2.05cqw; line-height:1.2; color:#fff; margin:0 0 1.3cqw; }
-  .ov-s22-right p{ font-size:1.22cqw; line-height:1.5; font-weight:800; color:#fff; margin:0 0 1.4cqw; }
-  .ov-s22-right .byline{ padding-top:1.2cqw; border-top:1px solid rgba(242,233,218,0.2); font-style:italic; font-size:1.28cqw; color:#a89a86; }
+  .ov-s22-right h3{
+    font-family:var(--font-rise); font-weight:700; text-transform:uppercase;
+    letter-spacing:-0.045em; font-variation-settings:"wdth" 116, "opsz" 36;
+    font-size:2.05cqw; line-height:1.2; color:#fff; margin:0 0 1.3cqw;
+  }
+  .ov-s22-right p{ font-family:var(--font-body-2); font-weight:500; font-size:1.22cqw; line-height:1.5; color:#fff; margin:0 0 1.4cqw; }
+  .ov-s22-right .byline{ padding-top:1.2cqw; border-top:1px solid rgba(242,233,218,0.2); font-family:var(--font-body-2); font-weight:500; font-style:italic; font-size:1.28cqw; color:#a89a86; }
+
+  /* Slide 23 left column: logo, eyebrow, heading and the 5-item checklist
+     were baked pixels; erased into slide-23-textless-desktop.jpg (the
+     certificate photo and everything below stayed untouched) and replaced
+     with real HTML at the same measured positions, fonts unified to the
+     Roboto Flex/Geologica system. */
+  .ov-s23-brand{
+    display:flex; align-items:center; justify-content:center; gap:0.9cqw;
+    color:#fff; font-family:var(--font-rise); font-weight:700; font-size:1.5cqw;
+    letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap;
+  }
+  .ov-s23-brand img{ width:2.67cqw; height:2.67cqw; border-radius:50%; flex-shrink:0; display:block; }
+  .ov-s23-eyebrow{
+    margin:0; font-family:var(--font-body-2); font-weight:700; text-transform:uppercase;
+    letter-spacing:0.07em; font-size:1.1cqw; color:#c9a15a; line-height:1;
+  }
+  .ov-s23-heading{
+    margin:0; font-family:var(--font-rise); font-weight:700; text-transform:uppercase;
+    letter-spacing:-0.045em; font-variation-settings:"wdth" 116, "opsz" 36;
+    font-size:2.05cqw; line-height:1.18; color:#f5f0e6;
+  }
+  .ov-s23-list{ list-style:none; margin:0; padding:0; box-sizing:border-box; display:grid; row-gap:0; }
+  .ov-s23-list li{ display:flex; align-items:center; gap:1.75cqw; }
+  .ov-s23-list img{ width:2.6cqw; height:2.6cqw; min-width:2.6cqw; flex-shrink:0; display:block; }
+  .ov-s23-list span{ font-family:var(--font-body-2); font-weight:500; font-size:1.15cqw; line-height:1.35; color:#e9e0d3; }
 
   /* ---- Enlarged text on the slide-2 program cards -----------------
      Each card's number and block name were erased from slide-02.jpg
@@ -1575,7 +1604,17 @@
     </div>
   </div>
   <div class="slide-wrap s23-wrap">
-    <img class="slide-img" src="assets/slides/slide-23.jpg?v=3" alt="Слайд 23 - готов начать путь в тату-индустрии">
+    <img class="slide-img" src="assets/module-photos/slide-23-textless-desktop.jpg" alt="Слайд 23 - готов начать путь в тату-индустрии">
+    <div class="ov ov-s23-brand" style="left:0%;top:5.7%;width:100%;"><img src="assets/hero/logo-mark.png" alt="">VIP tattoo school</div>
+    <p class="ov ov-s23-eyebrow" style="left:6.25%;top:13.6%;">Почему именно это обучение</p>
+    <h2 class="ov ov-s23-heading" style="left:6.25%;top:16.6%;width:48%;">Чем VIP tattoo school отличается от типичного обучения</h2>
+    <ul class="ov ov-s23-list" style="left:3.75%;top:25%;width:46%;height:27.7%;">
+      <li><img src="assets/icons/mod-check.png" alt=""><span>Практика на моделях под личным наблюдением ментора</span></li>
+      <li><img src="assets/icons/mod-check.png" alt=""><span>Индивидуальный разбор каждой выполненной работы</span></li>
+      <li><img src="assets/icons/mod-check.png" alt=""><span>Сертификат, признанный 12 студиями-партнёрами</span></li>
+      <li><img src="assets/icons/mod-check.png" alt=""><span>Пожизненный доступ к записям и обновлениям</span></li>
+      <li><img src="assets/icons/mod-check.png" alt=""><span>Онлайн-связь с куратором без выходных</span></li>
+    </ul>
     <div class="ov ov-s22-included">
       <div class="discount-banner">Забрать курс со скидкой за <span class="old">600€</span> <span class="new">275€</span></div>
       <img class="s22-installment-banner" src="assets/images/payment-installment-banner.jpg?v=2" alt="Оплата частями: 0% - сначала учись, потом оплачивай">
