@@ -591,14 +591,43 @@
     .s20-col span{ font-size:3.6vw; }
   }
 
+  /* ---- Module slides (4-18) desktop title + checklist -----------------
+     Only the title and the checklist body text were baked pixels in
+     slide-NN.jpg; both were erased (flat cream fill, same as the page
+     background) into slide-NN-textless.jpg and replaced here with real
+     HTML at the exact same measured position/size as the original
+     baked text -- the photo, header icon and subtitle overlay are
+     untouched pixels/position, only the fonts on the erased text
+     changed (to match the Roboto Flex/Geologica system used on
+     slides 3/19/20), not the layout. */
+  .ov-mod-title{
+    display:flex; align-items:center; white-space:nowrap; line-height:1;
+    font-family:var(--font-rise); font-weight:700; font-size:3.2cqw;
+    letter-spacing:-0.045em; font-variation-settings:"wdth" 116, "opsz" 36;
+    text-transform:uppercase; color:#17120d;
+  }
+  /* Each <li> occupies one equal grid row, matching the fixed, evenly
+     spaced checkmark anchor points measured directly off the original
+     baked pixels (e.g. slide 4: centers at 23.26/33.85/44.37/54.93/
+     65.56/76.11/86.67% of the slide height) -- a plain flex+gap list
+     would bunch short items together instead of spreading them across
+     the same vertical range as the original, regardless of how many
+     lines each item's text wraps to. */
+  .ov-mod-list{
+    list-style:none; margin:0; padding:0; box-sizing:border-box;
+    display:grid; row-gap:0;
+  }
+  .ov-mod-list li{ display:flex; align-items:center; gap:1.75cqw; }
+  .ov-mod-list img{ width:2.21cqw; height:2.21cqw; min-width:2.21cqw; flex-shrink:0; display:block; }
+  .ov-mod-list span{ font-family:var(--font-body-2); font-weight:500; font-size:1.4cqw; line-height:1.42; color:#241a10; }
+
   /* ---- Module slides (4-18): mobile-only rebuild ----------------------
-     Desktop keeps the original baked-image slide untouched (per
-     request). On narrow screens the image shrinks the whole 2-column
+     On narrow screens the image shrinks the whole 2-column
      checklist+photo layout down to the point of being unreadable, so
      below 768px it's replaced with a real, centered HTML version
      instead -- same content, cropped photo and checkmark icon, but a
      legible single-column flow. Above 768px .mod-mobile stays hidden
-     and the original .slide-img/.ov overlay renders as before. */
+     and the desktop overlay above renders instead. */
   .mod-mobile{ display:none; }
   @media (max-width:768px){
     .mod-wrap > .slide-img,
@@ -817,10 +846,20 @@
     <div class="s3-badge"><span class="num">3</span><span class="den">/23</span></div>
   </div>
   <div class="slide-wrap mod-wrap">
-    <img class="slide-img" src="assets/slides/slide-04.jpg?v=9" alt="Слайд 4 - блок 1: вступление">
+    <img class="slide-img" src="assets/module-photos/slide-04-textless.jpg" alt="Слайд 4 - блок 1: вступление">
     <div class="ov sq-icon-hdr" style="left:3.708%;top:5.556%;width:5.083%;height:9.556%;"><span class="num">01</span></div>
-    <div class="ov ov-hdr-subtitle" style="left:14.83%;top:11.26%;width:68%;">Точка старта: от выбора пути до первого фото в портфолио.</div>
+    <div class="ov ov-hdr-subtitle" style="left:14.83%;top:13.2%;width:68%;">Точка старта: от выбора пути до первого фото в портфолио.</div>
     <div class="ov ov-badge on-light"><span class="num">4</span><span class="den">/23</span></div>
+    <div class="ov ov-mod-title" style="left:14.17%;top:6.7%;">VIP tattoo school - Вступление</div>
+    <ul class="ov ov-mod-list" style="left:3.708%;top:21.63%;width:63%;height:66.67%;grid-template-rows:repeat(7,1fr);">
+      <li><img src="assets/icons/mod-check.png" alt=""><span>Приветственное видео-кружочек от Виктории - личное неформальное знакомство</span></li>
+      <li><img src="assets/icons/mod-check.png" alt=""><span>Видео-урок 1: как войти в тату-индустрию, независимый мастер vs студия</span></li>
+      <li><img src="assets/icons/mod-check.png" alt=""><span>Видео-урок 2: честная картина профессии - доходы, расходы, путь от Procreate и искусственной кожи до настоящей</span></li>
+      <li><img src="assets/icons/mod-check.png" alt=""><span>Видео-урок 3: портфолио и продвижение - свет, фильтры, монтаж в CapCut</span></li>
+      <li><img src="assets/icons/mod-check.png" alt=""><span>Чек-лист инструментов для съёмки (кольцевая лампа, фильтры, Lightroom/Snapseed)</span></li>
+      <li><img src="assets/icons/mod-check.png" alt=""><span>Базовое ценообразование, безопасность и этика на старте</span></li>
+      <li><img src="assets/icons/mod-check.png" alt=""><span>Домашнее задание с личным разбором первого фото от Виктории</span></li>
+    </ul>
     <div class="mod-mobile">
       <div class="mod-head">
         <div class="mod-head-icons">
