@@ -375,6 +375,33 @@
     font-size:1.05cqw; line-height:1.4; color:#3a2c1c;
   }
 
+  /* Slide 22 ("Популярные вопросы") desktop: title + the 6 FAQ items
+     (number/heading/paragraph, in a 2-column x 3-row grid) were baked
+     pixels; erased into slide-22-textless-desktop.jpg and replaced with
+     real HTML at the same measured positions, fonts unified to the
+     Roboto Flex/Geologica system used elsewhere. */
+  .ov-s22-title{
+    margin:0; font-family:var(--font-rise); font-weight:700; text-transform:uppercase;
+    letter-spacing:-0.045em; font-variation-settings:"wdth" 116, "opsz" 36;
+    font-size:2.55cqw; color:#17120d; line-height:1;
+  }
+  .ov-s22-faq-item{ display:flex; align-items:flex-start; gap:1.7cqw; }
+  .ov-s22-faq-item .num{
+    flex-shrink:0; padding-top:0.2cqw;
+    font-family:var(--font-rise); font-weight:700;
+    letter-spacing:-0.02em; font-variation-settings:"wdth" 116, "opsz" 36;
+    font-size:1.9cqw; line-height:1; color:#a9662f;
+  }
+  .ov-s22-faq-item h3{
+    margin:0 0 0.5cqw; font-family:var(--font-rise); font-weight:700;
+    letter-spacing:-0.02em; font-variation-settings:"wdth" 116, "opsz" 36;
+    font-size:1.5cqw; line-height:1.25; color:#15110e;
+  }
+  .ov-s22-faq-item p{
+    margin:0; font-family:var(--font-body-2); font-weight:500;
+    font-size:1.15cqw; line-height:1.42; color:#3a2c1c;
+  }
+
   /* Slide 21 ("Честный старт"): mobile-only rebuild. Desktop keeps the
      original baked-image slide + .ov-s21-honest overlay untouched. Below
      768px the image/overlays are hidden and replaced with a real, flowing
@@ -1519,7 +1546,13 @@
       <div class="s3-badge"><span class="num">21</span><span class="den">/23</span></div>
     </div>
   </div>
-  <div class="slide-wrap s22-wrap"><img class="slide-img" src="assets/slides/slide-22.jpg?v=10" alt="Слайд 22 - популярные вопросы"><div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/question.png?v=3" alt=""></div><div class="ov ov-hdr-subtitle" style="left:17.96%;top:12.59%;width:60%;">Часто задаваемые вопросы.</div><div class="ov ov-badge on-dark" style="left:91.29%;"><span class="num">22</span><span class="den">/23</span></div>
+  <div class="slide-wrap s22-wrap"><img class="slide-img" src="assets/module-photos/slide-22-textless-desktop.jpg" alt="Слайд 22 - популярные вопросы"><div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/question.png?v=3" alt=""></div><h2 class="ov ov-s22-title" style="left:17.92%;top:6.52%;">Популярные вопросы</h2><div class="ov ov-hdr-subtitle" style="left:17.96%;top:14.5%;width:60%;">Часто задаваемые вопросы.</div><div class="ov ov-badge on-dark" style="left:91.29%;"><span class="num">22</span><span class="den">/23</span></div>
+    <div class="ov ov-s22-faq-item" style="left:4.58%;top:24%;width:24.5%;"><span class="num">01</span><div><h3>Нужен ли художественный опыт?</h3><p>Не обязателен, но приветствуется. В программе есть модуль по отработке линии и композиции с нуля.</p></div></div>
+    <div class="ov ov-s22-faq-item" style="left:33%;top:24%;width:25.3%;"><span class="num">02</span><div><h3>Сколько стоит оборудование?</h3><p>Базовый набор для практики на искусственной коже - от 60-80€. Список моделей есть в бонусном уроке.</p></div></div>
+    <div class="ov ov-s22-faq-item" style="left:4.58%;top:43.85%;width:24.5%;"><span class="num">03</span><div><h3>Гарантированы ли первые клиенты?</h3><p>Даём систему и шаблоны, которые уже сработали у учеников, но результат зависит от твоей практики.</p></div></div>
+    <div class="ov ov-s22-faq-item" style="left:33%;top:43.85%;width:25.3%;"><span class="num">04</span><div><h3>Сколько времени уделять обучению?</h3><p>В среднем 5-7 часов в неделю на протяжении 8 недель, включая уроки и практику.</p></div></div>
+    <div class="ov ov-s22-faq-item" style="left:4.58%;top:63.7%;width:24.5%;"><span class="num">05</span><div><h3>Есть ли возрастные ограничения?</h3><p>Обучение доступно с 18 лет - стандартное требование для работы в тату-индустрии.</p></div></div>
+    <div class="ov ov-s22-faq-item" style="left:33%;top:63.7%;width:25.3%;"><span class="num">06</span><div><h3>Нужен ли ноутбук для обучения?</h3><p>Достаточно смартфона - всё проходит через Telegram, удобно смотреть уроки и сдавать задания.</p></div></div>
     <div class="s22-mobile">
       <div class="s22-mob-head">
         <div class="sq-icon-hdr s22-mob-icon-wrap"><img src="assets/icons/question.png?v=3" alt=""></div>
