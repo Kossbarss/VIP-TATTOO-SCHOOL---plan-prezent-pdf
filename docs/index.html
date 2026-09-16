@@ -139,7 +139,11 @@
      Same card visual (gradient/ring/shine/V-watermark/number/label) as
      .sq-icon + .ov-card-num/.ov-card-label above -- only the layout
      mechanism changed, from position:absolute percentages to grid. */
-  .s2-wrap{ background:linear-gradient(105deg,#3a1712 0%,#1a110d 55%); }
+  .s2-wrap{
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255,0,3,0.42) 0%, transparent 55%),
+      linear-gradient(105deg,#5c1811 0%,#1a110d 60%);
+  }
   /* Title/subtitle rebuilt as real HTML using the exact same font
      treatment as slide 1's hero h1 (Roboto Flex, uppercase, same
      weight/letter-spacing/variation-settings), per request -- was
@@ -921,9 +925,9 @@
   }
   .hero{ position:relative; background:linear-gradient(180deg, #0e0a08 0%, #1c140f 100%); overflow:hidden; }
   .hero-glow{
-    position:absolute; left:50%; top:55%; width:900px; height:900px;
+    position:absolute; left:50%; top:55%; width:1150px; height:1150px;
     transform:translate(-50%,-50%);
-    background:radial-gradient(circle, rgba(255,0,3,0.32) 0%, rgba(255,0,3,0.16) 32%, rgba(201,162,74,0.1) 55%, transparent 72%);
+    background:radial-gradient(circle, rgba(255,0,3,0.55) 0%, rgba(255,0,3,0.38) 32%, rgba(201,162,74,0.14) 58%, transparent 75%);
     filter:blur(10px); pointer-events:none; z-index:0;
   }
   .hero-container{ position:relative; z-index:1; width:min(1180px, 100% - 48px); margin-inline:auto; }
