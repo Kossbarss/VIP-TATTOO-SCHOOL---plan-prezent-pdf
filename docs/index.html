@@ -235,10 +235,17 @@ src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
   }
   @media (max-width:600px){
     .s2-grid{ gap:3vw; padding:5vw 4vw 15vw; }
-    .s2-card{ aspect-ratio:1.42/1; }
-    .s2-card .s2-num{ font-size:5.6vw; top:11%; left:0; width:100%; text-align:center; }
-    .s2-card .s2-label{ font-size:3.7vw; line-height:1.25; bottom:9%; text-align:center; }
-    .s2-card .s2-label.one-word{ bottom:auto; top:50%; transform:translateY(-50%); }
+    .s2-card{ aspect-ratio:1.42/1; display:flex; flex-direction:column; }
+    .s2-card .s2-num{
+      position:relative; flex:0 0 auto; top:auto; left:auto; width:auto;
+      padding-top:11%; font-size:5.6vw; text-align:center;
+    }
+    .s2-card .s2-label{
+      position:relative; flex:1 1 auto; bottom:auto; left:auto; width:auto;
+      display:flex; align-items:center; justify-content:center;
+      padding:0 8% 4%; box-sizing:border-box;
+      font-size:3.7vw; line-height:1.25; text-align:center;
+    }
   }
 
   /* ---- Same rebuild applied to every module-slide header square ------
@@ -1097,18 +1104,18 @@ src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
     </div>
     <div class="s2-grid">
       <div class="s2-card"><span class="ring"></span><span class="s2-num">01</span><span class="s2-label">VIP tattoo school</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">02</span><span class="s2-label one-word">AI-assistant</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">03</span><span class="s2-label one-word">Безопасность</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">04</span><span class="s2-label one-word">Материалы</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">02</span><span class="s2-label">AI-assistant</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">03</span><span class="s2-label">Безопасность</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">04</span><span class="s2-label">Материалы</span></div>
       <div class="s2-card"><span class="ring"></span><span class="s2-num">05</span><span class="s2-label">Организация + место</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">06</span><span class="s2-label one-word">Практика</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">06</span><span class="s2-label">Практика</span></div>
       <div class="s2-card"><span class="ring"></span><span class="s2-num">07</span><span class="s2-label">Работа с кожей</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">08</span><span class="s2-label one-word">Трафареты</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">09</span><span class="s2-label one-word">Pro Stories®</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">08</span><span class="s2-label">Трафареты</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">09</span><span class="s2-label">Pro Stories®</span></div>
       <div class="s2-card"><span class="ring"></span><span class="s2-num">10</span><span class="s2-label">30-дн. практикум</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">11</span><span class="s2-label one-word">Стили</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">11</span><span class="s2-label">Стили</span></div>
       <div class="s2-card"><span class="ring"></span><span class="s2-num">12</span><span class="s2-label">Работа с клиентом</span></div>
-      <div class="s2-card"><span class="ring"></span><span class="s2-num">13</span><span class="s2-label one-word">Реклама</span></div>
+      <div class="s2-card"><span class="ring"></span><span class="s2-num">13</span><span class="s2-label">Реклама</span></div>
       <div class="s2-card"><span class="ring"></span><span class="s2-num">14</span><span class="s2-label">Zoom - Tattoo</span></div>
       <div class="s2-card"><span class="ring"></span><span class="s2-num">15</span><span class="s2-label">Именной диплом</span></div>
     </div>
