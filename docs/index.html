@@ -322,15 +322,15 @@
      to make room (photo column untouched), and this real HTML box fills
      the freed space. */
   .ov-s21-honest{
-    left:4.92%; top:22.67%; width:52.75%; height:29.63%; box-sizing:border-box;
+    left:4.92%; top:22.67%; width:52.75%; height:31.5%; box-sizing:border-box;
     display:flex; flex-direction:column; justify-content:center;
     background:#fff; border:1px solid #c9a15a; border-radius:1.4cqw;
-    padding:1.1cqw 2.2cqw;
+    padding:1.7cqw 2.2cqw;
   }
   .ov-s21-honest .eyebrow{
     display:flex; align-items:center; gap:0.6cqw;
-    font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
-    font-size:1.2cqw; color:#a9662f; margin-bottom:0.55cqw; line-height:1;
+    font-family:var(--font-body-2); font-weight:700; text-transform:uppercase; letter-spacing:0.04em;
+    font-size:1.1cqw; color:#a9662f; margin-bottom:0.55cqw; line-height:1;
   }
   .ov-s21-honest .eyebrow::before{
     content:""; width:0.2cqw; align-self:stretch; min-height:1.2cqw;
@@ -342,12 +342,37 @@
      the freed vertical space was given to this box, so its line-height
      and padding can now match the same comfortable spacing too. */
   .ov-s21-honest h3{
-    font-family:'Playfair Display',serif; font-weight:800; font-size:2.25cqw;
-    line-height:1.15; color:#21180f; margin:0 0 0.9cqw;
+    font-family:var(--font-rise); font-weight:700; text-transform:uppercase;
+    letter-spacing:-0.045em; font-variation-settings:"wdth" 116, "opsz" 36;
+    font-size:1.9cqw; line-height:1.15; color:#21180f; margin:0 0 0.9cqw;
   }
   .ov-s21-honest p{
-    font-family:'Nunito',sans-serif; font-weight:400; font-size:1.3cqw;
-    line-height:1.32; color:#666664; margin:0;
+    font-family:var(--font-body-2); font-weight:500; font-size:1.3cqw;
+    line-height:1.32; color:#3a2c1c; margin:0;
+  }
+  /* Slide 21 desktop: title, black badge, guarantee card and stats were
+     baked pixels (the "Честный ответ" box above was already real);
+     erased into slide-21-textless-desktop.jpg and replaced with real
+     HTML at the same measured position/size, matching slides 4-18. */
+  .ov-s21-badge-black{ border-radius:50%; }
+  .ov-s21-icon-round{ border-radius:50%; }
+  .ov-s21-guarantee-h{
+    margin:0; font-family:var(--font-rise); font-weight:700; text-transform:uppercase;
+    letter-spacing:-0.045em; font-variation-settings:"wdth" 116, "opsz" 36;
+    font-size:1.9cqw; color:#17120d;
+  }
+  .ov-s21-guarantee-p{
+    margin:0; font-family:var(--font-body-2); font-weight:500; font-size:1.3cqw;
+    line-height:1.38; color:#3a2c1c;
+  }
+  .ov-s21-stat .num{
+    display:block; font-family:var(--font-rise); font-weight:700; text-transform:uppercase;
+    letter-spacing:-0.045em; font-variation-settings:"wdth" 116, "opsz" 36;
+    font-size:2.6cqw; color:#a9662f; line-height:1; margin-bottom:0.6cqw;
+  }
+  .ov-s21-stat .label{
+    display:block; font-family:var(--font-body-2); font-weight:500;
+    font-size:1.05cqw; line-height:1.4; color:#3a2c1c;
   }
 
   /* Slide 21 ("Честный старт"): mobile-only rebuild. Desktop keeps the
@@ -1447,15 +1472,23 @@
     <div class="s3-badge"><span class="num">20</span><span class="den">/23</span></div>
   </div>
   <div class="slide-wrap s21-wrap">
-    <img class="slide-img" src="assets/slides/slide-21.jpg?v=21" alt="Слайд 21 - честный старт">
+    <img class="slide-img" src="assets/module-photos/slide-21-textless-desktop.jpg" alt="Слайд 21 - честный старт">
     <div class="ov sq-icon-hdr" style="left:3.958%;top:5.185%;width:6.333%;height:11.481%;"><img src="assets/icons/shield.png?v=3" alt=""></div>
-    <div class="ov ov-hdr-subtitle" style="left:17.96%;top:12.59%;width:60%;">Без риска и лишних вопросов.</div>
+    <div class="ov ov-hdr-subtitle" style="left:17.96%;top:14.5%;width:60%;">Без риска и лишних вопросов.</div>
     <div class="ov ov-s21-honest">
       <div class="eyebrow">Честный ответ</div>
       <h3>Почему такая низкая цена?</h3>
       <p>Я знаю, что не каждый готов сразу платить за очное обучение в студии от 1200€ и присутствовать лично в студии на обучении. Поэтому сделала онлайн обучение по доступной цене 275€ - чтобы вы могли начать путь в профессии без риска, а дальше уже сами решали, куда расти: в свою мини-студию или в открытие своего дела.</p>
     </div>
     <div class="ov ov-badge on-light" style="left:91.29%;"><span class="num">21</span><span class="den">/23</span></div>
+    <div class="ov ov-mod-title" style="left:17.83%;top:7.04%;">Честный старт</div>
+    <img class="ov ov-s21-badge-black" src="assets/icons/mod-badge-black-21.png" alt="" style="left:11.25%;top:5.93%;width:5.27cqw;height:5.27cqw;">
+    <img class="ov ov-s21-icon-round" src="assets/icons/s21-shield.png" alt="" style="left:8%;top:58.89%;width:6.98cqw;height:6.98cqw;">
+    <h3 class="ov ov-s21-guarantee-h" style="left:17.04%;top:57.7%;">Гарантия честного старта</h3>
+    <p class="ov ov-s21-guarantee-p" style="left:17.08%;top:64.22%;width:38%;">Если, пройдя все модули-блоки, ты поймёшь, что курс не твой - вернём оплату в течение 3 дней с момента старта обучения. Без лишних вопросов.</p>
+    <div class="ov ov-s21-stat" style="left:4.71%;top:79%;width:17%;"><span class="num">3 дня</span><span class="label">на честное решение с момента старта</span></div>
+    <div class="ov ov-s21-stat" style="left:23.46%;top:79%;width:17%;"><span class="num">100%</span><span class="label">возврат средств без объяснений</span></div>
+    <div class="ov ov-s21-stat" style="left:42.2%;top:79%;width:17%;"><span class="num">0€</span><span class="label">риска попробовать себя в профессии</span></div>
     <div class="s21-mobile">
       <div class="s21-mob-head">
         <div class="sq-icon-hdr s21-mob-shield-wrap"><img src="assets/icons/shield.png?v=3" alt=""></div>
