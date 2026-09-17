@@ -199,11 +199,12 @@ src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
     .s2-kicker{ font-size:3vw; margin-bottom:2vw; }
     .s2-heading{ font-size:6.5vw; }
   }
-  .s2-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:1.2cqw; padding:2.4cqw 4.458cqw 3.6cqw; }
+  .s2-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:1.2cqw; padding:2.4cqw 4.458cqw 6.4cqw; }
   .s2-card{
     position:relative; aspect-ratio:1.95/1; border-radius:14%/26%; overflow:hidden;
     background:linear-gradient(105deg,#f98658 0%,#f25832 24%,#e62115 52%,#f25832 78%,#f98658 100%);
     box-shadow:0 10px 20px -10px rgba(221,0,3,0.6);
+    display:flex; flex-direction:column;
   }
   .s2-card::before{
     content:"V"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
@@ -221,15 +222,16 @@ src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
     animation:icon-shine-sweep 3.6s ease-in-out infinite;
   }
   .s2-card .s2-num{
-    position:absolute; left:8%; top:16%;
+    position:relative; flex:0 0 auto; padding-top:16%; text-align:center;
     font-family:'Playfair Display',serif; font-weight:700; font-size:1.85cqw; color:#fff; line-height:1;
   }
   .s2-card .s2-label{
-    position:absolute; left:8%; bottom:12%; width:84%;
+    position:relative; flex:1 1 auto; display:flex; align-items:center; justify-content:center;
+    padding:0 8% 10%; box-sizing:border-box; text-align:center;
     font-family:'Nunito',sans-serif; font-weight:800; font-size:1.3cqw; line-height:1.25; color:#fff;
   }
   @media (max-width:900px){
-    .s2-grid{ grid-template-columns:repeat(3,1fr); gap:2.4cqw; padding:3.4cqw 4cqw 5cqw; }
+    .s2-grid{ grid-template-columns:repeat(3,1fr); gap:2.4cqw; padding:3.4cqw 4cqw 9cqw; }
     .s2-card .s2-num{ font-size:4.4cqw; }
     .s2-card .s2-label{ font-size:3.1cqw; line-height:1.2; }
   }
