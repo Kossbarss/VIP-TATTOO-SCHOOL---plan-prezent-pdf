@@ -94,22 +94,6 @@ src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
     55%{ transform:skewX(-18deg) translateX(422%); }
     100%{ transform:skewX(-18deg) translateX(422%); }
   }
-  /* Rotating white "beam" ring around the primary CTA -- a real element
-     (not a pseudo, both of which are already used by the button above)
-     whose conic-gradient sweep is masked down to just the ring's
-     outline via the padding + mask-composite:exclude trick, then spun
-     with a plain transform:rotate animation. */
-  .cta-bar .btn-primary .ring{
-    content:""; position:absolute; inset:0; border-radius:inherit;
-    padding:2px; box-sizing:border-box;
-    background:conic-gradient(from 0deg, transparent 0deg, transparent 300deg, #fff 300deg, #fff 338deg, transparent 338deg, transparent 360deg);
-    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite:xor;
-    mask-composite:exclude;
-    animation:cta-btn-ring-spin 2.6s linear infinite;
-    pointer-events:none; z-index:1;
-  }
-  @keyframes cta-btn-ring-spin{ to{ transform:rotate(360deg); } }
   .cta-bar .btn-secondary{
     flex:1 1 200px;
     color:#fff; border:1.5px solid rgba(255,255,255,0.5);
@@ -1876,7 +1860,7 @@ src="https://www.facebook.com/tr?id=2292163738269124&ev=PageView&noscript=1"
     </div>
    </div>
     <div class="cta-bar">
-      <a class="btn btn-primary" href="https://buy.stripe.com/fZucN57RO3TEgXu23C9AA00" target="_blank" rel="noopener"><span class="ring"></span><span>Открыть доступ к обучению</span></a>
+      <a class="btn btn-primary" href="https://buy.stripe.com/fZucN57RO3TEgXu23C9AA00" target="_blank" rel="noopener"><span>Открыть доступ к обучению</span></a>
       <a class="btn btn-outline" href="https://website.vip-tattoo-school.com/#vtpCheckoutCtaInstallment" target="_blank" rel="noopener">Оплата частями - 2×137.50€</a>
       <a class="btn btn-secondary" href="https://t.me/+48733341364" target="_blank" rel="noopener">Написать Виктории</a>
     </div>
